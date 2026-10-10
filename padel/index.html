@@ -228,6 +228,46 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .dots button{width:34px;height:34px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:900;font-size:13px;color:var(--muted)}
 .dots button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 
+/* Statistik & Material */
+.subtabs{margin:-4px 0 16px}
+.subtabs button{flex:1;position:relative}
+.dot2{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-style:normal;padding:0 4px;margin-left:2px}
+.wld{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.wld b{display:block;font-family:var(--font-display);font-size:28px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.wld span{font-size:12px;font-weight:800;color:var(--muted)}
+.wlbar{display:flex;height:12px;border-radius:9px;overflow:hidden;background:var(--surface-2)}
+.wlbar i{display:block;height:100%}
+.form{display:flex;gap:5px;flex-wrap:wrap}
+.fm{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:14px;color:#fff}
+.fm.w{background:var(--good)} .fm.l{background:var(--bad)} .fm.d{background:var(--locked-ink)}
+.trow{display:flex;align-items:center;gap:10px}
+.trow .pct{font-family:var(--font-display);font-weight:600;width:48px;text-align:right;color:var(--accent)}
+.skr{display:flex;align-items:center;gap:10px}
+.skr .ic{width:38px;height:38px;border-radius:12px}
+.skr .ic svg{width:20px;height:20px}
+.skr .score{font-family:var(--font-display);font-size:20px;font-weight:600;width:36px;text-align:right;font-variant-numeric:tabular-nums}
+.spark{width:90px;height:30px;flex:none}
+.rr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.rr label{font-weight:800;font-size:14px}
+.rr input{grid-column:1/3;width:100%;accent-color:var(--accent);height:28px}
+.rr.unset input{opacity:.35}
+.rv{border:2px solid var(--line);background:var(--surface);border-radius:10px;min-width:40px;height:32px;font-family:var(--font-display);font-weight:600;font-size:17px}
+.rr:not(.unset) .rv{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.gear.due{border-color:var(--flame)}
+.rspecs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rspecs div{background:var(--surface-2);border-radius:12px;padding:8px 10px}
+.rspecs span{display:block;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rspecs b{font-size:15px}
+.why{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:14px}
+
+.rsvg{width:58px;height:88px;flex:none}
+.rshape{width:56px;height:76px;flex:none;background:var(--accent);position:relative}
+.rshape::after{content:"";position:absolute;left:50%;bottom:-18px;width:10px;height:22px;background:var(--fg);border-radius:4px;transform:translateX(-50%)}
+.rshape.s0{border-radius:50%/48%}
+.rshape.s1{border-radius:50% 50% 46% 46%/62% 62% 38% 38%}
+.rshape.s2{clip-path:polygon(50% 0,100% 38%,86% 100%,14% 100%,0 38%);border-radius:0}
+.racket .row:first-child{margin-bottom:14px}
+
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
 .lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -466,17 +506,17 @@ function mascot(mood,wear){
 
 /* ================= Skills ================= */
 const SK={
- aufschlag:{n:'Aufschlag & Return',s:'Aufschlag',ic:'serve',c:'var(--u1)'},
- vorhand:{n:'Vorhand',s:'Vorhand',ic:'racket',c:'var(--u2)'},
- rueckhand:{n:'Rückhand',s:'Rückhand',ic:'backhand',c:'var(--u2)'},
- volley:{n:'Volley',s:'Volley',ic:'net',c:'var(--u3)'},
- wand:{n:'Wandspiel',s:'Wand',ic:'wall',c:'var(--u6)'},
- lob:{n:'Lob',s:'Lob',ic:'lob',c:'var(--u4)'},
- bandeja:{n:'Bandeja & Víbora',s:'Bandeja',ic:'overhead',c:'var(--u5)'},
- smash:{n:'Smash',s:'Smash',ic:'smash',c:'var(--u5)'},
- taktik:{n:'Taktik',s:'Taktik',ic:'tactic',c:'var(--u1)'},
- kopf:{n:'Kopf & Mental',s:'Kopf',ic:'brain',c:'var(--u3)'},
- athletik:{n:'Athletik & Fitness',s:'Athletik',ic:'dumbbell',c:'var(--u4)'}
+ aufschlag:{p:'Aufschläge & Returns',n:'Aufschlag & Return',s:'Aufschlag',ic:'serve',c:'var(--u1)'},
+ vorhand:{p:'Vorhände',n:'Vorhand',s:'Vorhand',ic:'racket',c:'var(--u2)'},
+ rueckhand:{p:'Rückhände',n:'Rückhand',s:'Rückhand',ic:'backhand',c:'var(--u2)'},
+ volley:{p:'Volleys',n:'Volley',s:'Volley',ic:'net',c:'var(--u3)'},
+ wand:{p:'Wandbälle',n:'Wandspiel',s:'Wand',ic:'wall',c:'var(--u6)'},
+ lob:{p:'Lobs',n:'Lob',s:'Lob',ic:'lob',c:'var(--u4)'},
+ bandeja:{p:'Bandejas & Víboras',n:'Bandeja & Víbora',s:'Bandeja',ic:'overhead',c:'var(--u5)'},
+ smash:{p:'Smashes',n:'Smash',s:'Smash',ic:'smash',c:'var(--u5)'},
+ taktik:{p:'taktischen Entscheidungen',n:'Taktik',s:'Taktik',ic:'tactic',c:'var(--u1)'},
+ kopf:{p:'Nerven & dein Fokus',n:'Kopf & Mental',s:'Kopf',ic:'brain',c:'var(--u3)'},
+ athletik:{p:'Beinarbeit & Fitness',n:'Athletik & Fitness',s:'Athletik',ic:'dumbbell',c:'var(--u4)'}
 };
 const SKIDS=Object.keys(SK);
 
@@ -1206,7 +1246,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-function defaults(){return{v:2,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
+function defaults(){return{v:3,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
  day:{d:null,lessons:0,drills:0,xp:0,perfect:0,logs:0,missions:0,claimed:[],chest:false,goalHit:false},
@@ -1217,6 +1257,7 @@ try{const raw=localStorage.getItem(KEY);S=Object.assign(defaults(),raw?JSON.pars
 if(S.v<2){const OLD=['griff','vorhand','rueckhand','aufschlag','rueckwand','rueckwand2','seitenwand','bajada','volleyvh','volleyrh','netzpos','volleyziele','lob','lobtaktik','chiquita','contrapared','bandeja','vibora','smash','ueberkopf','mitte','kommunikation','geduld','routine'],OU=['basics','waende','netz1','defense','overhead','teamplay'];
  if(typeof S.unlockFrom==='number')S.unlockId=OLD[S.unlockFrom]||'griff';delete S.unlockFrom;
  const t={},c={};Object.entries(S.tests||{}).forEach(([k,v])=>{t[OU[+k]||k]=v;});Object.entries(S.chests||{}).forEach(([k,v])=>{c['c'+(OU[+k.slice(1)]||k.slice(1))]=v;});S.tests=t;S.chests=c;S.ms=S.ms||{};S.v=2;}
+if(S.v<3){(S.journal||[]).forEach(j=>{if(j.rt&&!j.rs){Object.keys(j.rt).forEach(k=>{j.rt[k]=Math.min(10,j.rt[k]*2);});j.rs=10;}});S.v=3;}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
 /* ================= Sound & Effekte ================= */
@@ -1352,6 +1393,7 @@ const ACH=[
  {id:'ms5',t:'Praxistest',d:'5 Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=5},
  {id:'ms25',t:'Bewiesen auf dem Court',d:'Alle Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=MSALL.length},
  ...STAGES.map((st,si)=>({id:'st'+(si+1),t:'Stufe '+(si+1)+': '+st.t,d:'Stufe „'+st.t+'“ gemeistert',f:()=>stageDone(si)})),
+ {id:'gear1',t:'Materialpfleger',d:'Zum ersten Mal Material gewechselt',f:()=>(S.cnt.gear||0)>=1},
  {id:'lg',t:'Aufsteiger',d:'Erster Liga-Aufstieg',f:()=>S.league&&S.league.tier>=1}
 ];
 function checkAch(){ACH.forEach(a=>{if(!S.ach[a.id]&&a.f()){S.ach[a.id]=today();S.gems+=15;setTimeout(()=>{toast('Erfolg: <b>'+esc(a.t)+'</b> · +15 Bälle',I.trophy);beep('coin');},600);}});save();}
@@ -1362,7 +1404,7 @@ function selfRating(){
 }
 function weakest(){
  const sr=selfRating(),lost={};S.journal.slice(0,8).forEach(j=>{if(j.lost)lost[j.lost]=(lost[j.lost]||0)+1;});
- const score=k=>(sr[k]??3)-(S.focus.includes(k)?.8:0)-(lost[k]||0)*.4+skLv(S.skillXp[k]).L*.15;
+ const score=k=>(sr[k]??5)/2-(S.focus.includes(k)?.8:0)-(lost[k]||0)*.4+skLv(S.skillXp[k]).L*.15;
  return [...SKIDS].sort((a,b)=>score(a)-score(b));
 }
 function recommend(){
@@ -1415,7 +1457,7 @@ function renderTop(){
 function renderNav(){
  const am=activeMissions().length;
  const qOpen=questsToday().filter(id=>qProg(id)>=QUESTS[id].n&&!S.day.claimed.includes(id)).length;
- $('#nav').innerHTML=TABS.map(([id,n,ic])=>`<button data-act="tab" data-id="${id}" ${S.tab===id?'aria-current="page"':''}>${I[ic]}<span>${n}</span>${id==='missions'&&am?`<i class="dot">${am}</i>`:''}${id==='league'&&qOpen?`<i class="dot">${qOpen}</i>`:''}</button>`).join('');
+ $('#nav').innerHTML=TABS.map(([id,n,ic])=>`<button data-act="tab" data-id="${id}" ${S.tab===id?'aria-current="page"':''}>${I[ic]}<span>${n}</span>${id==='missions'&&am?`<i class="dot">${am}</i>`:''}${id==='league'&&qOpen?`<i class="dot">${qOpen}</i>`:''}${id==='journal'&&gearDue().length?`<i class="dot">${gearDue().length}</i>`:''}</button>`).join('');
 }
 const starRow=(n,max=3)=>`<div class="stars">${Array.from({length:max},(_,i)=>`<span class="${i<n?'':'e'}">${I.star}</span>`).join('')}</div>`;
 
@@ -1486,35 +1528,145 @@ function radarSvg(vals){
  let g='';[.2,.4,.6,.8,1].forEach(f=>{g+=`<polygon points="${SKIDS.map((_,i)=>pt(i,f).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1.5"/>`;});
  SKIDS.forEach((k,i)=>{const [x,y]=pt(i,1);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)" stroke-width="1.5"/>`;const [tx,ty]=pt(i,1.2);g+=`<text x="${tx}" y="${ty+4}" text-anchor="middle">${esc(SK[k].s)}</text>`;});
  const has=SKIDS.some(k=>vals[k]!=null);
- if(has){const poly=SKIDS.map((k,i)=>pt(i,(vals[k]??0)/5).join(',')).join(' ');g+=`<polygon points="${poly}" fill="color-mix(in srgb,var(--accent) 28%,transparent)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;SKIDS.forEach((k,i)=>{if(vals[k]!=null){const [x,y]=pt(i,vals[k]/5);g+=`<circle cx="${x}" cy="${y}" r="4" fill="var(--accent)"/>`;}});}
+ if(has){const poly=SKIDS.map((k,i)=>pt(i,(vals[k]??0)/10).join(',')).join(' ');g+=`<polygon points="${poly}" fill="color-mix(in srgb,var(--accent) 28%,transparent)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;SKIDS.forEach((k,i)=>{if(vals[k]!=null){const [x,y]=pt(i,vals[k]/10);g+=`<circle cx="${x}" cy="${y}" r="4" fill="var(--accent)"/>`;}});}
  return `<svg class="radar" viewBox="0 0 340 300" role="img" aria-label="Selbsteinschätzung pro Skill">${g}</svg>`;
 }
+/* ================= Tagebuch: Einträge · Statistik · Material ================= */
+const RES={w:'Sieg',l:'Niederlage',d:'Remis'};
+const fmt1=n=>(Math.round(n*10)/10).toLocaleString('de-DE');
+const entryTs=j=>j.ts||parseInt(j.id,36)||0;
+function parseScore(str){const out=[];String(str||'').replace(/(\d{1,2})\s*[:\-–\/]\s*(\d{1,2})/g,(m,a,b)=>{out.push([+a,+b]);return m;});return out;}
+function inferRes(score){const s=parseScore(score);if(!s.length)return null;const w=s.filter(([a,b])=>a>b).length,l=s.filter(([a,b])=>b>a).length;return w>l?'w':l>w?'l':null;}
+function statRange(){const f=S.sf||'all';if(f==='all')return S.journal;const lim=addDays(today(),f==='30'?-30:-365);return S.journal.filter(j=>j.date>=lim);}
+function recordOf(list){const r={w:0,l:0,d:0};list.forEach(j=>{if(r[j.res]!=null)r[j.res]++;});r.n=r.w+r.l+r.d;r.pct=r.n?Math.round(r.w/r.n*100):null;return r;}
+const byDateAsc=(a,b)=>a.date.localeCompare(b.date)||entryTs(a)-entryTs(b);
+function streaks(asc){let w=0,l=0,bw=0,bl=0;asc.forEach(j=>{if(j.res==='w'){w++;l=0;}else if(j.res==='l'){l++;w=0;}else{w=0;l=0;}bw=Math.max(bw,w);bl=Math.max(bl,l);});return{bw,bl,w,l};}
+function ratingHist(k){return [...S.journal].filter(j=>j.rt&&j.rt[k]!=null).sort(byDateAsc).map(j=>j.rt[k]);}
+function sparkSvg(v){if(v.length<2)return '';const W=110,H=30,pts=v.slice(-12).map((x,i,a)=>[(i/(a.length-1))*W,H-3-(x/10)*(H-6)]);return `<svg class="spark" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${pts[pts.length-1][0]}" cy="${pts[pts.length-1][1]}" r="3.5" fill="var(--accent)"/></svg>`;}
+function groupRecord(list,key){const m={};list.forEach(j=>{const raw=(j[key]||'').trim();if(!raw)return;const id=raw.toLowerCase();(m[id]=m[id]||{n:raw,list:[]}).list.push(j);});return Object.values(m).map(x=>({...recordOf(x.list),name:x.n})).sort((a,b)=>b.n-a.n||b.w-a.w).filter(x=>x.n>0);}
+
+/* ----- Material ----- */
+const GEAR=[
+ {id:'grip',t:'Overgrip',u:'s',def:5,opts:[3,5,8,10],d:'Rutschiges Griffband kostet Kontrolle – und du greifst fester zu, was den Unterarm belastet.'},
+ {id:'balls',t:'Bälle',u:'s',def:3,opts:[1,2,3,4],d:'Bälle verlieren nach wenigen Sessions Druck und werden langsamer.'},
+ {id:'shoes',t:'Schuhe',u:'h',def:100,opts:[60,100,150],d:'Abgefahrene Sohlen = weniger Halt und mehr Risiko fürs Sprunggelenk.'},
+ {id:'racket',t:'Schläger',u:'h',def:250,opts:[150,250,400],d:'Der Schaumkern verliert mit der Zeit Spannung – der Schläger wird „tot“.'}
+];
+function gearState(id){S.gear=S.gear||{};if(!S.gear[id]){const g=GEAR.find(x=>x.id===id);S.gear[id]={since:Date.now(),every:g.def};}return S.gear[id];}
+function gearUse(g){const st=gearState(g.id),list=S.journal.filter(j=>entryTs(j)>=st.since);const v=g.u==='s'?list.length:list.reduce((a,j)=>a+(+j.dur||0),0)/60;return{v,every:st.every,pct:Math.min(1,v/st.every),due:v>=st.every,since:st.since};}
+const gearDue=()=>GEAR.filter(g=>gearUse(g).due);
+const unitTxt=(g,n)=>g.u==='s'?(n===1?'Session':'Sessions'):'h';
+
+/* ----- Schläger-Empfehlung (Formen statt Marken) ----- */
+const RPROF=[
+ {form:'Rund',bal:'Niedrig (grifflastig)',haerte:'Weich',gew:'345–360 g',d:'Maximale Kontrolle und großer Sweetspot – verzeiht Fehltreffer und schont den Arm.'},
+ {form:'Tropfen',bal:'Mittel',haerte:'Mittel',gew:'355–365 g',d:'Der Allrounder: Kontrolle in der Abwehr, genug Druck über Kopf.'},
+ {form:'Diamant',bal:'Hoch (kopflastig)',haerte:'Mittel bis hart',gew:'360–375 g',d:'Viel Power für Bandeja, Víbora und Smash – verlangt saubere Technik.'}
+];
+function racketAdvice(){
+ const sr=selfRating(),avg=ks=>{const v=ks.map(k=>sr[k]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
+ const pw=avg(['smash','bandeja']),ct=avg(['volley','wand','lob','vorhand','rueckhand']),st=curStage(),why=[];let p=0;
+ if(st<=1){p-=2;why.push(`Du bist in Stufe ${st+1} (${STAGES[st].t}): Kontrolle und ein großer Sweetspot bringen dich jetzt am schnellsten weiter.`);}
+ else if(st>=3){p+=1;why.push(`Als ${STAGES[st].t}-Spieler kannst du mehr Power kontrolliert einsetzen.`);}
+ else why.push(`In Stufe ${st+1} (${STAGES[st].t}) passt eine Mischung aus Kontrolle und Power.`);
+ if(S.side==='links'){p+=1;why.push('Links (Revés) schließt du viele Punkte über Kopf ab – etwas mehr Kopflastigkeit hilft.');}
+ if(S.side==='rechts'){p-=.5;why.push('Rechts (Drive) zählt Konstanz – Kontrolle ist dein Freund.');}
+ if(pw!=null&&ct!=null){
+  if(pw>=6.5&&pw>ct+1){p+=1;why.push(`Dein Überkopf (${fmt1(pw)}/10) ist stärker als dein Kontrollspiel (${fmt1(ct)}/10).`);}
+  else if(ct>pw+1){p-=1;why.push(`Dein Kontrollspiel (${fmt1(ct)}/10) ist stärker als dein Überkopf (${fmt1(pw)}/10) – ein Kontrollschläger unterstützt deine Stärke.`);}
+  else why.push(`Überkopf (${fmt1(pw)}/10) und Kontrollspiel (${fmt1(ct)}/10) sind ausgeglichen.`);
+ }else why.push('Bewerte nach deinen Matches deine Schläge (0–10) – dann wird die Empfehlung genauer.');
+ if(S.pref==='power'){p+=1.5;why.push('Du willst mehr Power.');}else if(S.pref==='kontrolle'){p-=1.5;why.push('Du willst mehr Kontrolle.');}
+ if(S.arm){p=Math.min(p,0);why.push('Wegen Arm-/Ellbogenbeschwerden: weiche Fläche, eher leicht, nichts Kopflastiges.');}
+ const t=p<=-1.5?0:p<1.5?1:2,pr={...RPROF[t]};if(S.arm){pr.haerte='Weich';pr.gew='340–355 g';}
+ return{t,pr,why};
+}
+
 function viewJournal(){
- const J=S.journal,matches=J.filter(j=>j.res),w=wins();
- const wk=weekKey(),thisWeek=J.filter(j=>weekKey(j.date)===wk).length;
- let streakW=0;for(const j of [...matches].sort((a,b)=>b.date.localeCompare(a.date))){if(j.res==='w')streakW++;else break;}
- let h=`<h2 class="sec-title">Trainingstagebuch</h2>
- <div class="card stack" style="margin-bottom:14px"><div class="row"><div class="grow"><div class="eyebrow muted">Wochenziel</div><b>${thisWeek} von ${S.weekGoal} Sessions</b><div class="muted small b">${fmtN(J.filter(j=>weekKey(j.date)===wk).reduce((a,j)=>a+kcalOf(j),0))} kcal diese Woche</div></div>${thisWeek>=S.weekGoal?'<span class="chip good">'+I.check+' geschafft</span>':''}</div><div class="bar green"><i style="width:${Math.min(100,thisWeek/S.weekGoal*100)}%"></i></div>
- <button class="btn block" data-act="journalNew">${I.plus} Session eintragen</button></div>
- <div class="statgrid">
+ const due=gearDue().length,jt=S.jtab||'entries';
+ let h=`<h2 class="sec-title">Trainingstagebuch</h2><div class="seg big subtabs">${[['entries','Einträge'],['stats','Statistik'],['gear','Material'+(due?` <i class="dot2">${due}</i>`:'')]].map(([v,n])=>`<button data-act="jtab" data-v="${v}" aria-pressed="${jt===v}">${n}</button>`).join('')}</div>`;
+ return h+(jt==='stats'?viewStats():jt==='gear'?viewGear():viewEntries());
+}
+function viewEntries(){
+ const J=S.journal,wk=weekKey(),thisWeek=J.filter(j=>weekKey(j.date)===wk).length,due=gearDue();
+ let h=`<div class="card stack" style="margin-bottom:14px"><div class="row"><div class="grow"><div class="eyebrow muted">Wochenziel</div><b>${thisWeek} von ${S.weekGoal} Sessions</b><div class="muted small b">${fmtN(J.filter(j=>weekKey(j.date)===wk).reduce((a,j)=>a+kcalOf(j),0))} kcal diese Woche</div></div>${thisWeek>=S.weekGoal?'<span class="chip good">'+I.check+' geschafft</span>':''}</div><div class="bar green"><i style="width:${Math.min(100,thisWeek/S.weekGoal*100)}%"></i></div>
+ <button class="btn block" data-act="journalNew">${I.plus} Session eintragen</button></div>`;
+ if(due.length)h+=`<button class="mini" data-act="jtab" data-v="gear" style="border-color:var(--flame)"><span class="ic" style="--c:var(--flame)">${I.bag}</span><span class="grow"><span class="eyebrow muted">Material-Check</span><h3>${due.map(g=>g.t).join(', ')} wechseln</h3><p>Fällig nach deinen letzten Sessions</p></span><span class="go">${I.chev}</span></button>`;
+ if(!J.length)return h+`<div class="card empty">${mascot()}<h3>Noch keine Einträge</h3><p class="muted">Trag dein nächstes Match oder Training ein – mit Ergebnis, Gefühl und Selbsteinschätzung.</p></div>`;
+ return h+`<div class="card">${J.map((j,i)=>`<button class="entry" data-act="journalView" data-i="${i}"><span class="ic" style="--c:${j.type==='Match'||j.type==='Turnier'?'var(--accent)':'var(--u4)'}">${j.type==='Training'||j.type==='Trainerstunde'?I.dumbbell:I.racket}</span><div class="grow"><h3>${esc(j.type)}${j.score?' · '+esc(j.score):''}</h3><p>${fmtDate(j.date)} · ${j.dur} Min · ${fmtN(kcalOf(j))} kcal${j.partner?' · mit '+esc(j.partner):''}</p></div>${j.res?`<span class="res ${j.res}">${RES[j.res]}</span>`:''}</button>`).join('')}</div>`;
+}
+function recRow(x){return `<div class="trow"><span class="grow b">${esc(x.name)}</span><span class="muted b small">${x.n} ${x.n===1?'Match':'Matches'}</span><span class="b small"><span class="c-good">${x.w}</span>–<span style="color:var(--bad)">${x.l}</span>${x.d?'–'+x.d:''}</span><span class="pct">${x.pct??'–'}%</span></div>`;}
+function viewStats(){
+ const L=statRange(),M=L.filter(j=>j.res),r=recordOf(M),asc=[...M].sort(byDateAsc),st=streaks(asc);
+ let h=`<div class="seg" style="margin:4px 0 14px">${[['all','Gesamt'],['365','12 Monate'],['30','30 Tage']].map(([v,n])=>`<button data-act="sf" data-v="${v}" aria-pressed="${(S.sf||'all')===v}">${n}</button>`).join('')}</div>`;
+ // Bilanz
+ h+=`<div class="card stack"><div class="eyebrow muted">Bilanz · ${r.n} ${r.n===1?'Match':'Matches'}</div>
+ <div class="wld"><div><b class="c-good">${r.w}</b><span>Siege</span></div><div><b style="color:var(--bad)">${r.l}</b><span>Niederlagen</span></div><div><b class="muted">${r.d}</b><span>Remis</span></div><div><b class="c-acc">${r.pct!=null?r.pct+'%':'–'}</b><span>Siegquote</span></div></div>
+ ${r.n?`<div class="wlbar"><i style="width:${r.w/r.n*100}%;background:var(--good)"></i><i style="width:${r.d/r.n*100}%;background:var(--locked)"></i><i style="width:${r.l/r.n*100}%;background:var(--bad)"></i></div>`:''}
+ <div><div class="eyebrow muted" style="margin-bottom:6px">Form · letzte ${Math.min(10,asc.length)}</div><div class="form">${asc.length?asc.slice(-10).map(j=>`<span class="fm ${j.res}" title="${fmtDate(j.date)}">${{w:'S',l:'N',d:'R'}[j.res]}</span>`).join(''):'<span class="muted small b">Noch keine Matches mit Ergebnis</span>'}</div></div></div>`;
+ // Sätze & Games
+ let sw=0,sl=0,gw=0,gl=0,tbw=0,tbl=0,sc=0;M.forEach(j=>{const s=parseScore(j.score);if(s.length)sc++;s.forEach(([a,b])=>{if(a>b)sw++;else if(b>a)sl++;if(Math.max(a,b)<=7){gw+=a;gl+=b;if(a===7&&b===6)tbw++;if(a===6&&b===7)tbl++;}});});
+ h+=`<h2 class="sec-title">Zahlen</h2><div class="statgrid">
+  <div class="sg"><span class="c-good">${I.flame}</span><div><b>${st.w?st.w+' S':st.l?st.l+' N':'–'}</b><span>Aktuelle Serie</span></div></div>
+  <div class="sg"><span class="c-gold">${I.trophy}</span><div><b>${st.bw}</b><span>Längste Siegesserie</span></div></div>
+  <div class="sg"><span class="c-acc">${I.chart}</span><div><b>${sw}:${sl}</b><span>Sätze${sw+sl?' · '+Math.round(sw/(sw+sl)*100)+'%':''}</span></div></div>
+  <div class="sg"><span class="c-acc">${I.ball}</span><div><b>${gw}:${gl}</b><span>Games${gw+gl?' · '+Math.round(gw/(gw+gl)*100)+'%':''}</span></div></div>
+  <div class="sg"><span class="c-gold">${I.bolt}</span><div><b>${tbw}:${tbl}</b><span>Tie-Breaks (7:6)</span></div></div>
+  <div class="sg"><span style="color:var(--bad)">${I.x}</span><div><b>${st.bl}</b><span>Längste Niederlagenserie</span></div></div>
+ </div>${M.length&&sc<M.length?`<p class="muted small b" style="margin-top:8px">Sätze/Games aus ${sc} von ${M.length} Matches – trag das Satzergebnis immer aus deiner Sicht ein (z. B. 6:4 3:6 7:5).</p>`:''}`;
+ // Typ
+ const rm=recordOf(M.filter(j=>j.type==='Match')),rt=recordOf(M.filter(j=>j.type==='Turnier'));
+ if(rt.n)h+=`<div class="card stack" style="margin-top:12px">${recRow({...rm,name:'Freie Matches'})}${recRow({...rt,name:'Turniere'})}</div>`;
+ // Monate
+ const months=[];const d0=parseD(today());for(let i=5;i>=0;i--){const d=new Date(d0.getFullYear(),d0.getMonth()-i,1),key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');const ms=S.journal.filter(j=>j.res&&j.date.slice(0,7)===key);months.push({l:['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'][d.getMonth()],...recordOf(ms)});}
+ const mm=Math.max(1,...months.map(x=>x.n));
+ h+=`<h2 class="sec-title">Matches pro Monat</h2><div class="card"><div class="chart">${months.map((x,i)=>`<div class="col"><em>${x.n?x.pct+'%':''}</em><i style="height:${x.n/mm*100}%;background:linear-gradient(to top,var(--good) ${x.n?x.w/x.n*100:0}%,var(--bad) ${x.n?x.w/x.n*100:0}%)"></i><span>${x.l}</span></div>`).join('')}</div><p class="muted small b" style="margin-top:8px"><span class="c-good">■</span> Siege · <span style="color:var(--bad)">■</span> Niederlagen/Remis · Zahl = Siegquote</p></div>`;
+ // Partner / Gegner
+ const P=groupRecord(M,'partner').slice(0,6),O=groupRecord(M,'opp').slice(0,6);
+ h+=`<h2 class="sec-title">Mit wem gewinnst du?</h2><div class="card stack">${P.length?P.map(recRow).join(''):'<p class="muted small b">Trag beim Match deine/n Partner/in ein – dann siehst du hier eure Bilanz.</p>'}</div>`;
+ if(O.length)h+=`<h2 class="sec-title">Gegen wen?</h2><div class="card stack">${O.map(recRow).join('')}</div>`;
+ // Gefühl
+ const fe=[1,2,3,4,5].map(f=>({f,...recordOf(M.filter(j=>(j.feel||3)===f))})).filter(x=>x.n);
+ if(fe.length>1)h+=`<h2 class="sec-title">Gefühl & Ergebnis</h2><div class="card stack">${fe.map(x=>recRow({...x,name:['Mies','Naja','Okay','Gut','Top'][x.f-1]})).join('')}</div>`;
+ // Aktivität
+ const J=L,wk=weekKey();
+ h+=`<h2 class="sec-title">Aktivität</h2><div class="statgrid">
   <div class="sg"><span class="c-acc">${I.racket}</span><div><b>${J.length}</b><span>Sessions</span></div></div>
-  <div class="sg"><span class="c-gold">${I.trophy}</span><div><b>${matches.length?Math.round(w/matches.length*100)+'%':'–'}</b><span>Siegquote (${w}/${matches.length})</span></div></div>
-  <div class="sg"><span class="c-good">${I.clock}</span><div><b>${hours().toFixed(1).replace('.',',')} h</b><span>auf dem Court</span></div></div>
-  <div class="sg"><span class="c-flame">${I.flame}</span><div><b>${streakW}</b><span>Siege in Folge</span></div></div>
+  <div class="sg"><span class="c-good">${I.clock}</span><div><b>${fmt1(J.reduce((a,j)=>a+(+j.dur||0),0)/60)} h</b><span>auf dem Court</span></div></div>
   <div class="sg"><span class="c-flame">${I.flame}</span><div><b>${fmtN(J.reduce((a,j)=>a+kcalOf(j),0))}</b><span>kcal gesamt</span></div></div>
-  <div class="sg"><span class="c-gold">${I.bolt}</span><div><b>${J.length?fmtN(J.reduce((a,j)=>a+kcalOf(j),0)/J.length):'–'}</b><span>kcal pro Session</span></div></div>
- </div>`;
- // Aktivität: letzte 8 Wochen in Minuten
- const weeks=[];for(let i=7;i>=0;i--){const k=addDays(wk,-7*i);weeks.push({k,m:J.filter(j=>weekKey(j.date)===k).reduce((a,j)=>a+(+j.dur||0),0)});}
+  <div class="sg"><span class="c-gold">${I.bolt}</span><div><b>${J.length?fmtN(J.reduce((a,j)=>a+kcalOf(j),0)/J.length):'–'}</b><span>kcal pro Session</span></div></div></div>`;
+ const weeks=[];for(let i=7;i>=0;i--){const k=addDays(wk,-7*i);weeks.push({k,m:S.journal.filter(j=>weekKey(j.date)===k).reduce((a,j)=>a+(+j.dur||0),0)});}
  const mx=Math.max(60,...weeks.map(x=>x.m));
- h+=`<h2 class="sec-title">Spielzeit pro Woche</h2><div class="card"><div class="chart">${weeks.map((x,i)=>`<div class="col"><em>${x.m?Math.round(x.m/6)/10+'h':''}</em><i class="${i===7?'now':''}" style="height:${x.m/mx*100}%"></i><span>${i===7?'Jetzt':parseD(x.k).getDate()+'.'+(parseD(x.k).getMonth()+1)+'.'}</span></div>`).join('')}</div></div>`;
- const sr=selfRating(),wk1=weakest()[0];
- h+=`<h2 class="sec-title">Dein Spielerprofil</h2><div class="card stack">${radarSvg(sr)}
-  ${SKIDS.some(k=>sr[k]!=null)?'':'<p class="muted small" style="text-align:center">Bewerte nach deinen Sessions deine Schläge (1–5) – hier entsteht dann dein persönliches Spielerprofil.</p>'}
-  <div class="row"><span class="ic" style="--c:var(--bad)">${I.target}</span><div class="grow"><div class="eyebrow muted">Deine Baustelle</div><b>${esc(SK[wk1].n)}</b></div>${(()=>{const l=LESSONS.find(l=>l.sk===wk1&&unlocked(l.idx));return l?`<button class="btn sm" data-act="lesson" data-id="${l.id}">Üben</button>`:'';})()}</div></div>`;
- h+=`<h2 class="sec-title">Einträge</h2>`;
- if(!J.length)h+=`<div class="card empty">${mascot()}<h3>Noch keine Einträge</h3><p class="muted">Trag dein nächstes Match oder Training ein – mit Ergebnis, Gefühl und Selbsteinschätzung.</p></div>`;
- else h+=`<div class="card">${J.map((j,i)=>`<button class="entry" data-act="journalView" data-i="${i}"><span class="ic" style="--c:${j.type==='Match'||j.type==='Turnier'?'var(--accent)':'var(--u4)'}">${j.type==='Training'||j.type==='Trainerstunde'?I.dumbbell:I.racket}</span><div class="grow"><h3>${esc(j.type)}${j.score?' · '+esc(j.score):''}</h3><p>${fmtDate(j.date)} · ${j.dur} Min · ${fmtN(kcalOf(j))} kcal${j.partner?' · mit '+esc(j.partner):''}</p></div>${j.res?`<span class="res ${j.res}">${{w:'Sieg',l:'Niederlage',d:'Remis'}[j.res]}</span>`:''}</button>`).join('')}</div>`;
+ h+=`<div class="card" style="margin-top:12px"><div class="eyebrow muted">Spielzeit pro Woche</div><div class="chart">${weeks.map((x,i)=>`<div class="col"><em>${x.m?fmt1(x.m/60)+'h':''}</em><i class="${i===7?'now':''}" style="height:${x.m/mx*100}%"></i><span>${i===7?'Jetzt':parseD(x.k).getDate()+'.'+(parseD(x.k).getMonth()+1)+'.'}</span></div>`).join('')}</div></div>`;
+ // Selbsteinschätzung
+ const sr=selfRating(),rated=SKIDS.filter(k=>sr[k]!=null);
+ h+=`<h2 class="sec-title">Selbsteinschätzung</h2><p class="sec-sub">Schnitt deiner letzten 5 Bewertungen (0–10) · Trend = letzte 3 vs. die 3 davor</p><div class="card stack">${radarSvg(sr)}`;
+ if(!rated.length)h+='<p class="muted small b" style="text-align:center">Bewerte nach jedem Spiel, wie gut deine Lobs, Bandejas & Co. waren – hier entstehen dann dein Profil und deine Trends.</p>';
+ else{const best=[...rated].sort((a,b)=>sr[b]-sr[a])[0],worst=[...rated].sort((a,b)=>sr[a]-sr[b])[0];
+  h+=`<div class="row"><span class="chip good">Stärke: ${esc(SK[best].s)} ${fmt1(sr[best])}</span><span class="chip" style="background:var(--bad-bg);color:var(--bad)">Baustelle: ${esc(SK[worst].s)} ${fmt1(sr[worst])}</span></div>`;}
+ SKIDS.forEach(k=>{const hs=ratingHist(k);if(!hs.length)return;const a=hs.slice(-3),b=hs.slice(-6,-3),av=x=>x.reduce((s,y)=>s+y,0)/x.length,tr=b.length?av(a)-av(b):0;
+  h+=`<div class="skr"><span class="ic" style="--c:${SK[k].c}">${I[SK[k].ic]}</span><div class="grow"><b>${esc(SK[k].n)}</b><div class="muted small b">${hs.length}× bewertet${b.length?` · <span style="color:${tr>0.2?'var(--good)':tr<-0.2?'var(--bad)':'var(--muted)'}">${tr>0.2?'▲':tr<-0.2?'▼':'▬'} ${tr>0?'+':''}${fmt1(tr)}</span>`:''}</div></div>${sparkSvg(hs)}<span class="score">${fmt1(sr[k])}</span></div>`;});
+ const wk1=weakest()[0],l1=LESSONS.find(l=>l.sk===wk1&&unlocked(l.idx));
+ h+=`<div class="row"><span class="ic" style="--c:var(--bad)">${I.target}</span><div class="grow"><div class="eyebrow muted">Empfohlene Baustelle</div><b>${esc(SK[wk1].n)}</b></div>${l1?`<button class="btn sm" data-act="lesson" data-id="${l1.id}">Üben</button>`:''}</div></div>`;
+ return h;
+}
+function rShape(t){const head=['<ellipse cx="30" cy="30" rx="26" ry="27"/>','<path d="M30 3C47 3 56 15 56 30c0 13-10 25-26 27C14 55 4 43 4 30 4 15 13 3 30 3z"/>','<path d="M30 2 57 24 50 54H10L3 24z"/>'][t];
+ return `<svg class="rsvg" viewBox="0 0 60 92" aria-hidden="true"><g fill="var(--accent)">${head}</g><rect x="26" y="56" width="8" height="32" rx="3" fill="var(--fg)"/><g fill="#fff" opacity=".55">${[[22,20],[30,16],[38,20],[22,30],[30,26],[38,30],[26,40],[34,40]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.2"/>`).join('')}</g></svg>`;}
+function viewGear(){
+ let h=`<p class="sec-sub" style="margin-top:4px">Richtwerte – stell die Intervalle so ein, wie es für dich passt. Gezählt werden Sessions aus deinem Tagebuch seit dem letzten Wechsel.</p><div class="stack">`;
+ GEAR.forEach(g=>{const u=gearUse(g);
+  h+=`<div class="card stack gear ${u.due?'due':''}"><div class="row"><span class="ic" style="--c:${u.due?'var(--flame)':'var(--accent)'}">${g.id==='grip'?I.racket:g.id==='balls'?I.ball:g.id==='shoes'?I.dumbbell:I.racket}</span><div class="grow"><b>${g.t}</b><div class="muted small b">${g.d}</div></div>${u.due?'<span class="chip" style="background:color-mix(in srgb,var(--flame) 20%,transparent)">Fällig!</span>':''}</div>
+  <div class="goal"><div class="bar ${u.due?'':'blue'}"><i style="width:${u.pct*100}%;${u.due?'background:var(--flame)':''}"></i></div><span>${g.u==='s'?u.v:fmt1(u.v)}/${u.every} ${unitTxt(g,u.every)}</span></div>
+  <div class="row"><div class="seg grow">${g.opts.map(o=>`<button data-act="gearEvery" data-id="${g.id}" data-v="${o}" aria-pressed="${u.every===o}">${o}${g.u==='s'?'':' h'}</button>`).join('')}</div><button class="btn sm ${u.due?'gold':'ghost'}" data-act="gearReset" data-id="${g.id}">${I.check} Gewechselt</button></div>
+  <div class="muted small b">Zuletzt gewechselt: ${new Date(u.since).toLocaleDateString('de-DE')}</div></div>`;});
+ const ra=racketAdvice(),pr=ra.pr;
+ h+=`</div><h2 class="sec-title">Schläger-Empfehlung</h2><p class="sec-sub">Aus deiner Roadmap-Stufe, deiner Seite und deinen 0–10-Bewertungen. Bewusst ohne Marken – teste vor dem Kauf.</p>
+ <div class="card stack racket"><div class="row">${rShape(ra.t)}<div class="grow"><div class="eyebrow muted">Dein Profil</div><h2 style="font-size:24px">${pr.form}</h2><p class="muted b small">${pr.d}</p></div></div>
+ <div class="rspecs"><div><span>Form</span><b>${pr.form}</b></div><div><span>Balance</span><b>${pr.bal}</b></div><div><span>Härte</span><b>${pr.haerte}</b></div><div><span>Gewicht</span><b>${pr.gew}</b></div></div>
+ <div><div class="eyebrow muted" style="margin-bottom:6px">Warum?</div><ul class="why">${ra.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>
+ <div><span class="lab">Was willst du mehr?</span><div class="seg">${[['kontrolle','Kontrolle'],['ausgewogen','Ausgewogen'],['power','Power']].map(([v,n])=>`<button data-act="set" data-k="pref" data-v="${v}" aria-pressed="${(S.pref||'ausgewogen')===v}">${n}</button>`).join('')}</div></div>
+ <div><span class="lab">Arm- oder Ellbogenbeschwerden?</span><div class="seg"><button data-act="set" data-k="arm" data-v="0" aria-pressed="${!S.arm}">Nein</button><button data-act="set" data-k="arm" data-v="1" aria-pressed="${!!S.arm}">Ja</button></div></div>
+ <div class="protip">${mascot()}<div><b>Beim Probespielen</b><p>Spiel mit dem Testschläger 20 Minuten Volleys, Bandejas und Lobs. Fühlt sich der Arm danach gut an und triffst du den Sweetspot oft? Viele Clubs verleihen Testschläger.</p></div></div></div>`;
  return h;
 }
 
@@ -1745,26 +1897,29 @@ function drawJournal(){
   <div><span class="lab">Intensität</span><div class="seg">${INTENS.map(([v,n])=>`<button data-act="jf" data-k="int" data-v="${v}" aria-pressed="${JF.int===v}">${n}</button>`).join('')}</div></div>
   <div class="kcal"><span class="c-flame">${I.flame}</span><div class="grow"><b id="jkcal">≈ ${fmtN(kcalCalc(JF.type,JF.dur,JF.int))} kcal</b><span>bei ${String(S.weight).replace('.',',')} kg · Schätzung</span></div></div>
   ${isMatch?`<div><span class="lab">Ergebnis</span><div class="seg big">${[['w','Sieg'],['l','Niederlage'],['d','Remis']].map(([v,n])=>`<button data-act="jf" data-k="res" data-v="${v}" aria-pressed="${JF.res===v}">${n}</button>`).join('')}</div></div>
-  <div><label class="lab" for="jscore">Satzergebnis</label><input id="jscore" class="field" placeholder="z. B. 6:4 3:6 7:5" value="${esc(JF.score)}"></div>`:''}
+  <div><label class="lab" for="jscore">Satzergebnis</label><input id="jscore" class="field" placeholder="Aus deiner Sicht, z. B. 6:4 3:6 7:5" value="${esc(JF.score)}"></div>`:''}
   <div class="row"><div class="grow"><label class="lab" for="jpart">Partner/in</label><input id="jpart" class="field" value="${esc(JF.partner)}" placeholder="optional"></div>${isMatch?`<div class="grow"><label class="lab" for="jopp">Gegner</label><input id="jopp" class="field" value="${esc(JF.opp)}" placeholder="optional"></div>`:''}</div>
   <div><span class="lab">Wie hast du dich gefühlt?</span><div class="seg">${feels.map((f,i)=>`<button data-act="jf" data-k="feel" data-v="${i+1}" aria-pressed="${JF.feel===i+1}">${f}</button>`).join('')}</div></div>
   ${am.length?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
-  <div><span class="lab">Selbsteinschätzung (1 = schwach, 5 = top)</span><p class="muted small" style="margin-bottom:8px">Bewerte, was du heute gespielt hast – daraus entsteht dein Spielerprofil.</p><div class="rate">${SKIDS.map(k=>`<span>${esc(SK[k].s)}</span><div class="dots">${[1,2,3,4,5].map(v=>`<button class="${JF.rt[k]===v?'on':''}" data-act="jrt" data-k="${k}" data-v="${v}" aria-label="${esc(SK[k].n)} ${v}">${v}</button>`).join('')}</div>`).join('')}</div></div>
+  <div><span class="lab">Wie gut warst du heute? (0–10)</span><p class="muted small" style="margin-bottom:8px">Zieh nur bei dem, was du heute gespielt hast. Tipp auf die Zahl zum Zurücksetzen.</p><div class="stack">${SKIDS.map(k=>{const v=JF.rt[k];return `<div class="rr ${v==null?'unset':''}"><label for="r_${k}">Wie gut waren deine ${esc(SK[k].p)}?</label><button class="rv" data-act="rclear" data-k="${k}" id="rv_${k}" aria-label="Zurücksetzen">${v??'–'}</button><input id="r_${k}" type="range" min="0" max="10" step="1" value="${v??5}" data-rk="${k}"></div>`;}).join('')}</div></div>
   <div><span class="lab">Wo hast du die meisten Punkte verloren?</span><div class="seg">${SKIDS.map(k=>`<button data-act="jf" data-k="lost" data-v="${k}" aria-pressed="${JF.lost===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
   <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
  </div></div>
  <div class="l-foot"><div class="foot-in"><button class="btn block" data-act="saveJournal">${I.check} Speichern</button></div></div></div>`;
- liveKcal();
+ liveKcal();liveRate();
 }
+function liveRate(){document.querySelectorAll('[data-rk]').forEach(r=>{const set=()=>{const k=r.dataset.rk;JF.rt[k]=+r.value;const b=document.getElementById('rv_'+k);if(b)b.textContent=r.value;r.parentElement.classList.remove('unset');};r.addEventListener('input',set);r.addEventListener('pointerup',set);r.addEventListener('keyup',set);});}
 function liveKcal(){const i=document.getElementById('jdur'),o=document.getElementById('jkcal');if(i&&o)i.addEventListener('input',()=>{o.textContent='≈ '+fmtN(kcalCalc(JF.type,parseInt(i.value)||0,JF.int))+' kcal';});}
 function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
  const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
  ['score','partner','opp','notes'].forEach(k=>{const v=g('j'+({partner:'part'}[k]||k));if(v!=null)JF[k]=v.trim();});}
 function saveJournal(){
  syncJF();
- const e={id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
+ const e={rs:10,id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
  if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;}
  e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
+ e.ts=Date.now();if((e.type==='Match'||e.type==='Turnier')&&!e.res&&e.score)e.res=inferRes(e.score);
+ const prevSR=selfRating(),dueBefore=gearDue().map(g=>g.id),rBefore=racketAdvice().pr.form;
  const newL=e.lost?unlockSkill(e.lost):null;
  S.journal.unshift(e);S.journal.sort((a,b)=>b.date.localeCompare(a.date));
  S.day.logs++;
@@ -1776,7 +1931,13 @@ function saveJournal(){
  const done=outs.filter(o=>o.done);
  const mx=outs.reduce((a,o)=>a+o.res.n,0);
  const streak=res.streakUp;if(res.goal)setTimeout(()=>toast('Tagesziel erreicht! +10 Bälle',I.target),300);
+ const rk=Object.entries(e.rt||{}).filter(([k])=>prevSR[k]!=null).map(([k,v])=>({k,v,d:v-prevSR[k]})).sort((a,b)=>b.d-a.d);
+ const dueNew=gearDue().filter(g=>!dueBefore.includes(g.id)),rAfter=racketAdvice().pr.form;
+ const ins=[];if(rk.length&&rk[0].d>0.4)ins.push(`<div class="row"><span class="c-good">▲</span><span class="grow">${esc(SK[rk[0].k].n)}: <b>${rk[0].v}/10</b> – ${fmt1(rk[0].d)} über deinem Schnitt</span></div>`);if(rk.length>1&&rk[rk.length-1].d<-0.4){const x=rk[rk.length-1];ins.push(`<div class="row"><span style="color:var(--bad)">▼</span><span class="grow">${esc(SK[x.k].n)}: <b>${x.v}/10</b> – ${fmt1(-x.d)} unter deinem Schnitt</span></div>`);}
+ dueNew.forEach(g=>ins.push(`<div class="row"><span class="c-flame">${I.bag}</span><span class="grow"><b>${g.t} wechseln!</b> Intervall erreicht.</span></div>`));
+ if(rAfter!==rBefore)ins.push(`<div class="row"><span class="c-acc">${I.racket}</span><span class="grow">Neue Schläger-Empfehlung: <b>${rAfter}</b></span></div>`);
  modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">≈ ${fmtN(e.kcal)} kcal verbrannt · +${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
+ ${ins.length?`<div class="card stack small b">${ins.join('')}</div>`:''}
  ${e.lost?`<div class="card stack"><div class="eyebrow muted">Dein nächster Schritt</div><b>Du hast viele Punkte bei „${esc(SK[e.lost].n)}“ verloren.</b>${newL?`<p class="muted b small">Dafür habe ich dir „${esc(newL.t)}“ freigeschaltet.</p>`:''}${(()=>{const l=LESSONS.find(l=>l.sk===e.lost&&unlocked(l.idx));return l?`<button class="btn ball block" data-act="lesson" data-id="${l.id}">${esc(l.t)} üben</button>`:'';})()}</div>`:''}
  <button class="btn block" data-act="${streak?'showStreak':'closeModal'}">Weiter</button>`);
  beep('done');if(done.length||e.res==='w')confetti();
@@ -1788,7 +1949,7 @@ function journalView(i){
  ${j.score?`<p class="b">${esc(j.score)}</p>`:''}${j.partner?`<p class="muted b">Partner/in: ${esc(j.partner)}</p>`:''}${j.opp?`<p class="muted b">Gegner: ${esc(j.opp)}</p>`:''}
  <p class="b"><span class="c-flame">≈ ${fmtN(kcalOf(j))} kcal</span> · Intensität: ${(INTENS.find(x=>x[0]===(j.int||2))||INTENS[1])[1]}</p>
  <p class="b">Gefühl: ${['Mies','Naja','Okay','Gut','Top'][(j.feel||3)-1]}</p>
- ${rt.length?`<div class="stack">${rt.map(([k,v])=>`<div class="row"><span style="width:90px" class="b small">${esc(SK[k].s)}</span><div class="bar thin blue"><i style="width:${v*20}%"></i></div><span class="b small">${v}/5</span></div>`).join('')}</div>`:''}
+ ${rt.length?`<div class="stack">${rt.map(([k,v])=>`<div class="row"><span style="width:90px" class="b small">${esc(SK[k].s)}</span><div class="bar thin blue"><i style="width:${v*10}%"></i></div><span class="b small">${v}/10</span></div>`).join('')}</div>`:''}
  ${j.lost?`<p class="b">Punkte verloren vor allem bei: ${esc(SK[j.lost].n)}</p>`:''}
  ${(j.missions||[]).length?`<p class="b">Missionen: ${j.missions.map(m=>LBYID[m.id]?esc(LBYID[m.id].m.t)+' ('+RATE[m.r-1][1]+')':'').join(', ')}</p>`:''}
  ${j.notes?`<div class="card" style="white-space:pre-wrap">${esc(j.notes)}</div>`:''}
@@ -1868,6 +2029,11 @@ const ACT={
  journalNew(){closeModal();journalNew();},
  jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel'||k==='dur'||k==='int')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
+ rclear(el){delete JF.rt[el.dataset.k];syncJF();drawJournal();},
+ jtab(el){S.jtab=el.dataset.v;save();render();$('#main').scrollTop=0;},
+ sf(el){S.sf=el.dataset.v;save();render();},
+ gearEvery(el){gearState(el.dataset.id).every=+el.dataset.v;save();render();},
+ gearReset(el){const g=GEAR.find(x=>x.id===el.dataset.id);const st=gearState(g.id);st.since=Date.now();S.cnt.gear=(S.cnt.gear||0)+1;S.gems+=5;save();checkAch();render();toast(g.t+' gewechselt – Zähler zurückgesetzt · +5 Bälle',I.check);beep('coin');},
  jrt(el){syncJF();const k=el.dataset.k,v=+el.dataset.v;if(JF.rt[k]===v)delete JF.rt[k];else JF.rt[k]=v;drawJournal();},
  closeJournal(){JF=null;$('#ov').innerHTML='';},
  saveJournal(){saveJournal();},
@@ -1880,7 +2046,7 @@ const ACT={
   else{S.owned.push(it.id);S.wear={hat:it.id};}
   S.gems-=it.p;save();beep('coin');toast(esc(it.t)+' gekauft!',I.bag);shopSheet();renderTop();},
  wear(el){S.wear=S.wear.hat===el.dataset.id?{}:{hat:el.dataset.id};save();render();shopSheet();},
- set(el){const k=el.dataset.k;let v=el.dataset.v;if(k==='goal'||k==='weekGoal')v=+v;if(k==='sound')v=v==='1';S[k]=v;save();render();},
+ set(el){const k=el.dataset.k;let v=el.dataset.v;if(k==='goal'||k==='weekGoal')v=+v;if(k==='sound')v=v==='1';if(k==='arm')v=v==='1';S[k]=v;save();render();},
  focus(el){const k=el.dataset.k;if(S.focus.includes(k))S.focus=S.focus.filter(x=>x!==k);else if(S.focus.length<3){S.focus.push(k);const l=unlockSkill(k);if(l)toast('Freigeschaltet: <b>'+esc(l.t)+'</b>',I.sparkle);}else{toast('Maximal 3 Fokus-Skills',I.target);return;}save();render();},
  lvlInfo(){const lv=lvl(S.xp);modal(`<div class="center">${mascot('happy')}<h2>Level ${lv.L} · ${title(lv.L)}</h2><div class="goal" style="width:100%"><div class="bar blue"><i style="width:${lv.cur/lv.need*100}%"></i></div><span>${lv.cur}/${lv.need}</span></div><p class="muted b">Nächster Titel: ${(TITLES.find(t=>t[0]>lv.L)||['','Du bist eine Legende!'])[1]}${TITLES.find(t=>t[0]>lv.L)?' ab Level '+TITLES.find(t=>t[0]>lv.L)[0]:''}</p></div><button class="btn block" data-act="closeModal">OK</button>`);},
  streakInfo(){showStreak();},
