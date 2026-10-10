@@ -50,3 +50,15 @@ Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchs
 - **Backup als Datei** (Teilen → iCloud Drive/Dateien) mit Erinnerung alle 14 Tage und Wiederherstellen per Datei
 
 Der Fortschritt liegt im Browser (`localStorage`). Unter **Profil → Fortschritt sichern** gibt es einen Code zum Übertragen.
+
+## Tests
+
+Automatische Browser-Tests (Playwright) prüfen Inhalte, Lernpfad, Tagebuch, Statistik, Material, Schläger-Empfehlung, Backup, Ziele, Trainingspläne, Briefing und Animationen in Hell und Dunkel.
+
+```bash
+npm install
+npx playwright install chromium   # einmalig
+npm test
+```
+
+Auf GitHub laufen sie bei jeder Änderung an `padel/` automatisch (Workflow „PadelUp-Tests“).
