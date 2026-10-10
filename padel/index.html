@@ -344,6 +344,21 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .vbtn{align-self:flex-start;text-decoration:none}
 .rrun>span>svg{width:22px;height:22px}
 
+/* Extras */
+.lvlbig{font-family:var(--font-display);font-size:44px;font-weight:700;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.lvlbig small{font-size:16px;color:var(--muted)}
+.ins{display:flex;gap:10px;align-items:center}
+.ins p{margin:0;font-weight:700;font-size:14px}
+.ins .ic{width:38px;height:38px;border-radius:12px}.ins .ic svg{width:20px;height:20px}
+.tl{display:flex;flex-direction:column;gap:10px}
+.tlb{display:grid;grid-template-columns:54px 1fr;gap:10px;align-items:start;border-left:3px solid var(--accent);padding-left:10px}
+.tlm{font-family:var(--font-display);font-weight:600;color:var(--accent);font-size:14px}
+.tlb b{font-size:15px}.tlb p{margin:2px 0 0;font-size:13px;color:var(--muted);font-weight:700}
+.timer{font-family:var(--font-display);font-size:84px;font-weight:700;text-align:center;line-height:1;color:var(--accent);font-variant-numeric:tabular-nums}
+.timer.over{color:var(--good)}
+.goalc.done{border-color:var(--gold)}
+.qbtns{display:grid;grid-template-columns:1fr auto;gap:10px}
+
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
 .lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -1323,7 +1338,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-const APPVER='2026-10-10 · v11';
+const APPVER='2026-10-10 · v12';
 function defaults(){return{v:3,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
@@ -1471,6 +1486,10 @@ const ACH=[
  {id:'ms5',t:'Praxistest',d:'5 Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=5},
  {id:'ms25',t:'Bewiesen auf dem Court',d:'Alle Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=MSALL.length},
  ...STAGES.map((st,si)=>({id:'st'+(si+1),t:'Stufe '+(si+1)+': '+st.t,d:'Stufe „'+st.t+'“ gemeistert',f:()=>stageDone(si)})),
+ {id:'backup1',t:'Abgesichert',d:'Erstes Backup gespeichert',f:()=>(S.cnt.backup||0)>=1},
+ {id:'goal1',t:'Zielstrebig',d:'Erstes persönliches Ziel erreicht',f:()=>(S.cnt.goals||0)>=1},
+ {id:'plan1',t:'Trainingsfleißig',d:'Ersten Trainingsplan absolviert',f:()=>(S.cnt.plans||0)>=1},
+ {id:'brief1',t:'Gut vorbereitet',d:'Erstes Match-Briefing erstellt',f:()=>(S.cnt.brief||0)>=1},
  {id:'gear1',t:'Materialpfleger',d:'Zum ersten Mal Material gewechselt',f:()=>(S.cnt.gear||0)>=1},
  {id:'lg',t:'Aufsteiger',d:'Erster Liga-Aufstieg',f:()=>S.league&&S.league.tier>=1}
 ];
@@ -1587,7 +1606,7 @@ function missionCard(x,showBtn=true){
 }
 function viewMissions(){
  const am=activeMissions(),dm=doneMissions();
- let h=`<h2 class="sec-title">Match-Missionen</h2><p class="sec-sub">Lektionen lernen ist gut – auf dem Court anwenden macht dich besser. Bis zu 3 Missionen gleichzeitig.</p>`;
+ let h=`<button class="mini" data-act="brief" style="margin-top:4px"><span class="ic" style="--c:var(--accent)">${I.target}</span><span class="grow"><span class="eyebrow muted">Vor dem nächsten Match</span><h3>Match-Briefing</h3><p>Bilanz gegen die Gegner, deine Baustellen und ein Plan</p></span><span class="go">${I.chev}</span></button><h2 class="sec-title">Match-Missionen</h2><p class="sec-sub">Lektionen lernen ist gut – auf dem Court anwenden macht dich besser. Bis zu 3 Missionen gleichzeitig.</p>`;
  if(am.length){
   h+=`<div class="plan"><div class="eyebrow" style="opacity:.85">Dein Plan fürs nächste Match</div><h2>Fokus auf ${am.length===1?'eine Sache':am.length+' Dinge'}</h2><ol>${am.map(x=>`<li>${esc(x.l.m.t)}</li>`).join('')}</ol><button class="btn block" data-act="journalNew">${I.pen} Match eintragen & auswerten</button></div>`;
   h+=`<div class="stack">${am.map(x=>missionCard(x)).join('')}</div>`;
@@ -1598,6 +1617,7 @@ function viewMissions(){
  if(paused.length)h+=`<h2 class="sec-title">Pausiert</h2><div class="card stack">${paused.map(([id])=>`<div class="row"><span class="grow b">${esc(LBYID[id].m.t)}</span><button class="btn sm ghost" data-act="startMission" data-id="${id}">Aktivieren</button></div>`).join('')}</div>`;
  h+=`<h2 class="sec-title">Gemeistert · ${dm.length}</h2>`;
  h+=dm.length?`<div class="card stack">${dm.map(x=>`<div class="row"><span class="ic" style="--c:var(--gold)">${I.trophy}</span><div class="grow"><b>${esc(x.l.m.t)}</b><div class="muted small">${esc(SK[x.l.sk].n)} · ${x.m.doneAt?fmtDate(x.m.doneAt):''}</div></div></div>`).join('')}</div>`:`<p class="muted">Deine gemeisterten Missionen landen hier als Trophäen.</p>`;
+ h+=goalsSection()+plansSection();
  return h;
 }
 
@@ -1798,7 +1818,7 @@ function viewJournal(){
 function viewEntries(){
  const J=S.journal,wk=weekKey(),thisWeek=J.filter(j=>weekKey(j.date)===wk).length,due=gearDue();
  let h=`<div class="card stack" style="margin-bottom:14px"><div class="row"><div class="grow"><div class="eyebrow muted">Wochenziel</div><b>${thisWeek} von ${S.weekGoal} Sessions</b><div class="muted small b">${fmtN(J.filter(j=>weekKey(j.date)===wk).reduce((a,j)=>a+kcalOf(j),0))} kcal diese Woche</div></div>${thisWeek>=S.weekGoal?'<span class="chip good">'+I.check+' geschafft</span>':''}</div><div class="bar green"><i style="width:${Math.min(100,thisWeek/S.weekGoal*100)}%"></i></div>
- <button class="btn block" data-act="journalNew">${I.plus} Session eintragen</button></div>`;
+ <div class="qbtns"><button class="btn" data-act="journalNew">${I.plus} Session eintragen</button><button class="btn ball" data-act="quick" aria-label="Schnell eintragen">${I.bolt} Schnell</button></div></div>`;
  if(due.length)h+=`<button class="mini" data-act="jtab" data-v="gear" style="border-color:var(--flame)"><span class="ic" style="--c:var(--flame)">${I.bag}</span><span class="grow"><span class="eyebrow muted">Material-Check</span><h3>${due.map(g=>g.t).join(', ')} wechseln</h3><p>Fällig nach deinen letzten Sessions</p></span><span class="go">${I.chev}</span></button>`;
  if(!J.length)return h+`<div class="card empty">${mascot()}<h3>Noch keine Einträge</h3><p class="muted">Trag dein nächstes Match oder Training ein – mit Ergebnis, Gefühl und Selbsteinschätzung.</p></div>`;
  return h+`<div class="card">${J.map((j,i)=>`<button class="entry" data-act="journalView" data-i="${i}"><span class="ic" style="--c:${j.type==='Match'||j.type==='Turnier'?'var(--accent)':'var(--u4)'}">${j.type==='Training'||j.type==='Trainerstunde'?I.dumbbell:I.racket}</span><div class="grow"><h3>${esc(j.type)}${j.score?' · '+esc(j.score):''}</h3><p>${fmtDate(j.date)} · ${j.dur} Min · ${fmtN(kcalOf(j))} kcal${j.partner?' · mit '+esc(j.partner):''}</p></div>${j.res?`<span class="res ${j.res}">${RES[j.res]}</span>`:''}</button>`).join('')}</div>`;
@@ -1807,6 +1827,7 @@ function recRow(x){return `<div class="trow"><span class="grow b">${esc(x.name)}
 function viewStats(){
  const L=statRange(),M=L.filter(j=>j.res),r=recordOf(M),asc=[...M].sort(byDateAsc),st=streaks(asc);
  let h=`<div class="seg" style="margin:4px 0 14px">${[['all','Gesamt'],['365','12 Monate'],['30','30 Tage']].map(([v,n])=>`<button data-act="sf" data-v="${v}" aria-pressed="${(S.sf||'all')===v}">${n}</button>`).join('')}</div>`;
+ h+=levelCard()+'<div style="height:12px"></div>'+insightsCard(L)+'<div style="height:4px"></div>';
  // Bilanz
  h+=`<div class="card stack"><div class="eyebrow muted">Bilanz · ${r.n} ${r.n===1?'Match':'Matches'}</div>
  <div class="wld"><div><b class="c-good">${r.w}</b><span>Siege</span></div><div><b style="color:var(--bad)">${r.l}</b><span>Niederlagen</span></div><div><b class="muted">${r.d}</b><span>Remis</span></div><div><b class="c-acc">${r.pct!=null?r.pct+'%':'–'}</b><span>Siegquote</span></div></div>
@@ -1908,6 +1929,7 @@ function viewProfile(){
   <div><label class="lab" for="nm">Name</label><input id="nm" class="field" value="${esc(S.name)}" maxlength="24" data-act="noop"></div>
   <div class="row"><div class="grow"><label class="lab" for="wkg">Gewicht (kg)</label><input id="wkg" class="field" type="number" inputmode="decimal" min="30" max="250" step="0.1" value="${S.weight}"></div><div class="grow"><label class="lab" for="hcm">Größe (cm)</label><input id="hcm" class="field" type="number" inputmode="numeric" min="120" max="230" value="${S.height}"></div></div>
   <p class="muted small b" style="margin-top:-4px">Für die Kalorien-Schätzung. Halte dein Gewicht aktuell – neue Sessions rechnen mit dem aktuellen Wert, alte behalten ihren.</p>
+  <div><label class="lab" for="mylvl">Dein bekanntes Niveau (0–7, optional)</label><input id="mylvl" class="field" type="number" inputmode="decimal" min="0" max="7" step="0.1" value="${S.myLevel??''}" placeholder="z. B. aus deiner Buchungs-App"><p class="muted small b" style="margin-top:4px">Startwert für die Spielstärke-Schätzung in der Statistik.</p></div>
   <div><span class="lab">Seite</span><div class="seg">${[['rechts','Rechts'],['links','Links'],['beide','Beide']].map(([v,n])=>`<button data-act="set" data-k="side" data-v="${v}" aria-pressed="${S.side===v}">${n}</button>`).join('')}</div></div>
   <div><span class="lab">Tagesziel</span><div class="seg">${[10,20,30,50].map(v=>`<button data-act="set" data-k="goal" data-v="${v}" aria-pressed="${S.goal===v}">${v} XP</button>`).join('')}</div></div>
   <div><span class="lab">Sessions pro Woche</span><div class="seg">${[1,2,3,4,5].map(v=>`<button data-act="set" data-k="weekGoal" data-v="${v}" aria-pressed="${S.weekGoal===v}">${v}</button>`).join('')}</div></div>
@@ -1915,12 +1937,15 @@ function viewProfile(){
   <div><span class="lab">Design</span><div class="seg">${[['auto','System'],['light','Hell'],['dark','Dunkel']].map(([v,n])=>`<button data-act="set" data-k="theme" data-v="${v}" aria-pressed="${S.theme===v}">${n}</button>`).join('')}</div></div>
   <div><span class="lab">Sound</span><div class="seg"><button data-act="set" data-k="sound" data-v="1" aria-pressed="${S.sound}">An</button><button data-act="set" data-k="sound" data-v="0" aria-pressed="${!S.sound}">Aus</button></div></div>
  </div>
- <h2 class="sec-title">Fortschritt sichern</h2><div class="card stack"><p class="muted small">Dein Fortschritt liegt nur auf diesem Gerät. Mit dem Code kannst du ihn sichern oder auf ein anderes Gerät übertragen.</p>
+ <h2 class="sec-title">Datensicherung</h2><div class="card stack"><p class="muted small b">Alles liegt nur auf diesem Gerät. ${S.lastBackup?'Letztes Backup: '+fmtDate(S.lastBackup)+(dayDiff(S.lastBackup,today())>=14?' – <span style="color:var(--bad)">Zeit für ein neues!</span>':''):'<span style="color:var(--bad)">Noch kein Backup.</span>'} Speichere die Datei z. B. in iCloud Drive oder „Dateien“.</p>
+ <button class="btn block" data-act="backupNow">${I.shield} Backup als Datei sichern</button><button class="btn ghost block" data-act="restore">Backup-Datei laden</button>
+ <p class="muted small b" style="margin:6px 0 0">Alternativ als Text-Code:</p>
  <div class="row"><button class="btn sm ghost grow" data-act="export">Code kopieren</button><button class="btn sm ghost grow" data-act="import">Code einfügen</button></div>
  <button class="linkbtn" data-act="reset">Alles zurücksetzen</button></div><p class="muted small b" style="text-align:center;margin-top:14px">PadelUp ${APPVER}</p>`;
  return h;
 }
 function afterRender(){
+ const ml=$('#mylvl');if(ml)ml.addEventListener('change',()=>{const v=parseFloat(String(ml.value).replace(',','.'));S.myLevel=ml.value.trim()===''||isNaN(v)?null:Math.max(0,Math.min(7,v));save();toast('Niveau gespeichert',I.check);});
  document.querySelectorAll('[data-rf]').forEach(el=>{const k=el.dataset.rf;if(el.type==='range')el.addEventListener('input',()=>{const o=document.getElementById('rfv_'+k);if(o)o.textContent=el.value;});el.addEventListener('change',()=>{rfState()[k]=el.type==='range'?+el.value:el.value;S.rkOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;});});
  const rkq=$('#rkq');if(rkq)rkq.addEventListener('input',()=>{S.rkq=rkq.value;$('#rklist').innerHTML=rkListHTML(rkRanked(),rkq.value);});
  const wkg=$('#wkg');if(wkg)wkg.addEventListener('change',()=>{const v=parseFloat(String(wkg.value).replace(',','.'));if(v>=30&&v<=250){S.weight=Math.round(v*10)/10;save();toast('Gewicht gespeichert: '+String(S.weight).replace('.',',')+' kg',I.check);}});
@@ -1997,6 +2022,408 @@ function animSheet(key,lessonId){const A=ANIM[key];modal(`<div class="eyebrow mu
 function peekSheet(id){const l=LBYID[id],k=ANIMOF[id];
  modal(`<div class="eyebrow muted">Nachschauen</div><h2>${esc(l.t)}</h2>${k?animHTML(k):''}${l.cards.map(c=>`<div class="theory" style="padding:14px;animation:none"><h3 style="font-size:17px">${esc(c[0])}</h3><ul>${c[1].map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`).join('')}<div class="protip">${mascot()}<div><b>Profi-Tipp</b><p>${esc(l.tip)}</p></div></div>${videoBtn(id)}<button class="btn block" data-act="closeModal">Zurück zur Frage</button>`);initAnims($('#modal'));}
 function lexiconSheet(){modal(`<div class="eyebrow muted">Schlag-Lexikon</div><h2>Alle Schläge animiert</h2><p class="muted b small">Tippe auf einen Schlag, um den Ballflug zu sehen.</p><div class="stack">${Object.entries(ANIM).map(([k,A])=>`<button class="rrun" data-act="lexAnim" data-k="${k}"><span class="c-acc">${I.play}</span><span class="grow"><b>${esc(A.t)}</b><small>${esc(LEXD[k]||'')}</small></span><span class="go">${I.chev}</span></button>`).join('')}</div><button class="btn ghost block" data-act="closeModal">Schließen</button>`);}
+
+/* ================= Trainingspläne (Inhalte) ================= */
+window.TPLANS = [
+  {
+    id: 'p_grund1',
+    t: 'Grundschläge & Kontrolle',
+    st: 0,
+    n: 2,
+    sk: 'vorhand',
+    d: 'Du lernst eine kontrollierte Vorhand mit kurzer Ausholbewegung und sicherem Treffpunkt vor dem Körper.',
+    blocks: [
+      [10, 'Aufwärmen', 'Lockeres Laufen, Seitschritte, Armkreise und Ausfallschritte (5 Min.), dann im Mini-Padel am Netz sanft hin und her spielen. Achte auf lockeres Handgelenk und kurze Schläge.'],
+      [12, 'Vorhand aus dem Zuspiel', 'Einer steht am Netz und wirft oder spielt Bälle auf die Vorhandseite, der andere spielt von der Grundlinie cross zurück. 3 Serien à 10 Bälle, dann Wechsel. Ziel: 7 von 10 Bällen ins Feld.'],
+      [10, 'Kurze Ausholbewegung', 'Wie zuvor, aber der Schläger startet seitlich auf Hüfthöhe statt hinter dem Rücken. Schlage durch den Ball nach vorn, nicht nach oben. Je Spieler 2 x 4 Min.'],
+      [10, 'Rückhand-Ergänzung', 'Zuspieler wechselt nun Vorhand und Rückhand im Wechsel. Seitlich stellen, Schulter zum Netz drehen, die freie Hand führt den Schläger beim Ausholen. Je Spieler 2 x 3 Min., Fokus auf frühe Schulterdrehung.'],
+      [10, 'Kontroll-Rallye', 'Ihr spielt euch von der Grundlinie aus diagonal zu, Bälle auf mittlerer Höhe über das Netz. Zählt gemeinsam die Ballwechsel. Ziel: 15 Bälle am Stück ohne Fehler.'],
+      [8, 'Spielform & Cool-down', 'Diagonales Punktspiel nur im halben Feld bis 11, Aufschlag von unten. Danach 3 Min. lockeres Dehnen von Schultern, Unterarm und Waden.']
+    ]
+  },
+  {
+    id: 'p_wand1',
+    t: 'Wand-Basics',
+    st: 0,
+    n: 2,
+    sk: 'wand',
+    d: 'Du lernst, den Ball nach der Rückwand zu lesen, Abstand zu halten und ihn kontrolliert zurückzuspielen.',
+    blocks: [
+      [9, 'Aufwärmen', 'Dynamisches Mobilisieren mit Hüftkreisen, Seitschritten und Ausfallschritten, dann 4 Min. Einspielen am Netz mit kurzen Volleys und weichen Schlägen.'],
+      [10, 'Ball-Wand-Gefühl', 'Stell dich zwei Meter vor die Rückwand, wirf den Ball selbst gegen das Glas und fange ihn nach dem Abprall auf Hüfthöhe. 3 x 10 Würfe. Achte darauf, dich mit dem Ball nach vorn zu bewegen.'],
+      [12, 'Rückwand mit Zuspiel', 'Der Partner spielt vom Netz aus lange Bälle, die nach dem Aufsprung an die Rückwand gehen. Du lässt den Ball kommen und spielst ihn lang zurück. 3 Serien à 8 Bälle, dann Wechsel. Ziel: 6 von 8 zurück ins Feld.'],
+      [10, 'Seitenwand verstehen', 'Zuspiel diagonal in die Ecke, der Ball springt von der Seitenwand ab. Seitlich stellen, Ball vorbeilassen, kurz und weich zurückspielen. Je Spieler 2 x 4 Min.'],
+      [10, 'Doppelwand-Ecke', 'Zuspiel tief in die Ecke, sodass Rück- und Seitenwand getroffen werden. Bleib geduldig, geh mit dem Ball nach vorn und spiel einen hohen sicheren Ball. Ziel: 5 von 10 kontrolliert zurück.'],
+      [9, 'Spielform', 'Punktspiel von der Grundlinie: Jeder Punkt zählt doppelt, wenn du ihn nach einem Wandabpraller gewinnst. Bis 15 Punkte, danach kurz ausdehnen.']
+    ]
+  },
+  {
+    id: 'p_vier1',
+    t: 'Erste Spielformen zu viert',
+    st: 0,
+    n: 4,
+    sk: 'volley',
+    d: 'Ihr spielt erste Doppel-Formen, lernt Positionen am Netz und den sicheren Volley vor dem Körper.',
+    blocks: [
+      [10, 'Aufwärmen', 'Gemeinsam Laufschule (Kniehebelauf, Seitschritte, Überkreuzlauf), dann zu viert Mini-Padel am Netz: alle vier stehen nah am Netz und spielen weich diagonal.'],
+      [10, 'Volley-Basis', 'Zwei stehen am Netz, zwei spielen von der Grundlinie zu. Kurze Bewegung, Schlägerkopf oben, Ball vor dem Körper blocken. 5 Min., dann Seitenwechsel. Ziel: 8 von 10 Volleys ins Feld.'],
+      [10, 'Volley auf die Mitte', 'Gleiche Aufstellung, Netzspieler spielen jeden Volley auf die Mitte zwischen die Gegner. Wer das Zuspiel macht, wechselt alle 10 Bälle. Achte auf eine kurze, geführte Bewegung.'],
+      [10, 'Positionsspiel', 'Ein Paar am Netz, eins hinten. Bewegt euch als Paar wie mit einem Seil verbunden: Ball rechts, beide schieben nach rechts. 2 x 4 Min. pro Seite, Trainer- oder Zurufkommandos helfen.'],
+      [12, 'Netz gegen Grundlinie', 'Paar am Netz gegen Paar hinten, Punkt beginnt mit Zuspiel von hinten. Netzpaar bekommt den Punkt bei Volley-Winner. Nach 7 Punkten Wechsel, 2 Runden.'],
+      [8, 'Spielform', 'Freies Doppel mit Aufschlag von unten, Spiele bis 4 Punkte. Rotiert nach jedem Spiel die Partner, damit jeder mit jedem spielt.']
+    ]
+  },
+  {
+    id: 'p_lob1',
+    t: 'Lob & Rückwand',
+    st: 1,
+    n: 2,
+    sk: 'lob',
+    d: 'Du spielst hohe, lange Lobs aus der Defensive und nutzt die Rückwand, um Zeit zu gewinnen.',
+    blocks: [
+      [10, 'Aufwärmen', 'Dynamisches Aufwärmen mit Skippings, Seitschritten und Schulterkreisen, dann 5 Min. Einspielen am Netz mit Volleys und weichen Bällen.'],
+      [10, 'Lob aus dem Stand', 'Einer steht am Netz und spielt Bälle auf die Grundlinie, der andere spielt den Lob über ihn hinweg. Schlägerfläche leicht offen, von unten nach oben durchschwingen. Ziel: 7 von 10 Lobs landen hinter der Aufschlaglinie.'],
+      [12, 'Lob nach Rückwand', 'Zuspiel lang an die Rückwand. Ball abprallen lassen, mit nach vorn gehen und einen hohen Lob cross spielen. 3 Serien à 8 Bälle pro Spieler. Achte auf ruhigen Oberkörper.'],
+      [10, 'Lob longline und cross', 'Zuspieler zeigt vor dem Schlag die Richtung an. Du reagierst und spielst den Lob entsprechend. Je 2 x 4 Min. Ziel: 6 von 10 in die angesagte Hälfte.'],
+      [10, 'Lob und Netz erobern', 'Nach einem guten Lob läufst du sofort ans Netz, der Partner muss den Ball nach der Rückwand zurückspielen. Spielt den Ballwechsel aus. 2 x 4 Min. pro Rolle.'],
+      [8, 'Spielform', 'Punktspiel ein gegen eins im ganzen Feld, ein Spieler startet am Netz. Ein Lob-Winner zählt zwei Punkte. Bis 11, danach lockeres Dehnen.']
+    ]
+  },
+  {
+    id: 'p_band1',
+    t: 'Bandeja-Grundlagen',
+    st: 1,
+    n: 2,
+    sk: 'bandeja',
+    d: 'Du lernst die Bandeja als sicheren Überkopfball, um nach einem Lob die Netzposition zu halten.',
+    blocks: [
+      [10, 'Aufwärmen', 'Schulter- und Rumpfmobilisation mit Theraband oder Armkreisen, Seitschritte rückwärts, dann 4 Min. Einspielen am Netz mit Volleys.'],
+      [10, 'Schattenschlag', 'Ohne Ball: seitlich stellen, Schläger hoch vor dem Kopf, freie Hand zeigt zum Ball, dann Schlag nach vorn-unten mit Schnitt. 3 x 10 Wiederholungen, der Partner korrigiert die Seitstellung.'],
+      [12, 'Bandeja aus dem Zuwurf', 'Partner wirft halbhohe Lobs aus Netzmitte. Du stehst kurz hinter der Aufschlaglinie und spielst die Bandeja cross. 3 Serien à 8 Bälle. Ziel: 6 von 8 landen im Feld vor der Rückwand.'],
+      [12, 'Bandeja mit Rückwärtsbewegung', 'Du startest am Netz, Partner spielt einen Lob. Seitlich nach hinten bewegen, Bandeja spielen, sofort zurück ans Netz. 3 x 6 Bälle pro Spieler. Achte darauf, dass der Ball nicht hoch von der Rückwand zurückkommt.'],
+      [8, 'Zielspiel', 'Markiert eine Zone in der gegnerischen Rückhand-Ecke. Jede Bandeja in die Zone zählt einen Punkt. Ziel: 5 Treffer in 12 Versuchen.'],
+      [8, 'Spielform', 'Einer am Netz, einer hinten. Punkt beginnt mit Lob, der Netzspieler muss mit Bandeja antworten. Bis 7, dann Rollenwechsel.']
+    ]
+  },
+  {
+    id: 'p_team1',
+    t: 'Teamplay & Netz erobern',
+    st: 1,
+    n: 4,
+    sk: 'taktik',
+    d: 'Ihr bewegt euch als Paar, erobert mit Lob oder Chiquita das Netz und haltet es gemeinsam.',
+    blocks: [
+      [10, 'Aufwärmen', 'Laufschule zu viert mit Seitschritten und Sprints zum Netz, dann 5 Min. Einspielen am Netz mit Volleys diagonal.'],
+      [10, 'Paarbewegung', 'Ein Paar hinten, eins am Netz. Das Netzpaar spielt Bälle in alle Richtungen, das hintere Paar bewegt sich parallel und hält etwa drei Meter Abstand. 2 x 4 Min. pro Paar.'],
+      [12, 'Lob und nachrücken', 'Hinteres Paar spielt einen Lob, beide rücken sofort zum Netz vor, das Netzpaar muss nach hinten. Spielt den Punkt aus. Ziel: 5 von 10 Netzeroberungen erfolgreich.'],
+      [10, 'Chiquita zum Vorrücken', 'Hinteres Paar spielt einen weichen, flachen Ball auf die Füße der Netzspieler und rückt dann vor. Netzpaar muss den Ball von unten spielen. 2 x 4 Min. pro Paar.'],
+      [10, 'Kommunikation', 'Freies Spiel, aber jeder Ball durch die Mitte muss angesagt werden (Ich oder Du). Ein Punkt Abzug für jeden ungeklärten Mittelball. Je 2 Spiele.'],
+      [8, 'Spielform', 'Doppel bis 6 Punkte, Punkte durch Netzeroberung zählen doppelt. Danach 3 Min. Cool-down mit Dehnen.']
+    ]
+  },
+  {
+    id: 'p_aufs1',
+    t: 'Aufschlag & Return',
+    st: 2,
+    n: 4,
+    sk: 'aufschlag',
+    d: 'Ihr verbessert einen platzierten Aufschlag mit Netzangriff und einen sicheren Return gegen den Aufschläger.',
+    blocks: [
+      [10, 'Aufwärmen', 'Dynamisches Mobilisieren mit Fokus auf Schulter und Hüfte, dann 5 Min. Einspielen am Netz und einige lockere Aufschläge.'],
+      [10, 'Aufschlag Zielzonen', 'Zwei schlagen gleichzeitig auf je eine Seite auf: Ball hinter der Aufschlaglinie aufprellen, auf oder unter Hüfthöhe treffen. Ziele: Glas-Ecke, Mitte, Körper. Ziel: 7 von 10 in die angesagte Zone.'],
+      [10, 'Aufschlag plus Volley', 'Nach dem Aufschlag rückst du ans Netz vor und spielst den ersten Volley tief. Returnspieler spielt neutral zurück. 2 Serien à 8 pro Spieler, dann Rotation.'],
+      [10, 'Return cross tief', 'Returnspieler spielen jeden Return cross auf die Füße oder lang in die Ecke, nie zum Netzspieler. Rotation alle 8 Bälle. Ziel: 8 von 10 Returns ins Feld.'],
+      [10, 'Return-Lob', 'Returnspieler spielen einen Lob über den Netzspieler. Aufschlagpaar muss mit Bandeja antworten. 2 x 4 Min. pro Paar, achtet auf die Wechselbewegung.'],
+      [10, 'Spielform', 'Doppel, jedes Paar schlägt 6 Punkte am Stück auf. Aufschlagpaar bekommt einen Bonuspunkt für jeden Punkt ohne Doppelfehler. Danach Wechsel.']
+    ]
+  },
+  {
+    id: 'p_vibo1',
+    t: 'Víbora & Gancho',
+    st: 2,
+    n: 2,
+    sk: 'bandeja',
+    d: 'Du erweiterst deinen Überkopf um die Víbora mit Seitspin und den Gancho als schnellen Angriffsball.',
+    blocks: [
+      [10, 'Aufwärmen', 'Schulter-, Rumpf- und Handgelenkmobilisation, Seitschritte rückwärts, dann 4 Min. Einspielen am Netz mit Bandejas in kleinem Tempo.'],
+      [10, 'Víbora Schattenschlag', 'Seitstellung, Treffpunkt etwas seitlich vom Kopf, Schlag von hinten-oben nach vorn-unten mit kräftigem Seitschnitt. 3 x 8 Schattenschläge, dann 10 Bälle aus dem Zuwurf.'],
+      [12, 'Víbora cross', 'Partner spielt Lobs auf deine Vorhandseite. Spiel die Víbora cross, sodass der Ball tief an der Seitenwand bleibt. 3 Serien à 8 Bälle. Ziel: 5 von 8 springen flach von der Seitenwand ab.'],
+      [10, 'Gancho', 'Zuspiel als halbhoher Lob nahe dem Netz. Treffpunkt vor dem Körper, schnell und flach in die Mitte oder auf die Füße. 2 x 8 Bälle pro Spieler. Achte auf kompakte Ausholbewegung.'],
+      [10, 'Entscheidung unter Druck', 'Partner spielt Lobs unterschiedlicher Länge. Tiefer Lob: Bandeja, mittlerer: Víbora, kurzer: Gancho. 2 x 4 Min. pro Spieler, der Partner bewertet die Wahl.'],
+      [8, 'Spielform', 'Ein Spieler am Netz gegen einen hinten. Jeder Punkt startet mit Lob. Víbora- oder Gancho-Winner zählen zwei Punkte. Bis 11.']
+    ]
+  },
+  {
+    id: 'p_bajada',
+    t: 'Wand-Angriff Bajada',
+    st: 2,
+    n: 2,
+    sk: 'wand',
+    d: 'Du greifst hohe Bälle nach der Rückwand mit der Bajada an, statt nur zu verteidigen.',
+    blocks: [
+      [9, 'Aufwärmen', 'Dynamisches Aufwärmen mit Kniehebelauf, Seitschritten und Schulterkreisen, dann 4 Min. Einspielen am Netz.'],
+      [10, 'Wand lesen', 'Partner spielt hohe lange Bälle an die Rückwand. Du drehst dich seitlich, gehst mit dem Ball nach vorn und fängst ihn zuerst mit der freien Hand auf Schulterhöhe. 2 x 8 Bälle.'],
+      [12, 'Bajada Vorhand', 'Gleiches Zuspiel, du schlägst jetzt die Bajada: Treffpunkt auf Schulterhöhe vor dem Körper, Schlag nach vorn-unten mit Schnitt. 3 Serien à 8. Ziel: 6 von 8 flach und tief ins Feld.'],
+      [10, 'Bajada Rückhand', 'Zuspiel auf die Rückhandseite an die Rückwand. Früh drehen, Schulter zeigt zur Wand, kurzer Schlag. 3 Serien à 6 Bälle pro Spieler.'],
+      [10, 'Bajada auf Ziele', 'Partner steht am Netz. Bajada wahlweise auf die Füße, zwischen Mitte und Glas oder als Lob, wenn der Ball zu tief ist. Ziel: 7 von 10 richtige Entscheidungen.'],
+      [9, 'Spielform', 'Einer am Netz, einer hinten. Netzspieler startet mit hohem Ball an die Rückwand. Bajada-Winner zählen doppelt. Bis 11, dann Cool-down.']
+    ]
+  },
+  {
+    id: 'p_netz3',
+    t: 'Netzduelle & Block',
+    st: 3,
+    n: 2,
+    sk: 'volley',
+    d: 'Du trainierst schnelle Reaktionen am Netz, den Blockvolley gegen harte Bälle und das Gewinnen von Netzduellen.',
+    blocks: [
+      [10, 'Aufwärmen', 'Reaktions- und Laufschule mit Split-Step auf Zuruf, dann 5 Min. schnelles Volley-Einspielen am Netz.'],
+      [10, 'Volley-Volley', 'Ihr steht beide an der Aufschlaglinie und spielt Volley gegen Volley, zuerst ruhig, dann schneller. 3 x 2 Min. Ziel: 20 Volleys am Stück ohne Fehler.'],
+      [12, 'Blockvolley', 'Einer schlägt von der Grundlinie harte flache Bälle auf den Körper, der andere blockt kurz ohne Ausholen. 3 Serien à 10 Bälle pro Spieler. Ziel: 7 von 10 Blocks ins Feld.'],
+      [10, 'Rückhand-Volley auf den Körper', 'Zuspiel direkt auf die Schlaghand-Schulter. Schläger vor dem Körper als Rückhand-Block, Ellbogen vorn. 2 x 4 Min. pro Spieler.'],
+      [10, 'Reaktionsduell', 'Beide am Netz, ein Meter näher als üblich. Ball nur auf Hüfthöhe oder tiefer, kein Lob. Wer zuerst fehlt, verliert den Punkt. 2 Sätze bis 7.'],
+      [8, 'Spielform & Cool-down', 'Netz gegen Grundlinie bis 7, Netzspieler muss jeden Punkt per Volley abschließen. Danach Unterarm und Schulter dehnen.']
+    ]
+  },
+  {
+    id: 'p_muster',
+    t: 'Spielmuster trainieren',
+    st: 3,
+    n: 4,
+    sk: 'taktik',
+    d: 'Ihr übt feste Spielmuster wie Mitte spielen, Lob auf die Rückhand und Druck mit Bandeja zur Netzsicherung.',
+    blocks: [
+      [10, 'Aufwärmen', 'Laufschule zu viert, Mobilisation, dann 5 Min. Einspielen am Netz und einige Bandejas.'],
+      [10, 'Muster 1: Mitte', 'Netzpaar spielt jeden Volley in die Mitte zwischen die Gegner, um Verwirrung zu erzeugen. Grundlinienpaar verteidigt. 2 x 4 Min. pro Paar. Ziel: 8 von 10 Bällen in die Mitte.'],
+      [10, 'Muster 2: Lob auf Rückhand', 'Grundlinienpaar lobt auf die Rückhandseite des Netzspielers und rückt vor. Netzpaar übt die Wechselbewegung nach hinten. Je Paar 2 x 4 Min.'],
+      [10, 'Muster 3: Bandeja und Netz halten', 'Netzpaar beantwortet jeden Lob mit Bandeja cross und bleibt vorn. Grundlinienpaar versucht, mit dem nächsten Lob durchzukommen. Ziel: 6 von 10 Punkten Netz gehalten.'],
+      [10, 'Muster-Spiel', 'Jedes Paar sagt vor dem Punkt ein Muster an. Gelingt es und gewinnt ihr den Punkt, zählt er doppelt. Rotiert nach 6 Punkten die Seiten.'],
+      [10, 'Spielform', 'Doppel bis 6 Spiele mit Goldenem Punkt. Kurze Teambesprechung bei jedem Seitenwechsel: Welches Muster funktioniert?']
+    ]
+  },
+  {
+    id: 'p_dejada',
+    t: 'Dejada & Tempowechsel',
+    st: 3,
+    n: 2,
+    sk: 'volley',
+    d: 'Du lernst die Dejada und den Wechsel zwischen weichen und schnellen Bällen, um Gegner aus dem Rhythmus zu bringen.',
+    blocks: [
+      [10, 'Aufwärmen', 'Mobilisation von Handgelenk, Schulter und Hüfte, dann 5 Min. Einspielen am Netz mit wechselnd weichen und schnellen Volleys.'],
+      [10, 'Dejada-Gefühl', 'Zuspiel auf Hüfthöhe aus der Grundlinie, du spielst einen weichen Stoppvolley knapp hinter das Netz mit offener Schlägerfläche. 3 Serien à 8. Ziel: 6 von 8 springen zweimal vor der Aufschlaglinie.'],
+      [10, 'Dejada nach Bandeja', 'Zuspiel kurzer Lob, du täuschst eine Bandeja an und spielst stattdessen eine weiche Dejada nahe an die Seitenwand. 2 x 8 Bälle pro Spieler.'],
+      [10, 'Tempowechsel', 'Rallye von Netz zu Grundlinie. Netzspieler wechselt zwischen langem tiefem Volley und Dejada, Grundlinienspieler muss reagieren. 2 x 4 Min. pro Rolle.'],
+      [12, 'Langsam-schnell', 'Freie Rallye: Nach jedem schnellen Ball muss ein weicher Ball folgen. Wer das Tempo nicht wechselt, verliert den Punkt. Ziel: 10 Wechsel am Stück. 2 x 5 Min.'],
+      [8, 'Spielform', 'Netz gegen Grundlinie bis 11, Dejada-Winner zählen doppelt, Punkt nach zu hoher Dejada geht an den Gegner. Danach Cool-down.']
+    ]
+  },
+  {
+    id: 'p_bigpts',
+    t: 'Match-Simulation Big Points',
+    st: 4,
+    n: 4,
+    sk: 'kopf',
+    d: 'Ihr trainiert entscheidende Punkte unter Druck mit Routinen, klaren Plänen und Konzentration.',
+    blocks: [
+      [10, 'Aufwärmen', 'Zügiges dynamisches Aufwärmen mit Sprints, dann 5 Min. Einspielen am Netz, Überkopfbälle und Aufschläge wie vor einem Match.'],
+      [8, 'Routine zwischen Punkten', 'Jeder legt eine kurze Routine fest: Atmen, Saiten richten, Plan mit dem Partner absprechen. Übt sie bei 10 Punkten, jeweils maximal 20 Sekunden.'],
+      [12, 'Goldener Punkt', 'Jeder Punkt wird als Goldener Punkt bei 40:40 gespielt, das Returnpaar wählt die Seite. 12 Punkte, Aufschlag wechselt alle 3. Ziel: Aufschlagpaar gewinnt mindestens 7 von 12.'],
+      [10, 'Rückstand aufholen', 'Jedes Spiel startet bei 15:40 für das Returnpaar. Aufschlagpaar muss mit hohem Erstaufschlag-Anteil und sicherem Spiel drehen. 6 Spiele, dann Wechsel.'],
+      [12, 'Tie-Break-Serie', 'Spielt drei Tie-Breaks bis 7 mit Seitenwechsel nach je 6 Punkten. Nach jedem verlorenen Punkt sofort die Routine durchführen. Ergebnis notieren.'],
+      [8, 'Spielform & Reflexion', 'Ein Satz-Endspiel ab 4:4 bis 6. Danach 3 Min. Besprechung: Welcher Plan hat bei Big Points funktioniert?']
+    ]
+  },
+  {
+    id: 'p_athlet',
+    t: 'Padel-Athletik-Zirkel',
+    st: 4,
+    n: 2,
+    sk: 'athletik',
+    d: 'Ihr verbessert Beinarbeit, Explosivität und Ausdauer in padeltypischen Bewegungen auf dem Platz.',
+    blocks: [
+      [10, 'Aufwärmen', 'Laufen, Skippings, Anfersen, Hüftöffner und Ausfallschritte mit Rotation, dann 4 Min. Einspielen am Netz.'],
+      [10, 'Split-Step und Antritt', 'Partner zeigt eine Richtung, du machst Split-Step und sprintest drei Meter. 4 Serien à 6 Wiederholungen, 30 Sek. Pause. Ziel: Reaktion unter einer halben Sekunde.'],
+      [12, 'Zirkel am Platz', '40 Sek. Belastung, 20 Sek. Pause: Seitschritte Netz-Seitenwand, Ausfallschritte mit Schläger, Sprünge zum Smash, Rückwärtslauf zur Rückwand. 3 Runden.'],
+      [10, 'Bewegung mit Ball', 'Partner spielt Bälle abwechselnd Netz links, Grundlinie rechts. Du läufst und schlägst jeden Ball zurück. 6 x 45 Sek. pro Spieler. Ziel: 8 von 10 Bällen ins Feld.'],
+      [10, 'Rumpf und Stabilität', 'Unterarmstütz, Seitstütz, Rotationen mit dem Schläger und einbeinige Kniebeugen. 2 Runden à 40 Sek. pro Übung, abwechselnd mit dem Partner.'],
+      [8, 'Spielform & Cool-down', 'Intensives Punktspiel ein gegen eins im halben Feld bis 7, danach 4 Min. Auslaufen und Dehnen von Waden, Hüfte und Schultern.']
+    ]
+  },
+  {
+    id: 'p_turnier',
+    t: 'Turniervorbereitung',
+    st: 4,
+    n: 4,
+    sk: 'taktik',
+    d: 'Ihr simuliert einen Turniertag mit kurzem Einspielen, klarer Taktik und Matches mit Wertung.',
+    blocks: [
+      [8, 'Aufwärmen wie im Turnier', 'Kurz und zügig: dynamische Mobilisation, dann Einspielen am Netz, Grundlinie, Überkopf und Aufschläge in je einer Minute.'],
+      [10, 'Gegneranalyse', 'Ein Paar spielt bewusst einen Stil (viel Lob oder viel Tempo). Das andere Paar erkennt den Stil und passt sich an. 2 x 4 Min., dann Rollenwechsel.'],
+      [12, 'Taktik pro Seite', 'Spieler auf der Rückhandseite übernimmt Überkopfbälle in der Mitte, Vorhandseite sichert. Spielt Punkte mit dieser Absprache. Ziel: 8 von 10 Mittelbällen ohne Abstimmungsfehler.'],
+      [10, 'Erste Aufschläge sichern', 'Jedes Spiel startet mit Aufschlag, nur ein Versuch. Aufschlagpaar muss den ersten Volley tief spielen. 8 Punkte pro Paar. Ziel: mindestens 6 erste Aufschläge im Feld.'],
+      [14, 'Turniermatch', 'Kurzsatz bis 4 Spiele mit Goldenem Punkt und Tie-Break bei 3:3. Seitenwechsel nach ungeraden Spielen, Pausen nur 60 Sekunden.'],
+      [6, 'Cool-down & Plan', 'Lockeres Dehnen und kurze Besprechung: Was nehmt ihr ins Turnier mit? Notiert je zwei Stärken und einen Schwerpunkt.']
+    ]
+  }
+];
+
+/* ================= Datensicherung (Backup-Datei) ================= */
+function backupNow(){
+ const data=JSON.stringify({app:'PadelUp',v:S.v,saved:new Date().toISOString(),state:S});
+ const name=`padelup-backup-${today()}.json`;let file=null;try{file=new File([data],name,{type:'application/json'});}catch(e){}
+ const done=()=>{S.lastBackup=today();S.cnt.backup=(S.cnt.backup||0)+1;save();checkAch();render();toast('Backup gesichert',I.check);};
+ if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'PadelUp Backup'}).then(done,()=>{});return;}
+ const url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);done();
+}
+function restorePick(){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{const f=i.files&&i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),st=o&&o.state?o.state:o;if(!st||typeof st!=='object'||!('xp' in st))throw 0;
+ PENDING_RESTORE=st;modal(`<div class="center">${mascot()}<h2>Backup laden?</h2><p class="b">${o.saved?'Gesichert am '+new Date(o.saved).toLocaleDateString('de-DE')+' · ':''}${(st.journal||[]).length} Einträge · ${st.xp||0} XP</p><p class="muted small b">Dein aktueller Stand auf diesem Gerät wird ersetzt.</p></div><button class="btn block" data-act="restoreDo">Laden</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);}catch(e){toast('Das ist keine gültige PadelUp-Sicherung',I.x);}};r.readAsText(f);};i.click();}
+let PENDING_RESTORE=null;
+const backupDue=()=>S.onb&&S.journal.length>0&&(!S.lastBackup||dayDiff(S.lastBackup,today())>=14);
+function backupPopup(){S.backupAsked=today();save();modal(`<div class="center"><span class="ic" style="width:84px;height:84px;--c:var(--accent)">${I.shield}</span><h2>Zeit für ein Backup</h2><p class="b">${S.lastBackup?'Dein letztes Backup ist '+dayDiff(S.lastBackup,today())+' Tage her.':'Du hast noch nie ein Backup gemacht.'} ${S.journal.length} Einträge liegen nur auf diesem Handy.</p><p class="muted small b">Sichere die Datei z. B. in iCloud Drive oder „Dateien“ – dann ist nichts verloren, wenn das Handy weg ist.</p></div><button class="btn block" data-act="backupNowPop">${I.shield} Jetzt sichern</button><button class="btn ghost block" data-act="nextModal">Später</button>`);}
+
+/* ================= Spielstärke (Elo aus deinen Ergebnissen) =================
+ Niveau-Skala 0–7. Unbekannte Gegner starten auf deinem Niveau und lernen mit jedem Match gegen sie dazu.
+ Trägst du das Niveau von Gegnern/Partner ein, wird die Schätzung deutlich genauer. */
+const L2R=l=>600+l*200,R2L=r=>Math.max(0,Math.min(7,(r-600)/200));
+const oppKey=s=>(s||'').trim().toLowerCase();
+function eloReplay(){
+ const base=S.myLevel!=null&&S.myLevel!==''?+S.myLevel:[1,2,3,4][S.lvl||0];
+ let R=L2R(base);const opp={},hist=[];let n=0;
+ [...S.journal].filter(j=>j.res&&(j.type==='Match'||j.type==='Turnier')).sort(byDateAsc).forEach(j=>{
+  const pr=j.pl!=null&&j.pl!==''?L2R(+j.pl):R,team=(R+pr)/2,k=oppKey(j.opp);
+  let orr;if(j.ol!=null&&j.ol!=='')orr=L2R(+j.ol);else if(k){if(opp[k]==null)opp[k]=team;orr=opp[k];}else orr=team;
+  const E=1/(1+Math.pow(10,(orr-team)/400));let Sx=j.res==='w'?1:j.res==='l'?0:.5;
+  const sc=parseScore(j.score).filter(([a,b])=>Math.max(a,b)<=7);if(sc.length){const gw=sc.reduce((s,x)=>s+x[0],0),gl=sc.reduce((s,x)=>s+x[1],0);if(gw+gl)Sx=.75*Sx+.25*gw/(gw+gl);}
+  const K=n<10?40:24,d=K*(Sx-E);R+=d;if(k&&(j.ol==null||j.ol===''))opp[k]-=d;n++;hist.push({date:j.date,R});});
+ return{R,L:R2L(R),base,n,hist,opp};
+}
+function levelCard(){const E=eloReplay();if(!E.n)return `<div class="card stack"><div class="eyebrow muted">Spielstärke</div><p class="muted small b">Trag Matches mit Ergebnis ein – dann schätzt die App dein Niveau (0–7) aus Siegen, Niederlagen und Games.${S.myLevel==null?' Startwert: '+fmt1(E.base)+' (aus deiner Einstufung, im Profil änderbar).':''}</p></div>`;
+ const before=E.hist.filter(h=>h.date<=addDays(today(),-30)).pop(),tr=before?R2L(E.R)-R2L(before.R):R2L(E.R)-E.base;
+ const vs=[E.base,...E.hist.map(h=>R2L(h.R))],mn=Math.min(...vs)-.2,mx=Math.max(...vs)+.2,W=340,H=70,X=i=>8+i/(vs.length-1||1)*(W-16),Y=v=>H-6-(v-mn)/(mx-mn||1)*(H-12);
+ return `<div class="card stack"><div class="row"><div class="grow"><div class="eyebrow muted">Geschätzte Spielstärke</div><div class="lvlbig">${fmt1(E.L)}<small> / 7</small></div></div><span class="b" style="color:${tr>0.05?'var(--good)':tr<-0.05?'var(--bad)':'var(--muted)'}">${tr>0.05?'▲':tr<-0.05?'▼':'▬'} ${tr>0?'+':''}${fmt1(tr)} <span class="muted small">30 Tage</span></span></div>
+ <svg viewBox="0 0 ${W} ${H}" class="dev" aria-label="Verlauf der Spielstärke"><path d="${vs.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${X(vs.length-1)}" cy="${Y(vs[vs.length-1])}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/></svg>
+ <p class="muted small b" style="margin:0">Aus ${E.n} Matches berechnet (Start ${fmt1(E.base)}). Unbekannte Gegner zählen erst wie dein Niveau – trag beim Match das Niveau von Gegnern und Partner ein, dann wird's genauer.</p></div>`;}
+
+/* ================= Erkenntnisse ================= */
+function insights(L){
+ const M=L.filter(j=>j.res==='w'||j.res==='l'),out=[];
+ SKIDS.forEach(k=>{const p=M.filter(j=>j.rt&&j.rt[k]!=null);if(p.length<4)return;const vals=p.map(j=>j.rt[k]).sort((a,b)=>a-b),m=vals[Math.floor(vals.length/2)];
+  const hi=p.filter(j=>j.rt[k]>=m),lo=p.filter(j=>j.rt[k]<m);if(hi.length<2||lo.length<2)return;
+  const wh=hi.filter(j=>j.res==='w').length,wl=lo.filter(j=>j.res==='w').length,ph=Math.round(wh/hi.length*100),pl=Math.round(wl/lo.length*100);
+  if(Math.abs(ph-pl)>=25)out.push({w:Math.abs(ph-pl),ic:SK[k].ic,c:ph>pl?'var(--good)':'var(--bad)',h:`Wenn deine <b>${esc(SK[k].p)}</b> bei ${m}+ liegen, gewinnst du <b>${wh} von ${hi.length}</b> (${ph} %) – sonst ${wl} von ${lo.length} (${pl} %).`});});
+ out.sort((a,b)=>b.w-a.w);const res=out.slice(0,3);
+ const losses=M.filter(j=>j.res==='l'&&j.lost);if(losses.length>=2){const c={};losses.forEach(j=>c[j.lost]=(c[j.lost]||0)+1);const [k,n]=Object.entries(c).sort((a,b)=>b[1]-a[1])[0];if(n>=2){const l=LESSONS.find(x=>x.sk===k&&unlocked(x.idx));res.push({ic:'target',c:'var(--bad)',h:`In <b>${n} von ${M.filter(j=>j.res==='l').length} Niederlagen</b> hast du die meisten Punkte bei <b>${esc(SK[k].n)}</b> verloren.`,a:l?`<button class="btn sm" data-act="lesson" data-id="${l.id}">Üben</button>`:''});}}
+ const P=groupRecord(M,'partner').filter(x=>x.n>=3).sort((a,b)=>b.pct-a.pct);if(P.length){const b=P[0];res.push({ic:'user',c:'var(--good)',h:`Mit <b>${esc(b.name)}</b> gewinnst du am häufigsten: <b>${b.w} von ${b.n}</b> (${b.pct} %).`});}
+ const rw=M.filter(j=>j.res==='w'&&j.rt&&Object.keys(j.rt).length),rl=M.filter(j=>j.res==='l'&&j.rt&&Object.keys(j.rt).length);
+ if(rw.length>=2&&rl.length>=2){const av=a=>a.reduce((s,j)=>{const v=Object.values(j.rt);return s+v.reduce((x,y)=>x+y,0)/v.length;},0)/a.length,aw=av(rw),al=av(rl);if(aw-al>=.5)res.push({ic:'chart',c:'var(--accent)',h:`Nach Siegen bewertest du dich im Schnitt mit <b>${fmt1(aw)}</b>, nach Niederlagen mit <b>${fmt1(al)}</b>.`});}
+ return{list:res,n:M.length};
+}
+function insightsCard(L){const I2=insights(L);
+ if(!I2.list.length)return `<div class="card stack"><div class="eyebrow muted">Erkenntnisse</div><p class="muted small b">Ab etwa 4–6 Matches mit Ergebnis und Bewertung zeigt dir die App hier, was bei Siegen anders läuft als bei Niederlagen (bisher ${I2.n}).</p></div>`;
+ return `<div class="card stack"><div class="eyebrow muted">Erkenntnisse aus ${I2.n} Matches</div>${I2.list.map(x=>`<div class="ins"><span class="ic" style="--c:${x.c}">${I[x.ic]||I.chart}</span><p class="grow">${x.h}</p>${x.a||''}</div>`).join('')}<p class="muted small b" style="margin:0">Zusammenhänge, keine Beweise – aber gute Hinweise, worauf du achten kannst.</p></div>`;}
+
+/* ================= Match-Briefing ================= */
+const toks=s=>oppKey(s).split(/\s*(?:&|\+|,|\/|\bund\b)\s*/).map(x=>x.trim()).filter(Boolean);
+function briefData(opp,partner){
+ const M=S.journal.filter(j=>j.res),ot=toks(opp),vs=ot.length?M.filter(j=>toks(j.opp).some(t=>ot.includes(t))):[],wp=partner?M.filter(j=>oppKey(j.partner)===oppKey(partner)):[];
+ const sr=selfRating(),diff=[];if(vs.length){SKIDS.forEach(k=>{const v=vs.filter(j=>j.rt&&j.rt[k]!=null).map(j=>j.rt[k]);if(v.length&&sr[k]!=null)diff.push({k,d:v.reduce((a,b)=>a+b,0)/v.length-sr[k]});});diff.sort((a,b)=>a.d-b.d);}
+ const lc={};vs.filter(j=>j.lost).forEach(j=>lc[j.lost]=(lc[j.lost]||0)+1);const lost=Object.entries(lc).sort((a,b)=>b[1]-a[1])[0];
+ const E=eloReplay(),k=oppKey(opp);let prob=null;if(k&&E.opp[k]!=null){prob=Math.round(100/(1+Math.pow(10,(E.opp[k]-E.R)/400)));}
+ return{vs,wp,rv:recordOf(vs),rp:recordOf(wp),weak:diff[0]&&diff[0].d<-.4?diff[0]:null,lost:lost&&lost[1]>=1?lost[0]:null,prob};
+}
+function briefSheet(){const b=S.brief&&S.brief.date===today()?S.brief:{opp:'',partner:''};
+ const opps=[...new Set(S.journal.map(j=>(j.opp||'').trim()).filter(Boolean))],parts=[...new Set(S.journal.map(j=>(j.partner||'').trim()).filter(Boolean))];
+ let h=`<div class="eyebrow muted">Vor dem Match</div><h2>Match-Briefing</h2>
+ <div class="row"><div class="grow"><label class="lab" for="bopp">Gegner</label><input id="bopp" class="field" list="dl_opp" value="${esc(b.opp)}" placeholder="z. B. Ben & Jan"></div><div class="grow"><label class="lab" for="bpart">Partner/in</label><input id="bpart" class="field" list="dl_part" value="${esc(b.partner)}" placeholder="optional"></div></div>
+ <datalist id="dl_opp">${opps.map(o=>`<option value="${esc(o)}">`).join('')}</datalist><datalist id="dl_part">${parts.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+ <button class="btn block" data-act="briefGo">${I.target} Briefing erstellen</button>`;
+ if(b.opp||b.partner){const d=briefData(b.opp,b.partner),am=activeMissions(),sr=selfRating(),rated=SKIDS.filter(k=>sr[k]!=null),wk=weakest()[0];
+  h+=`<div class="card stack">`;
+  if(b.opp)h+=d.vs.length?`<div><div class="eyebrow muted">Gegen ${esc(b.opp)}</div><div class="b" style="font-size:18px"><span class="c-good">${d.rv.w} S</span> – <span style="color:var(--bad)">${d.rv.l} N</span>${d.rv.d?' – '+d.rv.d+' R':''} · ${d.rv.pct}%</div><div class="muted small b">${d.vs.slice(0,3).map(j=>`${fmtDate(j.date)}: ${RES[j.res]}${j.score?' '+esc(j.score):''}`).join(' · ')}</div></div>`:`<div class="muted small b">Gegen „${esc(b.opp)}“ hast du noch nichts eingetragen – nach dem Match weißt du mehr.</div>`;
+  if(d.prob!=null)h+=`<div class="row small b"><span class="grow">Siegchance laut Spielstärke</span><span class="c-acc" style="font-size:18px">${d.prob} %</span></div>`;
+  if(b.partner)h+=d.wp.length?`<div class="row small b"><span class="grow">Mit ${esc(b.partner)}</span><span>${d.rp.w}–${d.rp.l} · ${d.rp.pct}%</span></div>`:'';
+  h+=`</div><div class="plan" style="margin:0"><div class="eyebrow" style="opacity:.85">Dein Plan</div><ol>`;
+  const avoid=[d.lost,d.weak&&d.weak.k,wk].filter(Boolean),best=rated.filter(k=>!avoid.includes(k)).sort((x,y)=>sr[y]-sr[x])[0];
+  const pts=[];if(am[0])pts.push(`Mission: ${esc(am[0].l.m.t)}`);
+  if(d.lost)pts.push(`Gegen sie verlierst du die meisten Punkte bei ${esc(SK[d.lost].n)} – hier lieber sicher spielen.`);else if(d.weak)pts.push(`Gegen sie sind deine ${esc(SK[d.weak.k].p)} schwächer als sonst – Fokus darauf.`);else if(wk)pts.push(`Deine Baustelle: ${esc(SK[wk].n)} – bei engen Bällen auf Sicherheit.`);
+  if(best)pts.push(`Deine Stärke: ${esc(SK[best].n)} (${fmt1(sr[best])}) – such Situationen dafür.`);
+  pts.push('Bei 40:40 vorher absprechen, wer returniert.');
+  h+=pts.slice(0,4).map(x=>`<li>${x}</li>`).join('')+`</ol></div>`;
+  const gd=gearDue();if(gd.length)h+=`<div class="row small b"><span class="c-flame">${I.bag}</span><span class="grow">${gd.map(g=>g.t).join(', ')} ist fällig – vor dem Match wechseln?</span></div>`;
+  h+=`<button class="btn ball block" data-act="briefLog">${I.pen} Nach dem Match eintragen</button>`;}
+ h+=`<button class="btn ghost block" data-act="closeModal">Schließen</button>`;modal(h);}
+
+/* ================= Schnell-Eintrag ================= */
+function lastEntry(){return [...S.journal].sort((a,b)=>byDateAsc(b,a))[0]||{};}
+let QL=null;
+function quickSheet(){const le=lastEntry(),b=S.brief&&S.brief.date===today()?S.brief:{};
+ QL=QL||{type:le.type==='Training'||le.type==='Trainerstunde'?le.type:'Match',dur:le.dur||90,partner:b.partner||le.partner||'',opp:b.opp||'',res:null,score:''};
+ const parts=[...new Set(S.journal.map(j=>(j.partner||'').trim()).filter(Boolean))],opps=[...new Set(S.journal.map(j=>(j.opp||'').trim()).filter(Boolean))],isM=QL.type==='Match'||QL.type==='Turnier';
+ modal(`<div class="eyebrow muted">In 10 Sekunden</div><h2>Schnell eintragen</h2>
+ <div class="seg">${['Match','Training','Turnier'].map(t=>`<button data-act="ql" data-k="type" data-v="${t}" aria-pressed="${QL.type===t}">${t}</button>`).join('')}</div>
+ <div class="seg">${[60,90,120].map(v=>`<button data-act="ql" data-k="dur" data-v="${v}" aria-pressed="${QL.dur===v}">${v} Min</button>`).join('')}</div>
+ ${isM?`<div class="seg big">${[['w','Sieg'],['l','Niederlage'],['d','Remis']].map(([v,n])=>`<button data-act="ql" data-k="res" data-v="${v}" aria-pressed="${QL.res===v}">${n}</button>`).join('')}</div>
+ <input id="qscore" class="field" placeholder="Satzergebnis, z. B. 6:4 6:3 (optional)" value="${esc(QL.score)}">`:''}
+ <div class="row"><input id="qpart" class="field grow" list="ql_part" placeholder="Partner/in" value="${esc(QL.partner)}">${isM?`<input id="qopp" class="field grow" list="ql_opp" placeholder="Gegner" value="${esc(QL.opp)}">`:''}</div>
+ <datalist id="ql_part">${parts.map(o=>`<option value="${esc(o)}">`).join('')}</datalist><datalist id="ql_opp">${opps.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>
+ <p class="muted small b" style="margin:0">Ohne Bewertung – die kannst du später über „Bearbeiten“ ergänzen.</p>
+ <button class="btn block" data-act="qlSave">${I.check} Speichern</button><button class="btn ghost block" data-act="qlFull">Ausführlich mit Bewertung</button>`);}
+function qlSync(){const g=id=>{const e=document.getElementById(id);return e?e.value.trim():null;};['score','part','opp'].forEach(k=>{const v=g('q'+k);if(v!=null)QL[k==='part'?'partner':k]=v;});}
+
+/* ================= Persönliche Ziele ================= */
+const GOALT={sk:'Bewertung',win:'Siegquote',count:'Sessions'};
+function goalCur(g){if(g.type==='sk'){const v=selfRating()[g.sk];return v??g.start;}
+ if(g.type==='win'){const M=[...S.journal].filter(j=>j.res).sort(byDateAsc).slice(-10);return M.length>=3?Math.round(M.filter(j=>j.res==='w').length/M.length*100):null;}
+ return S.journal.filter(j=>j.date>=g.created&&j.date<=g.by).length;}
+function goalPct(g){const c=goalCur(g);if(c==null)return 0;if(g.type==='count')return Math.min(1,c/g.target);const st=Math.min(g.start??0,g.target-.01);return Math.max(0,Math.min(1,(c-st)/(g.target-st)));}
+function goalTitle(g){return g.type==='sk'?`${SK[g.sk].n} auf ${fmt1(g.target)}/10`:g.type==='win'?`Siegquote ${g.target} % (letzte 10)`:`${g.target} Sessions`;}
+function goalsCheck(){const hit=[];(S.goals||[]).forEach(g=>{if(g.done||today()>g.by)return;const c=goalCur(g);if(c!=null&&c>=g.target){g.done=today();S.gems+=25;S.cnt.goals=(S.cnt.goals||0)+1;hit.push(g);}});if(hit.length){addXP(50*hit.length,null);checkAch();save();}return hit;}
+function goalsSection(){const G=S.goals||[];
+ let h=`<h2 class="sec-title">Deine Ziele</h2><p class="sec-sub">Setz dir ein Ziel mit Datum – der Fortschritt kommt automatisch aus deinem Tagebuch.</p><div class="stack">`;
+ G.forEach((g,i)=>{const c=goalCur(g),p=goalPct(g),exp=!g.done&&today()>g.by,left=dayDiff(today(),g.by);
+  h+=`<div class="card stack goalc ${g.done?'done':''}"><div class="row"><span class="ic" style="--c:${g.done?'var(--gold)':exp?'var(--locked-ink)':'var(--accent)'}">${g.done?I.trophy:g.type==='sk'?I[SK[g.sk].ic]:g.type==='win'?I.trophy:I.calendar}</span><div class="grow"><b>${esc(goalTitle(g))}</b><div class="muted small b">${g.done?'Erreicht am '+fmtDate(g.done):exp?'Abgelaufen am '+parseD(g.by).toLocaleDateString('de-DE'):'bis '+parseD(g.by).toLocaleDateString('de-DE')+' · noch '+left+' Tage'}</div></div><button class="iconbtn" data-act="goalDel" data-i="${i}" aria-label="Ziel löschen">${I.x}</button></div>
+  <div class="goal"><div class="bar ${g.done?'':'blue'}"><i style="width:${p*100}%"></i></div><span>${c==null?'–':g.type==='sk'?fmt1(c):g.type==='win'?c+' %':c}${g.type==='count'?'/'+g.target:''}</span></div></div>`;});
+ h+=`<button class="btn ghost block" data-act="goalNew">${I.plus} Neues Ziel</button></div>`;return h;}
+let GN=null;
+function goalNewSheet(){const sr=selfRating();GN=GN||{type:'sk',sk:weakest()[0],target:null,by:addDays(today(),56)};
+ const cur=GN.type==='sk'?(sr[GN.sk]??5):GN.type==='win'?goalCur({type:'win'}):null;
+ if(GN.target==null)GN.target=GN.type==='sk'?Math.min(10,Math.round(cur+1.5)):GN.type==='win'?60:8;
+ const dl=[['4 Wochen',28],['8 Wochen',56],['3 Monate',91],['Jahresende',dayDiff(today(),new Date().getFullYear()+'-12-31')]];
+ modal(`<div class="eyebrow muted">Neues Ziel</div><h2>Was willst du erreichen?</h2>
+ <div class="seg big">${Object.entries(GOALT).map(([k,n])=>`<button data-act="gn" data-k="type" data-v="${k}" aria-pressed="${GN.type===k}">${n}</button>`).join('')}</div>
+ ${GN.type==='sk'?`<div><span class="lab">Bereich</span><div class="seg">${SKIDS.map(k=>`<button data-act="gn" data-k="sk" data-v="${k}" aria-pressed="${GN.sk===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
+  <div class="rr r3"><label for="gnt">Ziel-Bewertung (Schnitt der letzten 5)</label><span class="muted small b">jetzt ${sr[GN.sk]!=null?fmt1(sr[GN.sk]):'–'}</span><b class="rv" id="gntv">${GN.target}</b><input id="gnt" type="range" min="1" max="10" step="1" value="${GN.target}"></div>`
+ :GN.type==='win'?`<div><span class="lab">Siegquote in den letzten 10 Matches (jetzt ${cur==null?'–':cur+' %'})</span><div class="seg">${[50,60,70,80].map(v=>`<button data-act="gn" data-k="target" data-v="${v}" aria-pressed="${GN.target===v}">${v} %</button>`).join('')}</div></div>`
+ :`<div><span class="lab">Sessions bis zum Datum</span><div class="seg">${[4,8,12,20].map(v=>`<button data-act="gn" data-k="target" data-v="${v}" aria-pressed="${GN.target===v}">${v}</button>`).join('')}</div></div>`}
+ <div><span class="lab">Bis wann?</span><div class="seg">${dl.map(([n,d])=>{const v=addDays(today(),d);return `<button data-act="gn" data-k="by" data-v="${v}" aria-pressed="${GN.by===v}">${n}</button>`;}).join('')}</div></div>
+ <button class="btn block" data-act="goalSave">${I.target} Ziel setzen</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);
+ const r=document.getElementById('gnt');if(r)r.addEventListener('input',()=>{GN.target=+r.value;document.getElementById('gntv').textContent=r.value;});}
+function goalPopup(g){return()=>{modal(`<div class="center">${mascot('happy')}<h2>Ziel erreicht!</h2><p class="b">${esc(goalTitle(g))}</p><p class="muted b">+50 XP · +25 Bälle</p></div><button class="btn block" data-act="nextModal">Vamos!</button>`);confetti();beep('done');};}
+
+/* ================= Trainingspläne ================= */
+const PLANS=(window.TPLANS||[]);
+function plansSection(){if(!PLANS.length)return '';const cs=curStage(),n=S.pn||2,wk=weakest().slice(0,3),all=!!S.pall;
+ const list=PLANS.filter(p=>p.n===n&&(all||p.st===cs||p.st===Math.max(0,cs-1))).sort((a,b)=>(wk.includes(b.sk)?1:0)-(wk.includes(a.sk)?1:0)||Math.abs(a.st-cs)-Math.abs(b.st-cs));
+ return `<h2 class="sec-title">Trainingspläne</h2><p class="sec-sub">60 Minuten mit Ablauf und Timer – passend zu deiner Stufe und Baustelle.</p>
+ <div class="row" style="margin-bottom:10px"><div class="seg grow">${[[2,'Zu zweit'],[4,'Zu viert']].map(([v,t])=>`<button data-act="pn" data-v="${v}" aria-pressed="${n===v}">${t}</button>`).join('')}</div><button class="linkbtn" data-act="pall">${all?'Nur meine Stufe':'Alle Stufen'}</button></div>
+ <div class="stack">${list.map(p=>`<button class="mini" data-act="plan" data-id="${p.id}" style="margin:0"><span class="ic" style="--c:${SK[p.sk].c}">${I[SK[p.sk].ic]}</span><span class="grow"><span class="eyebrow muted">Stufe ${p.st+1} · ${p.n} Spieler · 60 Min${wk.includes(p.sk)?' · <span class="c-good">deine Baustelle</span>':''}${(S.plansDone||{})[p.id]?' · ✓ '+S.plansDone[p.id]+'×':''}</span><h3>${esc(p.t)}</h3><p>${esc(p.d)}</p></span><span class="go">${I.chev}</span></button>`).join('')||'<p class="muted b small">Keine Pläne für diese Auswahl – tippe auf „Alle Stufen“.</p>'}</div>`;}
+function planSheet(id){const p=PLANS.find(x=>x.id===id);let t=0;
+ modal(`<div class="eyebrow muted">Stufe ${p.st+1} · ${p.n} Spieler · ${esc(SK[p.sk].n)}</div><h2>${esc(p.t)}</h2><p class="muted b">${esc(p.d)}</p>
+ <div class="tl">${p.blocks.map(([m,ti,d])=>{const s=t;t+=m;return `<div class="tlb"><span class="tlm">${s}–${t}'</span><div><b>${esc(ti)}</b><p>${esc(d)}</p></div></div>`;}).join('')}</div>
+ <button class="btn block" data-act="planRun" data-id="${id}">${I.play} Training starten (mit Timer)</button><button class="btn ghost block" data-act="planDone" data-id="${id}">${I.check} Schon gemacht – eintragen</button><button class="linkbtn" data-act="closeModal">Schließen</button>`);}
+let PR=null;
+function planRun(id){const p=PLANS.find(x=>x.id===id);closeModal();PR={p,bi:0,left:p.blocks[0][0]*60,run:true,tick:null,wl:null};
+ try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>{PR&&(PR.wl=w);}).catch(()=>{});}catch(e){}
+ PR.tick=setInterval(()=>{if(!PR||!PR.run)return;PR.left--;if(PR.left===0){beep('done');try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}}drawPlanRun();},1000);drawPlanRun();}
+function drawPlanRun(){if(!PR)return;const p=PR.p,b=p.blocks[PR.bi],over=PR.left<=0,mm=Math.floor(Math.abs(PR.left)/60),ss=String(Math.abs(PR.left)%60).padStart(2,'0'),last=PR.bi===p.blocks.length-1;
+ $('#ov').innerHTML=`<div class="overlay"><div class="l-top"><button class="iconbtn" data-act="planQuit" aria-label="Beenden">${I.x}</button><div class="bar"><i style="width:${PR.bi/p.blocks.length*100}%"></i></div><span class="b small">${PR.bi+1}/${p.blocks.length}</span></div>
+ <div class="l-body"><div class="l-inner"><span class="ex-eyebrow">${I.clock} ${esc(p.t)}</span><h1 class="ex-title">${esc(b[1])}</h1>
+ <div class="timer ${over?'over':''}">${over?'+':''}${mm}:${ss}</div>
+ <div class="theory"><p style="font-size:17px;font-weight:700;margin:0">${esc(b[2])}</p></div>
+ ${p.blocks[PR.bi+1]?`<p class="muted b small">Danach: ${esc(p.blocks[PR.bi+1][1])} (${p.blocks[PR.bi+1][0]} Min)</p>`:''}</div></div>
+ <div class="l-foot"><div class="foot-in"><div class="foot-row"><button class="btn ghost" data-act="planPause">${PR.run?'Pause':'Weiter'}</button><button class="btn ${over?'good':''}" data-act="planNext">${last?'Training beenden':'Nächster Block'}</button></div></div></div></div>`;}
+function planFinish(p,real){S.plansDone=S.plansDone||{};S.plansDone[p.id]=(S.plansDone[p.id]||0)+1;S.cnt.plans=(S.cnt.plans||0)+1;const r=addXP(25,p.sk);checkAch();save();
+ toast(`${esc(p.t)} geschafft! +${r.n} XP`,I.check);journalNew({type:p.n===4?'Training':'Training',dur:60,notes:'Trainingsplan: '+p.t});}
 
 /* ================= Modals ================= */
 function modal(html){$('#modal').innerHTML=`<div class="modal" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;}
@@ -2164,14 +2591,17 @@ function missionDoneFx(out){
 
 /* ================= Tagebuch ================= */
 let JF=null;
-function journalNew(){
- JF={type:'Match',date:today(),dur:90,int:2,res:null,score:'',partner:'',opp:'',feel:3,rt:Object.fromEntries(SKIDS.map(k=>[k,lastRating(k)])),lost:null,mr:{},notes:''};
+function journalNew(o){
+ const b=S.brief&&S.brief.date===today()?S.brief:{};
+ JF=Object.assign({type:'Match',date:today(),dur:90,int:2,res:null,score:'',partner:b.partner||'',opp:b.opp||'',feel:3,rt:Object.fromEntries(SKIDS.map(k=>[k,lastRating(k)])),lost:null,mr:{},notes:'',ol:'',pl:''},o||{});
  drawJournal();
 }
+function journalEdit(id){const j=S.journal.find(x=>x.id===id);if(!j)return;closeModal();
+ JF={editId:id,type:j.type,date:j.date,dur:j.dur,int:j.int||2,res:j.res||null,score:j.score||'',partner:j.partner||'',opp:j.opp||'',feel:j.feel||3,rt:j.rt&&Object.keys(j.rt).length?{...j.rt}:Object.fromEntries(SKIDS.map(k=>[k,lastRating(k)])),lost:j.lost||null,mr:{},notes:j.notes||'',ol:j.ol??'',pl:j.pl??''};drawJournal();}
 function drawJournal(){
  const am=activeMissions(),isMatch=JF.type==='Match'||JF.type==='Turnier';
  const feels=['Mies','Naja','Okay','Gut','Top'];
- $('#ov').innerHTML=`<div class="overlay"><div class="l-top"><button class="iconbtn" data-act="closeJournal" aria-label="Schließen">${I.x}</button><h2 class="grow" style="font-size:20px">Session eintragen</h2></div>
+ $('#ov').innerHTML=`<div class="overlay"><div class="l-top"><button class="iconbtn" data-act="closeJournal" aria-label="Schließen">${I.x}</button><h2 class="grow" style="font-size:20px">${JF.editId?'Session bearbeiten':'Session eintragen'}</h2></div>
  <div class="l-body"><div class="l-inner">
   <div><span class="lab">Art</span><div class="seg big">${['Match','Training','Trainerstunde','Turnier'].map(t=>`<button data-act="jf" data-k="type" data-v="${t}" aria-pressed="${JF.type===t}">${t}</button>`).join('')}</div></div>
   <div class="row"><div class="grow"><label class="lab" for="jdate">Datum</label><input id="jdate" type="date" class="field" value="${JF.date}" max="${today()}"></div><div class="grow"><label class="lab" for="jdur">Dauer (Min)</label><input id="jdur" type="number" min="10" max="600" step="5" class="field" value="${JF.dur}"></div></div>
@@ -2182,7 +2612,8 @@ function drawJournal(){
   <div><label class="lab" for="jscore">Satzergebnis</label><input id="jscore" class="field" placeholder="Aus deiner Sicht, z. B. 6:4 3:6 7:5" value="${esc(JF.score)}"></div>`:''}
   <div class="row"><div class="grow"><label class="lab" for="jpart">Partner/in</label><input id="jpart" class="field" value="${esc(JF.partner)}" placeholder="optional"></div>${isMatch?`<div class="grow"><label class="lab" for="jopp">Gegner</label><input id="jopp" class="field" value="${esc(JF.opp)}" placeholder="optional"></div>`:''}</div>
   <div><span class="lab">Wie hast du dich gefühlt?</span><div class="seg">${feels.map((f,i)=>`<button data-act="jf" data-k="feel" data-v="${i+1}" aria-pressed="${JF.feel===i+1}">${f}</button>`).join('')}</div></div>
-  ${am.length?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
+  ${isMatch?`<div class="row"><div class="grow"><label class="lab" for="jol">Niveau Gegner (0–7)</label><input id="jol" class="field" type="number" inputmode="decimal" min="0" max="7" step="0.1" value="${esc(JF.ol)}" placeholder="optional"></div><div class="grow"><label class="lab" for="jpl">Niveau Partner/in</label><input id="jpl" class="field" type="number" inputmode="decimal" min="0" max="7" step="0.1" value="${esc(JF.pl)}" placeholder="optional"></div></div>`:''}
+  ${am.length&&!JF.editId?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
   <div><div class="row" style="margin-bottom:6px"><span class="lab grow" style="margin:0">Wie gut warst du heute? (0–10)</span><span class="chip" id="rcount">${Object.keys(JF.rt).length} von ${SKIDS.length} bewertet</span></div><p class="muted small b" style="margin-bottom:10px">Alle Regler starten mit deiner letzten Bewertung – schieb nur, was heute anders war. Was du nicht gespielt hast (z. B. Volleys im Single), tippst du auf „Nicht gespielt“.</p><div class="stack">${SKIDS.map(rateRow).join('')}</div></div>
   <div><span class="lab">Wo hast du die meisten Punkte verloren?</span><div class="seg">${SKIDS.map(k=>`<button data-act="jf" data-k="lost" data-v="${k}" aria-pressed="${JF.lost===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
   <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
@@ -2200,11 +2631,16 @@ function liveRate(only){document.querySelectorAll(only?'#r_'+only:'[data-rk]').f
 function liveKcal(){const i=document.getElementById('jdur'),o=document.getElementById('jkcal');if(i&&o)i.addEventListener('input',()=>{o.textContent='≈ '+fmtN(kcalCalc(JF.type,parseInt(i.value)||0,JF.int))+' kcal';});}
 function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
  const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
- ['score','partner','opp','notes'].forEach(k=>{const v=g('j'+({partner:'part'}[k]||k));if(v!=null)JF[k]=v.trim();});}
+ ['score','partner','opp','notes'].forEach(k=>{const v=g('j'+({partner:'part'}[k]||k));if(v!=null)JF[k]=v.trim();});
+ [['ol','jol'],['pl','jpl']].forEach(([k,id])=>{const v=g(id);if(v!=null){const n=parseFloat(String(v).replace(',','.'));JF[k]=v.trim()===''||isNaN(n)?'':Math.max(0,Math.min(7,n));}});}
 function saveJournal(){
  syncJF();
+ if(JF.editId){const j=S.journal.find(x=>x.id===JF.editId);if(j){Object.assign(j,{type:JF.type,date:JF.date||j.date,dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner,rs:10});
+  if(JF.type==='Match'||JF.type==='Turnier'){j.res=JF.res||inferRes(JF.score);j.score=JF.score;j.opp=JF.opp;j.ol=JF.ol;j.pl=JF.pl;}else{delete j.res;delete j.score;delete j.opp;}
+  S.journal.sort((a,b)=>b.date.localeCompare(a.date));}
+  JF=null;$('#ov').innerHTML='';const hit=goalsCheck();save();render();toast('Eintrag aktualisiert',I.check);MQ=hit.map(goalPopup);if(MQ.length)nextModal();return;}
  const e={rs:10,id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
- if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;}
+ if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;if(JF.ol!=='')e.ol=JF.ol;if(JF.pl!=='')e.pl=JF.pl;}
  e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
  e.ts=Date.now();if((e.type==='Match'||e.type==='Turnier')&&!e.res&&e.score)e.res=inferRes(e.score);
  const prevSR=selfRating(),dueBefore=gearDue().map(g=>g.id),rBefore=topRacket().id;
@@ -2227,8 +2663,9 @@ function saveJournal(){
  modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">≈ ${fmtN(e.kcal)} kcal verbrannt · +${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
  ${ins.length?`<div class="card stack small b">${ins.join('')}</div>`:''}
  ${e.lost?`<div class="card stack"><div class="eyebrow muted">Dein nächster Schritt</div><b>Du hast viele Punkte bei „${esc(SK[e.lost].n)}“ verloren.</b>${newL?`<p class="muted b small">Dafür habe ich dir „${esc(newL.t)}“ freigeschaltet.</p>`:''}${(()=>{const l=LESSONS.find(l=>l.sk===e.lost&&unlocked(l.idx));return l?`<button class="btn ball block" data-act="lesson" data-id="${l.id}">${esc(l.t)} üben</button>`:'';})()}</div>`:''}
+ ${Object.keys(e.rt||{}).length?'':`<button class="btn ghost block" data-act="journalEdit" data-id="${e.id}">${I.pen} Bewertung ergänzen</button>`}
  <button class="btn block" data-act="nextModal">Weiter</button>`);
- MQ=[];if(streak)MQ.push(showStreak);if(gearDue().length)MQ.push(gearPopup);
+ MQ=[];goalsCheck().forEach(g=>MQ.push(goalPopup(g)));if(streak)MQ.push(showStreak);if(gearDue().length)MQ.push(gearPopup);if(S.brief&&S.brief.date===today())S.brief=null;
  beep('done');if(done.length||e.res==='w')confetti();
 }
 function journalView(i){
@@ -2242,7 +2679,7 @@ function journalView(i){
  ${j.lost?`<p class="b">Punkte verloren vor allem bei: ${esc(SK[j.lost].n)}</p>`:''}
  ${(j.missions||[]).length?`<p class="b">Missionen: ${j.missions.map(m=>LBYID[m.id]?esc(LBYID[m.id].m.t)+' ('+RATE[m.r-1][1]+')':'').join(', ')}</p>`:''}
  ${j.notes?`<div class="card" style="white-space:pre-wrap">${esc(j.notes)}</div>`:''}
- <div class="row"><button class="btn ghost grow" data-act="closeModal">Schließen</button><button class="btn bad sm" data-act="journalDel" data-i="${i}">Löschen</button></div>`);
+ <div class="row"><button class="btn ghost grow" data-act="closeModal">Schließen</button><button class="btn sm" data-act="journalEdit" data-id="${j.id}">${I.pen} Bearbeiten</button><button class="btn bad sm" data-act="journalDel" data-i="${i}">Löschen</button></div>`);
 }
 
 /* ================= Shop ================= */
@@ -2319,6 +2756,32 @@ const ACT={
  jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel'||k==='dur'||k==='int')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
  peek(){peekSheet(LS.id);},
+ brief(){briefSheet();},
+ briefGo(){S.brief={opp:($('#bopp').value||'').trim(),partner:($('#bpart').value||'').trim(),date:today()};S.cnt.brief=(S.cnt.brief||0)+1;save();checkAch();briefSheet();},
+ briefLog(){closeModal();journalNew();},
+ quick(){QL=null;quickSheet();},
+ ql(el){qlSync();let v=el.dataset.v;if(el.dataset.k==='dur')v=+v;QL[el.dataset.k]=QL[el.dataset.k]===v&&el.dataset.k==='res'?null:v;quickSheet();},
+ qlSave(){qlSync();const isM=QL.type==='Match'||QL.type==='Turnier';JF={type:QL.type,date:today(),dur:QL.dur,int:2,res:isM?QL.res:null,score:isM?QL.score:'',partner:QL.partner,opp:isM?QL.opp:'',feel:3,rt:{},lost:null,mr:{},notes:'',ol:'',pl:''};QL=null;closeModal();saveJournal();},
+ qlFull(){qlSync();const q=QL;QL=null;closeModal();journalNew({type:q.type,dur:q.dur,res:q.res,score:q.score,partner:q.partner,opp:q.opp});},
+ journalEdit(el){journalEdit(el.dataset.id);},
+ goalNew(){GN=null;goalNewSheet();},
+ gn(el){const k=el.dataset.k;let v=el.dataset.v;if(k==='target')v=+v;GN[k]=v;if(k==='type'||k==='sk')GN.target=null;goalNewSheet();},
+ goalSave(){const sr=selfRating(),g={id:Date.now().toString(36),type:GN.type,sk:GN.type==='sk'?GN.sk:null,target:GN.target,by:GN.by,created:today()};g.start=g.type==='sk'?(sr[g.sk]??5):g.type==='win'?(goalCur({type:'win'})??0):0;
+  if(g.type!=='count'&&g.start>=g.target){toast('Das hast du schon erreicht – nimm ein höheres Ziel',I.target);return;}
+  S.goals=S.goals||[];S.goals.unshift(g);save();closeModal();render();toast('Ziel gesetzt: '+esc(goalTitle(g)),I.target);beep('pop');},
+ goalDel(el){if(!confirm('Ziel löschen?'))return;S.goals.splice(+el.dataset.i,1);save();render();},
+ pn(el){S.pn=+el.dataset.v;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
+ pall(){S.pall=!S.pall;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
+ plan(el){planSheet(el.dataset.id);},
+ planRun(el){planRun(el.dataset.id);},
+ planDone(el){closeModal();planFinish(PLANS.find(x=>x.id===el.dataset.id));},
+ planPause(){PR.run=!PR.run;drawPlanRun();},
+ planNext(){const p=PR.p;if(PR.bi<p.blocks.length-1){PR.bi++;PR.left=p.blocks[PR.bi][0]*60;PR.run=true;beep('tap');drawPlanRun();}else{clearInterval(PR.tick);try{PR.wl&&PR.wl.release();}catch(e){}PR=null;$('#ov').innerHTML='';confetti();planFinish(p);}},
+ planQuit(){if(!confirm('Training abbrechen?'))return;clearInterval(PR.tick);try{PR.wl&&PR.wl.release();}catch(e){}PR=null;$('#ov').innerHTML='';},
+ backupNow(){backupNow();},
+ backupNowPop(){closeModal();backupNow();},
+ restore(){restorePick();},
+ restoreDo(){try{localStorage.setItem(KEY,JSON.stringify(PENDING_RESTORE));}catch(e){toast('Konnte nicht gespeichert werden',I.x);return;}location.reload();},
  lexicon(){lexiconSheet();},
  lexAnim(el){animSheet(el.dataset.k,el.dataset.l);},
  animReplay(el){const a=el.closest('.anim');a._run=(a._run||0)+1;runAnim(a);},
@@ -2395,7 +2858,7 @@ const startMsgs=tick();
 render();
 if(S.onb)checkAch();
 startMsgs.forEach((m,i)=>setTimeout(()=>toast(m[0],m[1]),400+i*700));
-function gearCheckOnOpen(){if(S.onb&&gearDue().length&&S.gearAsked!==today()&&!$('#modal').innerHTML&&!LS&&!JF){MQ=[];gearPopup();}}
+function gearCheckOnOpen(){if(!S.onb||$('#modal').innerHTML||LS||JF||PR)return;MQ=[];const g=gearDue().length&&S.gearAsked!==today(),b=backupDue()&&S.backupAsked!==today();if(g&&b)MQ.push(backupPopup);if(g)gearPopup();else if(b)backupPopup();}
 setTimeout(gearCheckOnOpen,1200);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(gearCheckOnOpen,600);});
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}

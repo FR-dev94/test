@@ -39,4 +39,14 @@ Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchs
 - Kalorien-Schätzung pro Session (MET × Gewicht × Dauer, mit Intensität), kcal pro Woche und gesamt
 - Tagebuch-Statistiken: Siegquote, Stunden, Spielzeit pro Woche, Radar-Spielerprofil, Wochenziel
 
+## Trainieren, planen, absichern
+
+- **Match-Briefing** vor dem Spiel: Bilanz gegen die Gegner und mit dem Partner, Siegchance, wo du gegen sie Punkte verlierst, und ein 3-Punkte-Plan
+- **Erkenntnisse** in der Statistik: z. B. „Wenn deine Lobs bei 7+ liegen, gewinnst du 9 von 11“, häufigste Verlust-Bereiche, bester Partner
+- **Spielstärke-Schätzung** (0–7) aus Siegen, Niederlagen und Games – genauer, wenn du das Niveau von Gegnern/Partner einträgst
+- **Schnell-Eintrag** in 10 Sekunden, Einträge **bearbeiten** und Bewertung später ergänzen
+- **Persönliche Ziele** (Bewertung eines Bereichs, Siegquote, Anzahl Sessions) mit Datum und automatischem Fortschritt
+- **15 Trainingspläne** (60 Min, zu zweit oder zu viert, je Stufe) mit Ablauf und Block-Timer
+- **Backup als Datei** (Teilen → iCloud Drive/Dateien) mit Erinnerung alle 14 Tage und Wiederherstellen per Datei
+
 Der Fortschritt liegt im Browser (`localStorage`). Unter **Profil → Fortschritt sichern** gibt es einen Code zum Übertragen.
