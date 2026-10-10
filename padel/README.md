@@ -34,7 +34,7 @@ Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchs
 - 11 Skills (inkl. Athletik) mit eigenem Level-Balken (bis Level 10)
 - Tägliche Quests + Bonustruhe, Wochenliga (Club → Major) mit Auf- und Abstieg
 - Bälle als Währung, Shop (Streak-Schutz, Doppel-XP, Outfits für Maskottchen Bolita), 26 Erfolge
-- Tagebuch mit drei Bereichen: **Einträge**, **Statistik** (Siege/Niederlagen/Remis, Siegquote, Form, Serien, Sätze, Games, Tie-Breaks, Bilanz pro Partner und Gegner, Monatsverlauf, Gefühl vs. Ergebnis) und **Material** (Wechsel-Erinnerungen für Overgrip, Bälle, Schuhe, Schläger + Schläger-Empfehlung nach Form, Balance, Härte, Gewicht)
+- Tagebuch mit drei Bereichen: **Einträge**, **Statistik** (Siege/Niederlagen/Remis, Siegquote, Form, Serien, Sätze, Games, Tie-Breaks, Bilanz pro Partner und Gegner, Monatsverlauf, Gefühl vs. Ergebnis) und **Material** (Wechsel-Erinnerungen für Overgrip, Bälle, Schuhe, Schläger + Schläger-Empfehlung aus 114 konkreten Schlägern von Padel-Point, Preise vom 05.10.2026: Top-Match mit Prozent-Passung, Stärken/Schwächen je Schläger, Rangliste mit Suche, Feinabstimmung, „mein Schläger“-Vergleich)
 - Selbsteinschätzung 0–10 nach jedem Spiel („Wie gut waren deine Lobs?“) mit Schnitt, Trend und Verlauf pro Bereich
 - Kalorien-Schätzung pro Session (MET × Gewicht × Dauer, mit Intensität), kcal pro Woche und gesamt
 - Tagebuch-Statistiken: Siegquote, Stunden, Spielzeit pro Woche, Radar-Spielerprofil, Wochenziel

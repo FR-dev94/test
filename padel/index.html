@@ -268,6 +268,41 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .rshape.s2{clip-path:polygon(50% 0,100% 38%,86% 100%,14% 100%,0 38%);border-radius:0}
 .racket .row:first-child{margin-bottom:14px}
 
+/* Schläger */
+.rwin{background:#1F5FD6;color:#fff;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.rwin h2{font-size:28px}
+.rwin .rsvg{color:#fff}
+.rwin .btn{--b:#fff;--ink:#1F5FD6;box-shadow:0 4px 0 rgba(0,0,0,.25);text-decoration:none}
+.rwin .reasons li::before{background:var(--ball)}
+.rprice{font-family:var(--font-display);font-size:26px;font-weight:600}
+.bigpct{font-family:var(--font-display);font-size:44px;font-weight:700;line-height:.9;text-align:right;font-variant-numeric:tabular-nums}
+.bigpct small{display:block;font-family:var(--font-body);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+.sheet .bigpct{color:var(--accent);font-size:38px}
+.reasons{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-weight:700;font-size:14px}
+.reasons li{display:flex;gap:8px;align-items:baseline}
+.reasons li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--good)}
+.reasons li.warn::before{background:transparent;border:2px solid currentColor;width:6px;height:6px}
+.sheet .reasons li.warn{color:var(--bad)}
+.rruns{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:12px}
+@media (min-width:560px){.rruns{grid-template-columns:1fr 1fr}}
+.rrun{display:flex;gap:8px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:10px;min-width:0}
+.rrun .grow{min-width:0;display:flex;flex-direction:column}
+.rrun b{font-size:15px;line-height:1.2}
+.rrun small{font-size:11px;color:var(--muted);font-weight:800}
+.pctS{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--accent)}
+.rkrow{display:grid;grid-template-columns:24px minmax(0,1fr) 56px 26px;gap:8px;align-items:center;text-align:left;background:none;border:0;padding:6px 4px;border-radius:10px;width:100%}
+.rkrow:hover{background:var(--surface-2)}
+.rkrow.mine{background:color-mix(in srgb,var(--ball) 25%,transparent)}
+.rkrow .rk{color:var(--muted);font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.rkrow .nm{min-width:0}
+.rkrow .nm b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rkrow .nm small{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.rkrow .num,.abars .num{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:800;text-align:right;font-size:13px}
+.abars{display:grid;grid-template-columns:auto minmax(0,1fr) 32px;gap:6px 10px;align-items:center;font-size:13px;font-weight:800}
+.tune summary{cursor:pointer;font-size:16px}
+.rr .ends{grid-column:1/3;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-top:-4px}
+.rr b.rv{display:grid;place-items:center;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
 .lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -1557,29 +1592,134 @@ function gearUse(g){const st=gearState(g.id),list=S.journal.filter(j=>entryTs(j)
 const gearDue=()=>GEAR.filter(g=>gearUse(g).due);
 const unitTxt=(g,n)=>g.u==='s'?(n===1?'Session':'Sessions'):'h';
 
-/* ----- Schläger-Empfehlung (Formen statt Marken) ----- */
-const RPROF=[
- {form:'Rund',bal:'Niedrig (grifflastig)',haerte:'Weich',gew:'345–360 g',d:'Maximale Kontrolle und großer Sweetspot – verzeiht Fehltreffer und schont den Arm.'},
- {form:'Tropfen',bal:'Mittel',haerte:'Mittel',gew:'355–365 g',d:'Der Allrounder: Kontrolle in der Abwehr, genug Druck über Kopf.'},
- {form:'Diamant',bal:'Hoch (kopflastig)',haerte:'Mittel bis hart',gew:'360–375 g',d:'Viel Power für Bandeja, Víbora und Smash – verlangt saubere Technik.'}
-];
-function racketAdvice(){
- const sr=selfRating(),avg=ks=>{const v=ks.map(k=>sr[k]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;};
- const pw=avg(['smash','bandeja']),ct=avg(['volley','wand','lob','vorhand','rueckhand']),st=curStage(),why=[];let p=0;
- if(st<=1){p-=2;why.push(`Du bist in Stufe ${st+1} (${STAGES[st].t}): Kontrolle und ein großer Sweetspot bringen dich jetzt am schnellsten weiter.`);}
- else if(st>=3){p+=1;why.push(`Als ${STAGES[st].t}-Spieler kannst du mehr Power kontrolliert einsetzen.`);}
- else why.push(`In Stufe ${st+1} (${STAGES[st].t}) passt eine Mischung aus Kontrolle und Power.`);
- if(S.side==='links'){p+=1;why.push('Links (Revés) schließt du viele Punkte über Kopf ab – etwas mehr Kopflastigkeit hilft.');}
- if(S.side==='rechts'){p-=.5;why.push('Rechts (Drive) zählt Konstanz – Kontrolle ist dein Freund.');}
- if(pw!=null&&ct!=null){
-  if(pw>=6.5&&pw>ct+1){p+=1;why.push(`Dein Überkopf (${fmt1(pw)}/10) ist stärker als dein Kontrollspiel (${fmt1(ct)}/10).`);}
-  else if(ct>pw+1){p-=1;why.push(`Dein Kontrollspiel (${fmt1(ct)}/10) ist stärker als dein Überkopf (${fmt1(pw)}/10) – ein Kontrollschläger unterstützt deine Stärke.`);}
-  else why.push(`Überkopf (${fmt1(pw)}/10) und Kontrollspiel (${fmt1(ct)}/10) sind ausgeglichen.`);
- }else why.push('Bewerte nach deinen Matches deine Schläge (0–10) – dann wird die Empfehlung genauer.');
- if(S.pref==='power'){p+=1.5;why.push('Du willst mehr Power.');}else if(S.pref==='kontrolle'){p-=1.5;why.push('Du willst mehr Kontrolle.');}
- if(S.arm){p=Math.min(p,0);why.push('Wegen Arm-/Ellbogenbeschwerden: weiche Fläche, eher leicht, nichts Kopflastiges.');}
- const t=p<=-1.5?0:p<1.5?1:2,pr={...RPROF[t]};if(S.arm){pr.haerte='Weich';pr.gew='340–355 g';}
- return{t,pr,why};
+/* ----- Schläger von Padel-Point: 114 Modelle, ausgelesen am 05.10.2026 (aus deinem Schlägerfinder) -----
+ Power, Kontrolle, Komfort usw. sind aus Kopfform, Fläche, Kern und Gewicht berechnet – keine Herstellerwerte. */
+const RK_DATE='05.10.2026';
+const RK_RAW=[{"n":"HEAD Motion","p":109.95,"s":1,"w":null,"f":"","c":"","h":"head-motion-padelschlaeger-00606404315000"},{"n":"Dunlop Galactica Team","p":104.95,"s":1,"w":null,"f":"Fiberglas","c":"EVA Pro","h":"dunlop-galactica-team-padelschlaeger-01607002390000"},{"n":"Bullpadel Vertex 05","p":237.95,"s":2,"w":null,"f":"12k Karbon","c":"EVA Multi","h":"bullpadel-vertex-05-padelschlaeger-14907600233000"},{"n":"adidas Cross It Ctrl","p":174.95,"s":1,"w":355,"f":"15k Karbon","c":"EVA High Memory","h":"adidas-cross-it-ctrl-padelschlaeger-00506600180000"},{"n":"Siux Fenix Pro","p":191.95,"s":2,"w":null,"f":"12k Karbon","c":"EVA","h":"siux-fenix-pro-padelschlaeger-p0000005251201"},{"n":"Wilson Bela V3","p":173.95,"s":1,"w":null,"f":"Karbon","c":"EVA Soft","h":"wilson-bela-v3-padelschlaeger-00707504154000"},{"n":"Babolat Counter Viper 2026","p":198.95,"s":1,"w":null,"f":"3k Karbon","c":"EVA X","h":"babolat-counter-viper-2026-padelschlaeger-00907603195000"},{"n":"HEAD Radical Pro 2026","p":199.95,"s":1,"w":370,"f":"Karbon","c":"Control Foam","h":"head-radical-pro-2026-padelschlaeger-00607204599000"},{"n":"Siux Electra Stupa Pro ST4","p":129.95,"s":1,"w":null,"f":"15K Carbon","c":"EVA-Hard","h":"siux-electra-stupa-pro-st4-padelschlaeger-31007000061000"},{"n":"HEAD Coello Motion","p":171.95,"s":2,"w":null,"f":"","c":"","h":"head-coello-motion-00607004555000"},{"n":"Wilson Carbon Force C","p":139.95,"s":1,"w":null,"f":"Carbon","c":"EVA Soft","h":"wilson-carbon-force-c-padelschlaeger-p0000008520201"},{"n":"Babolat Viper Juan Lebrón 3.0 FW","p":247.95,"s":2,"w":null,"f":"Carbon","c":"EVA","h":"babolat-viper-juan-lebron-30-fw-padelschlaeger-00907603205000"},{"n":"Wilson Defy V1","p":159.95,"s":2,"w":365,"f":"3k Karbon","c":"Power Foam","h":"wilson-defy-v1-padelschlaeger-00707504157000"},{"n":"Bullpadel Neuron 02","p":226.95,"s":1,"w":null,"f":"3k Karbon","c":"EVA Multi","h":"bullpadel-neuron-02-padelschlaeger-14907600240000"},{"n":"adidas Metalbone Reserve","p":259.95,"s":2,"w":368,"f":"16k Karbon","c":"EVA Soft","h":"adidas-metalbone-reserve-padelschlaeger-p0000003700201"},{"n":"NOX VK10 Ventus Control 12K","p":159.95,"s":0,"w":null,"f":"12k Karbon","c":"EVA Black","h":"nox-vk10-ventus-control-12k-padelschlaeger-p0000001211701"},{"n":"Black Crown Coyote Carbon 3k","p":95.95,"s":0,"w":null,"f":"Carbon","c":"EVA Pro","h":"black-crown-coyote-carbon-3k-padelschlaeger-p0000006210301"},{"n":"Wilson Bela Pro V3","p":197.95,"s":1,"w":null,"f":"Karbon","c":"EVA Pro","h":"wilson-bela-pro-v3-padelschlaeger-00707504153000"},{"n":"Starvie Polaris","p":114.95,"s":1,"w":360,"f":"Glasfaser","c":"EVA Flex","h":"starvie-polaris-padelschlaeger-p0000000920301"},{"n":"HEAD Extreme Pro","p":128.95,"s":1,"w":null,"f":"","c":"","h":"head-extreme-pro-padelschlaeger-00606404314000"},{"n":"Babolat Juan Lebron 2025","p":227.95,"s":2,"w":null,"f":"3k Karbon","c":"EVA X","h":"babolat-juan-lebron-2025-padelschlaeger-00907503061000"},{"n":"Bullpadel Vertex 05 W","p":198.95,"s":2,"w":null,"f":"Fibrix","c":"EVA Multi","h":"bullpadel-vertex-05-w-padelschlaeger-14907600237000"},{"n":"Wilson Optix V2 Power","p":95.95,"s":1,"w":null,"f":"Fiberglas","c":"EVA","h":"wilson-optix-v2-power-padelschlaeger-00707604269000"},{"n":"Bullpadel Icon 26","p":229.95,"s":2,"w":370,"f":"12k Karbon","c":"EVA Multi","h":"bullpadel-icon-26-padelschlaeger-14907600242000"},{"n":"HEAD Extreme One 2025","p":229.95,"s":2,"w":null,"f":"12k Karbon","c":"Power Foam","h":"head-extreme-one-2025-padelschlaeger-00607204604000"},{"n":"Siux Ultra Pro","p":149.95,"s":1,"w":358,"f":"12k Carbon","c":"EVA","h":"siux-ultra-pro-padelschlaeger-p0000009480201"},{"n":"Wilson Defy LS V1","p":129.95,"s":2,"w":355,"f":"Carbon","c":"Power Foam","h":"wilson-defy-ls-v1-padelschlaeger-00707504158000"},{"n":"NOX Ventus Control 3K","p":186.95,"s":0,"w":null,"f":"3k Karbon","c":"EVA","h":"nox-ventus-control-3k-padelschlaeger-p0000001210501"},{"n":"Siux Electra Pro","p":164.95,"s":1,"w":365,"f":"12k Karbon","c":"EVA","h":"siux-electra-pro-padelschlaeger-p0000005251801"},{"n":"Babolat Tech Viper Soft 2026","p":174.95,"s":2,"w":365,"f":"","c":"EVA","h":"babolat-tech-viper-soft-2026-padelschlaeger-00907603194000"},{"n":"Bullpadel Hack 04 CMF 26","p":149.95,"s":2,"w":null,"f":"Fibrix","c":"EVA Medium","h":"bullpadel-hack-04-cmf-26-padelschlaeger-14907600232000"},{"n":"HEAD Gravity Pro 2024","p":169.95,"s":0,"w":null,"f":"Karbon","c":"Control Foam","h":"head-gravity-pro-2024-00606804470000"},{"n":"HEAD Gravity Team 2024","p":127.95,"s":0,"w":360,"f":"Fiberglas","c":"Control Foam","h":"head-gravity-team-2024-padelschlaeger-00606804471000"},{"n":"Babolat Veron Juan Lebron 3.0","p":155.95,"s":2,"w":365,"f":"Carbon","c":"EVA X","h":"babolat-veron-juan-lebron-30-padelschlaeger-00907203148000"},{"n":"Wilson Blade LS V4","p":127.95,"s":1,"w":355,"f":"3k Carbon","c":"EVA Soft","h":"wilson-blade-ls-v4-padelschlaeger-p0000008720301"},{"n":"Babolat Dyna Spirit","p":113.95,"s":1,"w":null,"f":"Glasfaser","c":"EVA","h":"babolat-dyna-spirit-00906202892000"},{"n":"Dunlop Nanomax Pro","p":109.95,"s":1,"w":null,"f":"","c":"EVA Pro","h":"dunlop-nanomax-pro-padelschlaeger-p0000002700701"},{"n":"Bullpadel Vertex 05 CMF","p":191.95,"s":2,"w":null,"f":"Fibrix","c":"EVA Multi","h":"bullpadel-vertex-05-cmf-padelschlaeger-14907600236000"},{"n":"RS by Robin Söderling Prime Pro 2.0","p":169.95,"s":1,"w":365,"f":"12k Carbon","c":"EVA Pro","h":"rs-by-robin-soederling-prime-pro-20-padelschlaeger-p0000010170301"},{"n":"Wilson Endure Pro V1","p":206.95,"s":1,"w":null,"f":"3k Karbon","c":"","h":"wilson-endure-pro-v1-padelschlaeger-00707604271000"},{"n":"Dunlop Galactica OS Limited By Nisse","p":173.95,"s":0,"w":360,"f":"3k Carbon","c":"EVA Pro","h":"dunlop-galactica-os-limited-by-nisse-padelschlaeger-p0000008190201"},{"n":"RS by Robin Söderling Prime Team Edition 2.0","p":99.95,"s":2,"w":365,"f":"Fiberglas","c":"EVA Black","h":"rs-by-robin-soederling-prime-team-edition-20-padelschlaeger-p0000009090201"},{"n":"Siux Pegasus Pro","p":209.95,"s":1,"w":365,"f":"12k Carbon","c":"EVA","h":"siux-pegasus-pro-padelschlaeger-p0000005250401"},{"n":"Dunlop Galactica Limited By Nisse","p":144.95,"s":1,"w":370,"f":"16k Carbon","c":"EVA Pro","h":"dunlop-galactica-limited-by-nisse-padelschlaeger-p0000008190301"},{"n":"Babolat Technical Origin +","p":109.95,"s":1,"w":null,"f":"Fiberglas","c":"EVA Soft","h":"babolat-technical-origin-padelschlaeger-p0000007450501"},{"n":"Wilson Endure V1","p":173.95,"s":1,"w":null,"f":"Karbon","c":"","h":"wilson-endure-v1-padelschlaeger-00707604272000"},{"n":"HEAD Coello Pro 2026","p":296.95,"s":2,"w":null,"f":"Karbon","c":"Power Foam","h":"head-coello-pro-2026-padelschlaeger-00607604608000"},{"n":"NOX Ventus Attack 12K Xtreme","p":186.95,"s":2,"w":null,"f":"12k Karbon","c":"EVA Black","h":"nox-ventus-attack-12k-xtreme-padelschlaeger-p0000001210601"},{"n":"Tecnifibre Bomba Speed","p":144.95,"s":2,"w":null,"f":"3k Karbon","c":"Soft Foam","h":"tecnifibre-bomba-speed-padelschlaeger-p0000003670401"},{"n":"NOX AT10 Genius Attack 12K Xtreme","p":219.95,"s":2,"w":null,"f":"12k Karbon","c":"EVA","h":"nox-at10-genius-attack-12k-xtreme-padelschlaeger-p0000001210301"},{"n":"Tecnifibre Bomba Soft","p":121.95,"s":2,"w":355,"f":"Fiberglas","c":"Soft Foam","h":"tecnifibre-bomba-soft-padelschlaeger-p0000003670501"},{"n":"Siux Trilogy Pro","p":205.95,"s":0,"w":365,"f":"24k Carbon","c":"EVA","h":"siux-trilogy-pro-padelschlaeger-p0000005251101"},{"n":"HEAD Extreme One X 2025","p":234.95,"s":2,"w":370,"f":"12k Karbon","c":"Power Foam","h":"head-extreme-one-x-2025-padelschlaeger-00607204603000"},{"n":"Siux Diablo Pro","p":189.95,"s":1,"w":null,"f":"24k Carbon","c":"EVA","h":"siux-diablo-pro-padelschlaeger-p0000005251001"},{"n":"Starvie Nyra","p":95.95,"s":0,"w":340,"f":"Glasfaser","c":"EVA Flex","h":"starvie-nyra-padelschlaeger-p0000000920601"},{"n":"Bullpadel Hack 04 HYB Cloud","p":151.95,"s":1,"w":null,"f":"","c":"","h":"bullpadel-hack-04-hyb-cloud-padelschlaeger-14907600246000"},{"n":"Wilson Endure LS V1","p":141.95,"s":1,"w":null,"f":"Fiberglas","c":"","h":"wilson-endure-ls-v1-padelschlaeger-00707604273000"},{"n":"Dunlop FX Pro","p":157.95,"s":2,"w":null,"f":"12k Karbon","c":"EVA Pro","h":"dunlop-fx-pro-padelschlaeger-p0000002700601"},{"n":"HEAD Coello Motion 2026","p":296.95,"s":2,"w":null,"f":"Karbon","c":"Power Foam","h":"head-coello-motion-2026-padelschlaeger-00607604609000"},{"n":"adidas Arrow Hit Carbon","p":164.95,"s":2,"w":368,"f":"Carbon","c":"EVA Soft Performance","h":"adidas-arrow-hit-carbon-padelschlaeger-00507600306000"},{"n":"Bullpadel Hack 04 26","p":192.95,"s":2,"w":null,"f":"18k Karbon","c":"EVA Multi","h":"bullpadel-hack-04-26-padelschlaeger-14907600230000"},{"n":"adidas Arrow Hit Carbon Ctrl","p":174.95,"s":1,"w":368,"f":"Carbon","c":"EVA Soft Performance","h":"adidas-arrow-hit-carbon-ctrl-padelschlaeger-00507600307000"},{"n":"Babolat Stima Energy","p":137.95,"s":0,"w":365,"f":"Carbon","c":"EVA","h":"babolat-stima-energy-00906202891000"},{"n":"Starvie Black Titan","p":178.95,"s":1,"w":360,"f":"24k Karbon","c":"EVA Power","h":"starvie-black-titan-padelschlaeger-p0000000921001"},{"n":"Bullpadel Hack 04","p":219.95,"s":2,"w":null,"f":"Carbon","c":"EVA Multi","h":"bullpadel-hack-04-padelschlaeger-p0000002870401"},{"n":"Bullpadel Flow Legend","p":152.95,"s":2,"w":null,"f":"Fibrix","c":"EVA Multi","h":"bullpadel-flow-legend-padelschlaeger-14907600243000"},{"n":"adidas Arrow Hit Ctrl 2026","p":264.95,"s":0,"w":null,"f":"Karbon","c":"EVA Soft Performance","h":"adidas-arrow-hit-ctrl-2026-padelschlaeger-00507600298000"},{"n":"HEAD Extreme Pro 2025","p":199.95,"s":2,"w":null,"f":"Carbon","c":"","h":"head-extreme-pro-2025-padelschlaeger-00607104605000"},{"n":"Starvie Triton Power +","p":159.95,"s":2,"w":null,"f":"18k Karbon","c":"EVA Power","h":"starvie-triton-power-padelschlaeger-p0000000920701"},{"n":"Starvie Kenta +","p":159.95,"s":0,"w":360,"f":"12k Karbon","c":"EVA Flex","h":"starvie-kenta-padelschlaeger-p0000000920501"},{"n":"Bullpadel Wonder","p":199.95,"s":1,"w":360,"f":"Fibrix","c":"EVA Multi","h":"bullpadel-wonder-padelschlaeger-14907600245000"},{"n":"HEAD Coello Pro","p":157.95,"s":2,"w":375,"f":"Karbon","c":"Power Foam","h":"head-coello-pro-padelschlaeger-00607004554000"},{"n":"Wilson Blade Pro V3","p":135.95,"s":1,"w":365,"f":"3k Carbon","c":"EVA","h":"wilson-blade-pro-v3-padelschlaeger-00706704105000"},{"n":"Starvie Kenta Eternal Pro","p":229.95,"s":0,"w":370,"f":"3k Karbon","c":"EVA Pro","h":"starvie-kenta-eternal-pro-padelschlaeger-20307500112000"},{"n":"Starvie Astrum +","p":179.95,"s":1,"w":370,"f":"12k Karbon","c":"EVA Balance","h":"starvie-astrum-padelschlaeger-p0000000920201"},{"n":"Starvie Drax +","p":166.95,"s":1,"w":360,"f":"12k Karbon","c":"EVA Power","h":"starvie-drax-padelschlaeger-p0000000920901"},{"n":"Starvie Raptor +","p":173.95,"s":1,"w":360,"f":"3k Karbon","c":"EVA Balance","h":"starvie-raptor-padelschlaeger-p0000000920801"},{"n":"Wilson Defy Pro V1","p":189.95,"s":2,"w":null,"f":"15k Karbon","c":"Power Foam","h":"wilson-defy-pro-v1-padelschlaeger-00707504156000"},{"n":"Babolat Viper Juan Lebron 3.0","p":242.95,"s":2,"w":null,"f":"3k Karbon","c":"EVA X","h":"babolat-viper-juan-lebron-30-padelschlaeger-00907203147000"},{"n":"Bullpadel Pearl Cloud 25","p":106.95,"s":0,"w":null,"f":"","c":"","h":"bullpadel-pearl-cloud-25-14907500151000"},{"n":"Starvie Triton Balance+","p":216.95,"s":2,"w":360,"f":"18k Karbon","c":"EVA Balance","h":"starvie-triton-balance-padelschlaeger-p0000000921101"},{"n":"Dunlop Pro LS","p":132.95,"s":1,"w":365,"f":"16k Karbon","c":"EVA Pro","h":"dunlop-pro-ls-padelschlaeger-01607002388000"},{"n":"Babolat Counter Veron 2026","p":159.95,"s":1,"w":365,"f":"Carbon","c":"EVA X","h":"babolat-counter-veron-2026-padelschlaeger-00907603199000"},{"n":"Wilson Blade V4","p":141.95,"s":1,"w":null,"f":"Karbon","c":"EVA Soft","h":"wilson-blade-v4-padelschlaeger-p0000008720501"},{"n":"Tecnifibre Curva Soft","p":119.95,"s":0,"w":360,"f":"","c":"","h":"tecnifibre-curva-soft-01207001651000"},{"n":"HEAD Gravity Motion 2024","p":142.95,"s":1,"w":null,"f":"","c":"","h":"head-gravity-motion-2024-padelschlaeger-00606804469000"},{"n":"adidas Metalbone 2026","p":287.95,"s":2,"w":352,"f":"16k Karbon","c":"EVA Soft Performance","h":"adidas-metalbone-2026-padelschlaeger-00507600299000"},{"n":"Babolat Veron Juan Lebrón 3.1","p":211.95,"s":1,"w":null,"f":"Carbon","c":"EVA Black","h":"babolat-veron-juan-lebron-31-padelschlaeger-p0000007450201"},{"n":"Dunlop FX Hybrid","p":165.95,"s":1,"w":null,"f":"","c":"EVA Pro","h":"dunlop-fx-hybrid-padelschlaeger-p0000008930301"},{"n":"NOX AT10 Pro Cup Hard","p":149.95,"s":1,"w":null,"f":"Fiberglas","c":"EVA","h":"nox-at10-pro-cup-hard-padelschlaeger-p0000001210901"},{"n":"Dunlop FX Hybrid Team","p":116.95,"s":1,"w":360,"f":"","c":"EVA Pro","h":"dunlop-fx-hybrid-team-padelschlaeger-p0000008930201"},{"n":"Siux Diablo Revolution Sanyo Pro III","p":179.95,"s":1,"w":375,"f":"Carbon","c":"EVA","h":"siux-diablo-revolution-sanyo-pro-iii-padelschlaeger-31006600027000"},{"n":"Starvie Drax Soft 12K","p":211.95,"s":1,"w":null,"f":"12k Karbon","c":"EVA Soft","h":"starvie-drax-soft-12k-padelschlaeger-20307500111000"},{"n":"Wilson Accent","p":136.95,"s":0,"w":null,"f":"","c":"EVA","h":"wilson-accent-00706504017000"},{"n":"Black Crown Piton","p":104.95,"s":0,"w":375,"f":"Carbon","c":"","h":"black-crown-piton-20205100000000"},{"n":"Bullpadel Hack 04 25","p":156.95,"s":2,"w":null,"f":"Carbon","c":"EVA Hart","h":"bullpadel-hack-04-25-padelschlaeger-vollflaechig-14907500137000"},{"n":"Siux Diablo Sanyo Pro 4","p":169.95,"s":1,"w":365,"f":"18k Karbon","c":"","h":"siux-diablo-sanyo-pro-4-31007000060000"},{"n":"NOX AT10 Genius 18K","p":239.95,"s":1,"w":null,"f":"18k Karbon","c":"EVA Black","h":"nox-at10-genius-18k-padelschlaeger-p0000001210401"},{"n":"adidas It Ctrl 3.4","p":212.95,"s":0,"w":null,"f":"","c":"","h":"adidas-it-ctrl-34-padelschlaeger-00507500214000"},{"n":"Tecnifibre Curva Power 2026","p":156.95,"s":1,"w":360,"f":"Carbon","c":"Soft Foam","h":"tecnifibre-curva-power-2026-padelschlaeger-p0000009290301"},{"n":"Babolat Viper Soft Juan Lebrón 3.1","p":262.95,"s":1,"w":null,"f":"Carbon","c":"EVA Black","h":"babolat-viper-soft-juan-lebron-31-padelschlaeger-p0000007450301"},{"n":"HEAD Coello Team 2026","p":174.95,"s":2,"w":360,"f":"Fiberglas","c":"Power Foam","h":"head-coello-team-2026-padelschlaeger-00607604610000"},{"n":"Tecnifibre Curva Team","p":106.95,"s":1,"w":null,"f":"Carbon","c":"Soft Foam","h":"tecnifibre-curva-team-padelschlaeger-p0000009290501"},{"n":"Bullpadel Hack 04 Hyb 26","p":196.95,"s":2,"w":null,"f":"18k Karbon","c":"EVA Multi","h":"bullpadel-hack-04-hyb-26-padelschlaeger-14907600231000"},{"n":"NOX AT10 Pro Cup Soft","p":149.95,"s":1,"w":null,"f":"Fiberglas","c":"EVA","h":"nox-at10-pro-cup-soft-padelschlaeger-p0000001210201"},{"n":"Tecnifibre Curva Speed 2026","p":141.95,"s":1,"w":355,"f":"Carbon","c":"Control Foam","h":"tecnifibre-curva-speed-2026-padelschlaeger-p0000009290201"},{"n":"HEAD Extreme Motion 2026","p":193.95,"s":2,"w":360,"f":"Carbon","c":"Power Foam","h":"head-extreme-motion-2026-padelschlaeger-p0000011480201"},{"n":"Bullpadel Hack 05 CMF 27","p":259.95,"s":2,"w":365,"f":"Fibrix","c":"EVA Multi","h":"bullpadel-hack-05-cmf-27-padelschlaeger-vollflaechig-p0000012020901"},{"n":"Siux Zyron 3K Blue 2026","p":125.95,"s":1,"w":null,"f":"3k Carbon","c":"EVA Medium","h":"siux-zyron-3k-blue-2026-padelschlaeger-p0000011790301"},{"n":"Tecnifibre Curva Soft 2026","p":138.95,"s":1,"w":null,"f":"Carbon","c":"Soft Foam","h":"tecnifibre-curva-soft-2026-padelschlaeger-p0000009290401"},{"n":"Babolat Technical Veron 2026","p":137.95,"s":1,"w":365,"f":"Kohlefaser","c":"EVA X","h":"babolat-technical-veron-2026-padelschlaeger-00907603192000"},{"n":"Siux Evoque 3K 2026","p":125.95,"s":1,"w":null,"f":"3K Carbon","c":"EVA Medium","h":"siux-evoque-3k-2026-padelschlaeger-p0000011790201"},{"n":"adidas Crossit Carbon 2026","p":169.95,"s":2,"w":368,"f":"Carbon","c":"EVA Soft Performance","h":"adidas-crossit-carbon-2026-padelschlaeger-00507600304000"},{"n":"HEAD Extreme Pro 2026","p":227.95,"s":2,"w":370,"f":"Carbon","c":"Power Foam","h":"head-extreme-pro-2026-padelschlaeger-p0000011480301"}];
+const RK_BRANDS=["RS by Robin Söderling", "Black Crown", "HEAD", "Babolat", "adidas", "Bullpadel", "NOX", "Wilson", "Siux", "Starvie", "Dunlop", "Tecnifibre"];
+const SHAPES=['Rund','Tropfen','Diamant'];
+function normFace(f){if(!f)return '';const k=(f.match(/(\d{1,2})\s?k/i)||[])[1];if(/fiberglas|glasfaser/i.test(f))return 'Glasfaser';if(/fibrix/i.test(f))return 'Fibrix (Glasfaser)';if(/karbon|carbon|kohlefaser/i.test(f))return (k?k+'K ':'')+'Carbon';return f;}
+const RACKETS=RK_RAW.map(r=>{
+ const cl=v=>Math.round(Math.max(1,Math.min(10,v))*2)/2;
+ const brand=RK_BRANDS.find(b=>r.n.startsWith(b))||r.n.split(' ')[0],name=r.n.slice(brand.length).trim();
+ const nm=r.n.toLowerCase(),f=r.f.toLowerCase(),c=r.c.toLowerCase();
+ let power=[4,6,7.5][r.s],control=[8,6.5,5][r.s],comfort=[7,6,5][r.s],hard=5;
+ if(/fiberglas|glasfaser|fibrix/.test(f)){comfort+=1.5;hard-=1.5;power-=.3;}
+ else if(/karbon|carbon|kohlefaser/.test(f)){const k=+((f.match(/(\d{1,2})\s?k/)||[])[1]||3);hard+=.5+Math.min(k,24)/12;comfort-=.3+Math.min(k,24)/24;power+=k>=12?.5:.2;}
+ if(/soft|flex/.test(c)){comfort+=1;hard-=1;}
+ if(/power foam/.test(c)){power+=.3;comfort+=.5;hard-=.5;}
+ if(/eva pro|hard|hart|black/.test(c)){hard+=1.5;comfort-=1;power+=.3;}
+ if(/control foam/.test(c))control+=.7;
+ if(/high memory/.test(c))comfort+=.5;
+ if(/ctrl|control|counter/.test(nm)){control+=1;power-=1;}
+ if(/attack|power|xtreme/.test(nm)){power+=.6;hard+=.5;}
+ if(/\bhard\b/.test(nm))hard+=1;
+ if(/soft|cloud|comfort/.test(nm)){comfort+=1;hard-=1;}
+ if(/ ls\b| lt\b|lite|light/.test(nm)){power-=.3;control+=.3;}
+ if(r.w!=null){if(r.w>=368){power+=.5;comfort-=.5;}else if(r.w<=355){power-=.4;comfort+=.4;}}
+ let man=8.5-r.s*1.5;if(r.w!=null)man-=(r.w-355)/6;if(/ ls\b| lt\b|lite|light|motion/.test(nm))man+=.7;
+ let dur=6;if(/fiberglas|glasfaser/.test(f))dur=4.5;else if(/fibrix/.test(f))dur=5.5;else if(/karbon|carbon|kohlefaser/.test(f)){const k=+((f.match(/(\d{1,2})\s?k/)||[])[1]||3);dur=6+Math.min(k,24)/6;}
+ const demand=r.s*2+Math.max(0,hard-4)*1.2+Math.max(0,6-comfort)*.8;
+ return{id:r.h,brand,name,price:r.p,shape:r.s,weight:r.w,face:normFace(r.f),core:r.c,power:cl(power),control:cl(control),comfort:cl(comfort),hard:cl(hard),man:cl(man),dur:cl(dur),demand:cl(demand),url:'https://www.padel-point.de/products/'+r.h};
+});
+const RBYID=Object.fromEntries(RACKETS.map(r=>[r.id,r]));
+const euro=v=>v.toLocaleString('de-DE',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+
+/* Stärken & Schwächen jedes Schlägers (aus seinen Eigenschaften) */
+function racketSW(r){const s=[],w=[];
+ if(r.power>=7.5)s.push('Viel Power für Smash und Víbora');else if(r.power<=4.5)w.push('Wenig Eigen-Power – Smashes musst du selbst beschleunigen');
+ if(r.control>=7.5)s.push('Sehr kontrolliert: Lobs und Abwehrbälle landen präzise');else if(r.control<=5)w.push('Weniger Kontrolle, kleinerer Sweetspot');
+ if(r.comfort>=7)s.push('Armfreundlich, dämpft Vibrationen');else if(r.comfort<=4.5)w.push('Hart für Arm und Ellbogen');
+ if(r.hard<=4)s.push('Weiches Schlaggefühl – bringt Tempo auch bei langsamen Bällen und Kälte');else if(r.hard>=7.5)s.push('Direktes, hartes Schlaggefühl für schnelle Bälle');
+ if(r.man>=7.5)s.push('Wendig – schnell am Netz');else if(r.man<=5)w.push('Eher träge bei schnellen Volleys');
+ if(r.dur>=8)s.push('Robuste Carbon-Fläche, hält viele Spiele');else if(r.dur<=5)w.push('Glasfaser-Fläche nutzt sich schneller ab');
+ if(r.demand<=4&&r.shape<2)s.push('Verzeiht Fehltreffer – gut für den Einstieg');else if(r.demand<=4)s.push('Für einen Diamanten recht gutmütig');else if(r.demand>=7)w.push('Verlangt saubere Technik');
+ if(r.price<=120)s.push('Günstig');else if(r.price>=250)w.push('Hochpreisig');
+ if(r.weight==null)w.push('Gewicht auf der Produktseite nicht angegeben');
+ if(!s.length)s.push('Ausgewogener Allrounder');if(!w.length)w.push('Keine klare Spezialität – kein Extrem in eine Richtung');
+ return{s,w};}
+
+/* Deine Eingaben: aus Bewertungen, Seite, Roadmap-Stufe und Tagebuch – Rest aus der Feinabstimmung */
+const RF_DEF={off:8,force:5,pain:3,feel:4,weight:'richtig',cold:'manchmal',budget:'200',save:5,brand:''};
+function rfState(){S.rf=Object.assign({},RF_DEF,S.rf||{});return S.rf;}
+function finderInput(){
+ const rf=rfState(),sr=selfRating(),avg=(ks,d)=>{const v=ks.map(k=>sr[k]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:d;};
+ const st=curStage(),recent=S.journal.filter(j=>j.date>=addDays(today(),-28)).length/4,wk=recent||S.weekGoal;
+ const over=sr.smash!=null&&sr.bandeja!=null?(sr.smash>sr.bandeja+1?'smash':sr.bandeja>sr.smash+1?'bandeja':'beides'):'smash';
+ return{level:[2,4,6,7.5,9][st],off:rf.off,side:S.side==='beide'?'beides':S.side,over,smash:sr.smash??4,net:sr.volley??5,ctrl:avg(['lob','wand'],5),hit:avg(SKIDS,6),
+  force:rf.force,pain:S.arm?Math.max(7,rf.pain):rf.pain,feel:rf.feel,weight:rf.weight,freq:wk<1.5?'1':wk<3.5?'2':'4',cold:rf.cold,budget:rf.budget,save:rf.save,brand:rf.brand,_st:st,_wk:wk};
+}
+function rkProfile(s){
+ const sideB=s.side==='links'?1:s.side==='rechts'?-1:0,overP={bandeja:-.8,smash:.8,beides:0}[s.over],overC={bandeja:1,smash:-.5,beides:0}[s.over],coldH={nein:0,manchmal:.5,ja:1.2}[s.cold];
+ return{power:clampN(.45*s.off+.25*s.smash+.2*s.hit+.1*s.level+sideB+overP-.2*(s.force-5),0,10),control:clampN(s.ctrl+overC,0,10),comfort:clampN(.65*s.pain+.25*(10-s.hit)+coldH,0,10),
+  hard:clampN(s.feel-.3*s.pain+.3*(s.force-5)-coldH,0,10),man:clampN(s.net*.85,0,10),dur:{1:4,2:6,4:8}[s.freq],demand:clampN(s.level*.8+s.hit*.3+1,0,10),weight:{leicht:368,richtig:360,schwer:350}[s.weight],budget:+s.budget};
+}
+const clampN=(v,a,b)=>Math.max(a,Math.min(b,v));
+function rkScore(r,p,s){let pen=0;
+ pen+=4*Math.abs(r.power-p.power);pen+=2*Math.max(0,p.control-r.control);pen+=3*Math.max(0,p.comfort-r.comfort);pen+=1.5*Math.abs(r.hard-p.hard);
+ pen+=1.2*Math.max(0,p.man-r.man);pen+=1*Math.max(0,p.dur-r.dur);pen+=1.5*Math.max(0,r.demand-p.demand);
+ pen+=r.weight!=null?.25*Math.abs(r.weight-p.weight):1.5;if(r.price>p.budget)pen+=.3*(r.price-p.budget);pen+=.006*s.save*Math.max(0,r.price-90);
+ if(s.pain>=7&&r.hard>=6)pen+=2*(r.hard-5);if(s.brand&&r.brand===s.brand)pen-=1.6;
+ return clampN(Math.round(100-pen*2.5),0,99);}
+function rkReasons(r,p,s){const good=[],warn=[],dp=r.power-p.power;
+ if(Math.abs(dp)<=1)good.push('Power passt zu deinem Spiel');else if(dp<0)warn.push('Weniger Power, als du suchst');else warn.push('Mehr Power, als du gerade sicher kontrollierst');
+ if(r.shape===2&&s.side==='links'&&s.off>=6)good.push('Diamant passt zur linken Seite, wo die Smashes fallen');
+ if(r.comfort>=p.comfort){if(s.pain>=3&&r.comfort>=7)good.push('Weicher Aufbau schont den Arm');}else warn.push('Härter, als deinem Arm guttut');
+ const dh=r.hard-p.hard;if(Math.abs(dh)<=1.5)good.push('Schlaggefühl trifft deinen Geschmack');else if(dh>0)warn.push('Fühlt sich härter an, als du magst');else warn.push('Weicher, als du magst');
+ if(r.control<p.control)warn.push('Weniger Kontrolle bei Lobs und Abwehr');else if(p.control>=6)good.push('Genug Kontrolle für Lobs und Abwehr');
+ if(r.price<=p.budget){const left=p.budget-r.price;good.push(left>=10?`Im Budget, ${Math.floor(left)} € bleiben übrig`:'Im Budget');}else warn.push(`${Math.ceil(r.price-p.budget)} € über deinem Budget`);
+ if(r.weight!=null&&Math.abs(r.weight-p.weight)<=5)good.push(`${r.weight} g, nah an deinem Wunschgewicht`);
+ if(r.demand-p.demand>1.5)warn.push('Anspruchsvoll für dein jetziges Niveau');
+ if(p.man>=6){if(r.man>=p.man)good.push('Wendig genug für schnelle Volleys');else if(p.man-r.man>1.5)warn.push('Etwas träge bei schnellen Volleys');}
+ if(p.dur-r.dur>1.5)warn.push('Fläche nutzt sich bei deinem Pensum schneller ab');else if(s.freq==='4'&&r.dur>=7.5)good.push('Robuste Fläche für viele Spiele');
+ if(s.brand&&r.brand===s.brand)good.push('Deine Lieblingsmarke');
+ return{good,warn};}
+function rkRanked(){const s=finderInput(),p=rkProfile(s);return{s,p,list:RACKETS.map(r=>({r,score:rkScore(r,p,s)})).sort((a,b)=>b.score-a.score||a.r.price-b.r.price)};}
+const topRacket=()=>rkRanked().list[0].r;
+function racketSVG(shape,size){const heads=['M30 4 C49 4 56 19 56 36 C56 56 44 70 30 70 C16 70 4 56 4 36 C4 19 11 4 30 4Z','M30 4 C48 4 56 16 56 31 C56 49 42 66 30 71 C18 66 4 49 4 31 C4 16 12 4 30 4Z','M30 3 C43 3 54 12 56 25 C57 38 44 61 30 73 C16 61 3 38 4 25 C6 12 17 3 30 3Z'],spot=[40,33,27][shape];
+ return `<svg class="rsvg" viewBox="0 0 60 112" width="${size}" aria-hidden="true"><path d="${heads[shape]}" fill="currentColor" fill-opacity=".16" stroke="currentColor" stroke-width="2.5"/><circle cx="30" cy="${spot}" r="7" fill="var(--ball)"/><rect x="26" y="70" width="8" height="38" rx="3" fill="currentColor"/></svg>`;}
+const rkLi=(rs,n)=>[...rs.good.map(t=>`<li>${esc(t)}</li>`),...rs.warn.map(t=>`<li class="warn">${esc(t)}</li>`)].slice(0,n).join('');
+let rkShowAll=false;
+function rkListHTML(R,q){q=(q||'').trim().toLowerCase();let rows=R.list.map((x,i)=>({...x,rank:i+1}));if(q)rows=rows.filter(({r})=>(r.brand+' '+r.name).toLowerCase().includes(q));
+ const lim=q||rkShowAll?rows.length:12;
+ return (rows.slice(0,lim).map(({r,score,rank})=>`<button class="rkrow ${S.myRacket===r.id?'mine':''}" data-act="racket" data-id="${r.id}"><span class="rk">${rank}</span><span class="nm"><b>${esc(r.brand)} ${esc(r.name)}</b><small>${SHAPES[r.shape]} · ${euro(r.price)}${S.myRacket===r.id?' · dein Schläger':''}</small></span><span class="bar thin blue"><i style="width:${score}%"></i></span><span class="num">${score}</span></button>`).join('')||`<p class="muted b small">Kein Schläger passt zu „${esc(q)}“.</p>`)
+ +(q||rows.length<=12?'':`<button class="linkbtn" data-act="rkAll">${rkShowAll?'Nur die ersten 12 zeigen':'Alle '+rows.length+' zeigen'}</button>`);}
+function racketSheet(id){
+ const R=rkRanked(),i=R.list.findIndex(x=>x.r.id===id),{r,score}=R.list[i],sw=racketSW(r),fit=rkReasons(r,R.p,R.s);
+ const bars=[['Power',r.power],['Kontrolle',r.control],['Komfort',r.comfort],['Härte',r.hard],['Wendigkeit',r.man],['Haltbarkeit',r.dur],['Anspruch',r.demand]];
+ modal(`<div class="row"><span class="c-acc">${racketSVG(r.shape,52)}</span><div class="grow"><div class="eyebrow muted">${esc(r.brand)}</div><h2>${esc(r.name)}</h2><div class="b">${euro(r.price)} · Platz ${i+1} von ${RACKETS.length}</div></div><div class="bigpct">${score}<small>% passt</small></div></div>
+ <div class="rspecs"><div><span>Form</span><b>${SHAPES[r.shape]}</b></div><div><span>Gewicht</span><b>${r.weight!=null?r.weight+' g':'k. A.'}</b></div><div><span>Fläche</span><b>${esc(r.face||'k. A.')}</b></div><div><span>Kern</span><b>${esc(r.core||'k. A.')}</b></div></div>
+ <div class="abars">${bars.map(([t,v])=>`<span>${t}</span><div class="bar thin blue"><i style="width:${v*10}%"></i></div><span class="num">${fmt1(v)}</span>`).join('')}</div>
+ <div><div class="eyebrow c-good">Stärken</div><ul class="why">${sw.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+ <div><div class="eyebrow" style="color:var(--bad)">Schwächen</div><ul class="why">${sw.w.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+ <div><div class="eyebrow muted">Passt das zu dir?</div><ul class="reasons">${rkLi(fit,8)}</ul></div>
+ <p class="muted small b">Werte aus Form, Material, Kern und Gewicht berechnet – keine Herstellerangaben. Preis vom ${RK_DATE}.</p>
+ <a class="btn block" href="${r.url}" target="_blank" rel="noopener">Bei Padel-Point ansehen</a>
+ <div class="row"><button class="btn ghost grow" data-act="myRacket" data-id="${r.id}">${S.myRacket===r.id?'Nicht mehr mein Schläger':'Das ist mein Schläger'}</button><button class="btn ghost" data-act="closeModal">Schließen</button></div>`);
+}
+function racketSection(){
+ const R=rkRanked(),[w,...rest]=R.list,s=R.s,wr=rkReasons(w.r,R.p,s),rf=rfState(),q=S.rkq||'';
+ const src=[`Stufe ${s._st+1} (${STAGES[s._st].t})`,`Seite ${S.side}`,`Smash ${fmt1(s.smash)}/10`,`Volleys ${fmt1(s.net)}/10`,`Lob & Wand ${fmt1(s.ctrl)}/10`,`≈ ${fmt1(s._wk)} Sessions/Woche`];
+ let h=`<h2 class="sec-title">Schläger-Empfehlung</h2><p class="sec-sub">${RACKETS.length} Schläger von Padel-Point · Preise vom ${RK_DATE}. Passt sich nach jedem Spiel an deine Bewertungen an.</p>
+ <div class="rwin"><div class="eyebrow" style="opacity:.85">Dein Schläger</div>
+  <div class="row"><span>${racketSVG(w.r.shape,64)}</span><div class="grow"><div class="b small" style="opacity:.85;text-transform:uppercase;letter-spacing:.08em">${esc(w.r.brand)}</div><h2>${esc(w.r.name)}</h2></div><div class="bigpct">${w.score}<small>% passt</small></div></div>
+  <div class="small b" style="opacity:.9">${[SHAPES[w.r.shape],w.r.weight!=null?w.r.weight+' g':null,w.r.face,w.r.core?'Kern '+w.r.core:null].filter(Boolean).map(esc).join(' · ')}</div>
+  <ul class="reasons">${rkLi(wr,5)}</ul>
+  <div class="row"><span class="grow rprice">${euro(w.r.price)}</span><button class="btn sm" data-act="racket" data-id="${w.r.id}">Details</button><a class="btn sm" href="${w.r.url}" target="_blank" rel="noopener">Shop</a></div></div>
+ <div class="rruns">${rest.slice(0,4).map(({r,score})=>`<button class="rrun" data-act="racket" data-id="${r.id}"><span class="c-acc">${racketSVG(r.shape,30)}</span><span class="grow"><small>${esc(r.brand)}</small><b>${esc(r.name)}</b><small>${SHAPES[r.shape]} · ${euro(r.price)}</small></span><span class="pctS">${score}</span></button>`).join('')}</div>`;
+ if(S.myRacket&&RBYID[S.myRacket]){const i=R.list.findIndex(x=>x.r.id===S.myRacket),m=R.list[i];
+  h+=`<button class="mini" data-act="racket" data-id="${m.r.id}" style="margin-top:12px"><span class="c-acc">${racketSVG(m.r.shape,30)}</span><span class="grow"><span class="eyebrow muted">Dein aktueller Schläger · Platz ${i+1}</span><h3>${esc(m.r.brand)} ${esc(m.r.name)}</h3><p>${m.score}% passt${w.score-m.score>=10?` · ${esc(w.r.name)} passt ${w.score-m.score} Punkte besser`:' · passt gut zu dir'}</p></span><span class="go">${I.chev}</span></button>`;}
+ h+=`<p class="muted small b" style="margin:10px 0 4px">Berechnet aus: ${src.map(esc).join(' · ')}</p>
+ <details class="card tune"${S.rkOpen?' open':''}><summary class="b">Feinabstimmung</summary><div class="stack" style="margin-top:12px">
+  ${[['off','Wie offensiv willst du spielen?','Bälle zurückbringen','Punkt machen'],['force','Wie viel Wucht bringst du selbst mit?','Eher wenig','Sehr viel'],['pain','Wie oft melden sich Schulter oder Ellbogen?','Nie','Nach jedem Spiel'],['feel','Welches Schlaggefühl magst du?','Weich','Hart und direkt'],['save','Wie wichtig ist ein niedriger Preis?','Egal','So günstig wie möglich']].map(([k,t,lo,hi])=>`<div class="rr"><label for="rf_${k}">${t}</label><b class="rv" id="rfv_${k}">${rf[k]}</b><input id="rf_${k}" type="range" min="0" max="10" step="1" value="${rf[k]}" data-rf="${k}"><div class="ends"><span>${lo}</span><span>${hi}</span></div></div>`).join('')}
+  <div><span class="lab">Dein jetziger Schläger fühlt sich an …</span><div class="seg">${[['leicht','Zu leicht'],['richtig','Genau richtig'],['schwer','Zu schwer']].map(([v,n])=>`<button data-act="rfSet" data-k="weight" data-v="${v}" aria-pressed="${rf.weight===v}">${n}</button>`).join('')}</div></div>
+  <div><span class="lab">Spielst du bei Kälte?</span><div class="seg">${[['nein','Nein, Halle'],['manchmal','Manchmal'],['ja','Oft draußen']].map(([v,n])=>`<button data-act="rfSet" data-k="cold" data-v="${v}" aria-pressed="${rf.cold===v}">${n}</button>`).join('')}</div></div>
+  <div><span class="lab">Budget</span><div class="seg">${[['150','Bis 150 €'],['200','Bis 200 €'],['250','Bis 250 €'],['400','Egal']].map(([v,n])=>`<button data-act="rfSet" data-k="budget" data-v="${v}" aria-pressed="${rf.budget===v}">${n}</button>`).join('')}</div></div>
+  <div><label class="lab" for="rf_brand">Lieblingsmarke</label><select id="rf_brand" class="field" data-rf="brand"><option value="">Keine Vorliebe</option>${[...RK_BRANDS].sort((a,b)=>a.localeCompare(b,'de')).map(b=>`<option ${rf.brand===b?'selected':''}>${esc(b)}</option>`).join('')}</select></div>
+ </div></details>
+ <h2 class="sec-title">Rangliste</h2><div class="card stack"><input id="rkq" type="search" class="field" placeholder="Schläger oder Marke suchen" value="${esc(q)}"><div id="rklist" class="stack">${rkListHTML(R,q)}</div></div>
+ <p class="muted small b" style="margin-top:10px">Alle lieferbaren Erwachsenenschläger von Padel-Point zwischen 90 und 300 €, deren Produktseite die Kopfform nennt. Werte sind berechnet, keine Herstellerangaben, und Preise ändern sich – vor dem Kauf auf der Produktseite prüfen und am besten Probe spielen.</p>`;
+ return h;
 }
 
 function viewJournal(){
@@ -1650,8 +1790,6 @@ function viewStats(){
  h+=`<div class="row"><span class="ic" style="--c:var(--bad)">${I.target}</span><div class="grow"><div class="eyebrow muted">Empfohlene Baustelle</div><b>${esc(SK[wk1].n)}</b></div>${l1?`<button class="btn sm" data-act="lesson" data-id="${l1.id}">Üben</button>`:''}</div></div>`;
  return h;
 }
-function rShape(t){const head=['<ellipse cx="30" cy="30" rx="26" ry="27"/>','<path d="M30 3C47 3 56 15 56 30c0 13-10 25-26 27C14 55 4 43 4 30 4 15 13 3 30 3z"/>','<path d="M30 2 57 24 50 54H10L3 24z"/>'][t];
- return `<svg class="rsvg" viewBox="0 0 60 92" aria-hidden="true"><g fill="var(--accent)">${head}</g><rect x="26" y="56" width="8" height="32" rx="3" fill="var(--fg)"/><g fill="#fff" opacity=".55">${[[22,20],[30,16],[38,20],[22,30],[30,26],[38,30],[26,40],[34,40]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.2"/>`).join('')}</g></svg>`;}
 function viewGear(){
  let h=`<p class="sec-sub" style="margin-top:4px">Richtwerte – stell die Intervalle so ein, wie es für dich passt. Gezählt werden Sessions aus deinem Tagebuch seit dem letzten Wechsel.</p><div class="stack">`;
  GEAR.forEach(g=>{const u=gearUse(g);
@@ -1659,14 +1797,7 @@ function viewGear(){
   <div class="goal"><div class="bar ${u.due?'':'blue'}"><i style="width:${u.pct*100}%;${u.due?'background:var(--flame)':''}"></i></div><span>${g.u==='s'?u.v:fmt1(u.v)}/${u.every} ${unitTxt(g,u.every)}</span></div>
   <div class="row"><div class="seg grow">${g.opts.map(o=>`<button data-act="gearEvery" data-id="${g.id}" data-v="${o}" aria-pressed="${u.every===o}">${o}${g.u==='s'?'':' h'}</button>`).join('')}</div><button class="btn sm ${u.due?'gold':'ghost'}" data-act="gearReset" data-id="${g.id}">${I.check} Gewechselt</button></div>
   <div class="muted small b">Zuletzt gewechselt: ${new Date(u.since).toLocaleDateString('de-DE')}</div></div>`;});
- const ra=racketAdvice(),pr=ra.pr;
- h+=`</div><h2 class="sec-title">Schläger-Empfehlung</h2><p class="sec-sub">Aus deiner Roadmap-Stufe, deiner Seite und deinen 0–10-Bewertungen. Bewusst ohne Marken – teste vor dem Kauf.</p>
- <div class="card stack racket"><div class="row">${rShape(ra.t)}<div class="grow"><div class="eyebrow muted">Dein Profil</div><h2 style="font-size:24px">${pr.form}</h2><p class="muted b small">${pr.d}</p></div></div>
- <div class="rspecs"><div><span>Form</span><b>${pr.form}</b></div><div><span>Balance</span><b>${pr.bal}</b></div><div><span>Härte</span><b>${pr.haerte}</b></div><div><span>Gewicht</span><b>${pr.gew}</b></div></div>
- <div><div class="eyebrow muted" style="margin-bottom:6px">Warum?</div><ul class="why">${ra.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></div>
- <div><span class="lab">Was willst du mehr?</span><div class="seg">${[['kontrolle','Kontrolle'],['ausgewogen','Ausgewogen'],['power','Power']].map(([v,n])=>`<button data-act="set" data-k="pref" data-v="${v}" aria-pressed="${(S.pref||'ausgewogen')===v}">${n}</button>`).join('')}</div></div>
- <div><span class="lab">Arm- oder Ellbogenbeschwerden?</span><div class="seg"><button data-act="set" data-k="arm" data-v="0" aria-pressed="${!S.arm}">Nein</button><button data-act="set" data-k="arm" data-v="1" aria-pressed="${!!S.arm}">Ja</button></div></div>
- <div class="protip">${mascot()}<div><b>Beim Probespielen</b><p>Spiel mit dem Testschläger 20 Minuten Volleys, Bandejas und Lobs. Fühlt sich der Arm danach gut an und triffst du den Sweetspot oft? Viele Clubs verleihen Testschläger.</p></div></div></div>`;
+ h+='</div>'+racketSection();
  return h;
 }
 
@@ -1720,6 +1851,8 @@ function viewProfile(){
  return h;
 }
 function afterRender(){
+ document.querySelectorAll('[data-rf]').forEach(el=>{const k=el.dataset.rf;if(el.type==='range')el.addEventListener('input',()=>{const o=document.getElementById('rfv_'+k);if(o)o.textContent=el.value;});el.addEventListener('change',()=>{rfState()[k]=el.type==='range'?+el.value:el.value;S.rkOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;});});
+ const rkq=$('#rkq');if(rkq)rkq.addEventListener('input',()=>{S.rkq=rkq.value;$('#rklist').innerHTML=rkListHTML(rkRanked(),rkq.value);});
  const wkg=$('#wkg');if(wkg)wkg.addEventListener('change',()=>{const v=parseFloat(String(wkg.value).replace(',','.'));if(v>=30&&v<=250){S.weight=Math.round(v*10)/10;save();toast('Gewicht gespeichert: '+String(S.weight).replace('.',',')+' kg',I.check);}});
  const hcm=$('#hcm');if(hcm)hcm.addEventListener('change',()=>{const v=parseInt(hcm.value);if(v>=120&&v<=230){S.height=v;save();}});
  const nm=$('#nm');if(nm)nm.addEventListener('change',()=>{S.name=nm.value.trim().slice(0,24);save();renderTop();});
@@ -1919,7 +2052,7 @@ function saveJournal(){
  if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;}
  e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
  e.ts=Date.now();if((e.type==='Match'||e.type==='Turnier')&&!e.res&&e.score)e.res=inferRes(e.score);
- const prevSR=selfRating(),dueBefore=gearDue().map(g=>g.id),rBefore=racketAdvice().pr.form;
+ const prevSR=selfRating(),dueBefore=gearDue().map(g=>g.id),rBefore=topRacket().id;
  const newL=e.lost?unlockSkill(e.lost):null;
  S.journal.unshift(e);S.journal.sort((a,b)=>b.date.localeCompare(a.date));
  S.day.logs++;
@@ -1932,10 +2065,10 @@ function saveJournal(){
  const mx=outs.reduce((a,o)=>a+o.res.n,0);
  const streak=res.streakUp;if(res.goal)setTimeout(()=>toast('Tagesziel erreicht! +10 Bälle',I.target),300);
  const rk=Object.entries(e.rt||{}).filter(([k])=>prevSR[k]!=null).map(([k,v])=>({k,v,d:v-prevSR[k]})).sort((a,b)=>b.d-a.d);
- const dueNew=gearDue().filter(g=>!dueBefore.includes(g.id)),rAfter=racketAdvice().pr.form;
+ const dueNew=gearDue().filter(g=>!dueBefore.includes(g.id)),rAfter=topRacket();
  const ins=[];if(rk.length&&rk[0].d>0.4)ins.push(`<div class="row"><span class="c-good">▲</span><span class="grow">${esc(SK[rk[0].k].n)}: <b>${rk[0].v}/10</b> – ${fmt1(rk[0].d)} über deinem Schnitt</span></div>`);if(rk.length>1&&rk[rk.length-1].d<-0.4){const x=rk[rk.length-1];ins.push(`<div class="row"><span style="color:var(--bad)">▼</span><span class="grow">${esc(SK[x.k].n)}: <b>${x.v}/10</b> – ${fmt1(-x.d)} unter deinem Schnitt</span></div>`);}
  dueNew.forEach(g=>ins.push(`<div class="row"><span class="c-flame">${I.bag}</span><span class="grow"><b>${g.t} wechseln!</b> Intervall erreicht.</span></div>`));
- if(rAfter!==rBefore)ins.push(`<div class="row"><span class="c-acc">${I.racket}</span><span class="grow">Neue Schläger-Empfehlung: <b>${rAfter}</b></span></div>`);
+ if(rAfter.id!==rBefore)ins.push(`<div class="row"><span class="c-acc">${I.racket}</span><span class="grow">Neue Schläger-Empfehlung: <b>${esc(rAfter.brand+' '+rAfter.name)}</b></span></div>`);
  modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">≈ ${fmtN(e.kcal)} kcal verbrannt · +${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
  ${ins.length?`<div class="card stack small b">${ins.join('')}</div>`:''}
  ${e.lost?`<div class="card stack"><div class="eyebrow muted">Dein nächster Schritt</div><b>Du hast viele Punkte bei „${esc(SK[e.lost].n)}“ verloren.</b>${newL?`<p class="muted b small">Dafür habe ich dir „${esc(newL.t)}“ freigeschaltet.</p>`:''}${(()=>{const l=LESSONS.find(l=>l.sk===e.lost&&unlocked(l.idx));return l?`<button class="btn ball block" data-act="lesson" data-id="${l.id}">${esc(l.t)} üben</button>`:'';})()}</div>`:''}
@@ -2029,6 +2162,10 @@ const ACT={
  journalNew(){closeModal();journalNew();},
  jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel'||k==='dur'||k==='int')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
+ racket(el){racketSheet(el.dataset.id);},
+ myRacket(el){S.myRacket=S.myRacket===el.dataset.id?null:el.dataset.id;save();closeModal();render();toast(S.myRacket?'Als dein Schläger gespeichert':'Entfernt',I.racket);},
+ rkAll(){rkShowAll=!rkShowAll;const R=rkRanked();$('#rklist').innerHTML=rkListHTML(R,S.rkq);},
+ rfSet(el){rfState()[el.dataset.k]=el.dataset.v;S.rkOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
  rclear(el){delete JF.rt[el.dataset.k];syncJF();drawJournal();},
  jtab(el){S.jtab=el.dataset.v;save();render();$('#main').scrollTop=0;},
  sf(el){S.sf=el.dataset.v;save();render();},
