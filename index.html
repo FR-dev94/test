@@ -737,7 +737,7 @@ function renderEx(ex){
 }
 function optList(labels){return `<div class="opts">${labels.map((t,i)=>`<button class="opt" data-act="sel" data-i="${i}" aria-pressed="false"><span class="k">${i+1}</span><span>${esc(t)}</span></button>`).join('')}</div>`;}
 function listenBox(text){return `<div class="listen"><button class="spk big" data-act="speak" data-text="${esc(text)}" aria-label="Nochmal anhören">${I.speaker}</button><button class="spk slow" data-act="speak" data-slow="1" data-text="${esc(text)}" aria-label="Langsam anhören">0,5×</button></div>`;}
-function typeBox(ph){return `<textarea class="typebox" id="ans" rows="3" placeholder="${ph}" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea><div class="acc" aria-label="Sonderzeichen">${['á','é','í','ó','ú','ñ','ü','¿','¡'].map(c=>`<button data-act="acc" data-c="${c}">${c}</button>`).join('')}</div>`;}
+function typeBox(ph){return `<textarea class="typebox" id="ans" rows="3" placeholder="Hier tippen und auf Spanisch schreiben …" aria-label="${ph}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea><p class="small muted b" style="margin:-8px 0 0">Schreib mit deiner Tastatur. Die Knöpfe sind nur für Sonderzeichen – Akzente darfst du auch weglassen.</p><div class="acc" aria-label="Sonderzeichen">${['á','é','í','ó','ú','ñ','ü','¿','¡'].map(c=>`<button data-act="acc" data-c="${c}">${c}</button>`).join('')}</div>`;}
 function tileArea(){return `<div class="answer-line" id="aline"></div><div class="bank" id="bank"></div>`;}
 function renderTiles(){
  const ex=L.ex;
