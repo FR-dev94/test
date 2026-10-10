@@ -252,6 +252,14 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .rr input{grid-column:1/3;width:100%;accent-color:var(--accent);height:28px}
 .rr.unset input{opacity:.3}
 .rr.unset label{color:var(--muted)}
+.rq{font-weight:800;font-size:14px;color:var(--muted)}
+.rr.unset{display:block}
+.rr.r3{grid-template-columns:1fr auto auto}
+.rr.r3 input{grid-column:1/4}
+.rr.r3 .np{grid-column:auto;padding:3px 10px;font-size:12px}
+.seg.two{margin-top:6px}
+.seg.two button{display:inline-flex;align-items:center;gap:4px}
+.seg.two button svg{width:14px;height:14px}
 .np{grid-column:1/3;justify-self:start;display:inline-flex;align-items:center;gap:4px;border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px;font-size:13px;font-weight:800;color:var(--muted)}
 .np svg{width:14px;height:14px}
 .np[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--locked-ink)}
@@ -1302,6 +1310,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
+const APPVER='2026-10-10 · v10';
 function defaults(){return{v:3,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
@@ -1894,7 +1903,7 @@ function viewProfile(){
  </div>
  <h2 class="sec-title">Fortschritt sichern</h2><div class="card stack"><p class="muted small">Dein Fortschritt liegt nur auf diesem Gerät. Mit dem Code kannst du ihn sichern oder auf ein anderes Gerät übertragen.</p>
  <div class="row"><button class="btn sm ghost grow" data-act="export">Code kopieren</button><button class="btn sm ghost grow" data-act="import">Code einfügen</button></div>
- <button class="linkbtn" data-act="reset">Alles zurücksetzen</button></div>`;
+ <button class="linkbtn" data-act="reset">Alles zurücksetzen</button></div><p class="muted small b" style="text-align:center;margin-top:14px">PadelUp ${APPVER}</p>`;
  return h;
 }
 function afterRender(){
@@ -2071,7 +2080,7 @@ function missionDoneFx(out){
 /* ================= Tagebuch ================= */
 let JF=null;
 function journalNew(){
- JF={type:'Match',date:today(),dur:90,int:2,res:null,score:'',partner:'',opp:'',feel:3,rt:{},lost:null,mr:{},notes:''};
+ JF={type:'Match',date:today(),dur:90,int:2,res:null,score:'',partner:'',opp:'',feel:3,rt:Object.fromEntries(SKIDS.map(k=>[k,lastRating(k)])),lost:null,mr:{},notes:''};
  drawJournal();
 }
 function drawJournal(){
@@ -2089,15 +2098,20 @@ function drawJournal(){
   <div class="row"><div class="grow"><label class="lab" for="jpart">Partner/in</label><input id="jpart" class="field" value="${esc(JF.partner)}" placeholder="optional"></div>${isMatch?`<div class="grow"><label class="lab" for="jopp">Gegner</label><input id="jopp" class="field" value="${esc(JF.opp)}" placeholder="optional"></div>`:''}</div>
   <div><span class="lab">Wie hast du dich gefühlt?</span><div class="seg">${feels.map((f,i)=>`<button data-act="jf" data-k="feel" data-v="${i+1}" aria-pressed="${JF.feel===i+1}">${f}</button>`).join('')}</div></div>
   ${am.length?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
-  <div><div class="row" style="margin-bottom:6px"><span class="lab grow" style="margin:0">Wie gut warst du heute? (0–10)</span><span class="chip" id="rcount">${Object.keys(JF.rt).length} von ${SKIDS.length} bewertet</span></div><p class="muted small b" style="margin-bottom:10px">Alles startet als „nicht gespielt“ und zählt dann nicht. Zieh den Regler nur bei dem, was du heute wirklich gespielt hast.</p><div class="stack">${SKIDS.map(k=>{const v=JF.rt[k];return `<div class="rr ${v==null?'unset':''}" id="rr_${k}"><label for="r_${k}">Wie gut waren deine ${esc(SK[k].p)}?</label><b class="rv" id="rv_${k}">${v??'–'}</b><input id="r_${k}" type="range" min="0" max="10" step="1" value="${v??5}" data-rk="${k}"><button class="np" data-act="rclear" data-k="${k}" id="np_${k}" aria-pressed="${v==null}">${v==null?I.check+' Nicht gespielt':'Nicht gespielt'}</button></div>`;}).join('')}</div></div>
+  <div><div class="row" style="margin-bottom:6px"><span class="lab grow" style="margin:0">Wie gut warst du heute? (0–10)</span><span class="chip" id="rcount">${Object.keys(JF.rt).length} von ${SKIDS.length} bewertet</span></div><p class="muted small b" style="margin-bottom:10px">Alle Regler starten mit deiner letzten Bewertung – schieb nur, was heute anders war. Was du nicht gespielt hast (z. B. Volleys im Single), tippst du auf „Nicht gespielt“.</p><div class="stack">${SKIDS.map(rateRow).join('')}</div></div>
   <div><span class="lab">Wo hast du die meisten Punkte verloren?</span><div class="seg">${SKIDS.map(k=>`<button data-act="jf" data-k="lost" data-v="${k}" aria-pressed="${JF.lost===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
   <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
  </div></div>
  <div class="l-foot"><div class="foot-in"><button class="btn block" data-act="saveJournal">${I.check} Speichern</button></div></div></div>`;
  liveKcal();liveRate();
 }
+function lastRating(k){const j=[...S.journal].sort((a,b)=>byDateAsc(b,a)).find(j=>j.rt&&j.rt[k]!=null);return j?j.rt[k]:5;}
+function rateRow(k){const v=JF.rt[k],q=`Wie gut waren deine ${esc(SK[k].p)}?`;
+ if(v==null)return `<div class="rr unset" id="rr_${k}"><span class="rq">${q}</span><div class="seg two"><button data-act="rclear" data-k="${k}" aria-pressed="true">${I.check} Nicht gespielt</button><button data-act="rset" data-k="${k}" aria-pressed="false">Doch gespielt</button></div></div>`;
+ return `<div class="rr r3" id="rr_${k}"><label for="r_${k}">${q}</label><button class="np" data-act="rclear" data-k="${k}" id="np_${k}">Nicht gespielt</button><b class="rv" id="rv_${k}">${v}</b><input id="r_${k}" type="range" min="0" max="10" step="1" value="${v}" data-rk="${k}"></div>`;}
+function rateSwap(k){const el=document.getElementById('rr_'+k);if(!el)return;el.outerHTML=rateRow(k);liveRate(k);const c=document.getElementById('rcount');if(c)c.textContent=Object.keys(JF.rt).length+' von '+SKIDS.length+' bewertet';}
 function rateUI(k){const v=JF.rt[k],b=document.getElementById('rv_'+k),n=document.getElementById('np_'+k),row=document.getElementById('rr_'+k),c=document.getElementById('rcount');if(b)b.textContent=v??'–';if(n){n.setAttribute('aria-pressed',v==null);n.innerHTML=(v==null?I.check+' ':'')+'Nicht gespielt';}if(row)row.classList.toggle('unset',v==null);if(c)c.textContent=Object.keys(JF.rt).length+' von '+SKIDS.length+' bewertet';}
-function liveRate(){document.querySelectorAll('[data-rk]').forEach(r=>{const set=()=>{const k=r.dataset.rk;JF.rt[k]=+r.value;rateUI(k);};r.addEventListener('input',set);r.addEventListener('pointerup',set);r.addEventListener('keyup',set);});}
+function liveRate(only){document.querySelectorAll(only?'#r_'+only:'[data-rk]').forEach(r=>{const set=()=>{const k=r.dataset.rk;JF.rt[k]=+r.value;rateUI(k);};r.addEventListener('input',set);r.addEventListener('pointerup',set);r.addEventListener('keyup',set);});}
 function liveKcal(){const i=document.getElementById('jdur'),o=document.getElementById('jkcal');if(i&&o)i.addEventListener('input',()=>{o.textContent='≈ '+fmtN(kcalCalc(JF.type,parseInt(i.value)||0,JF.int))+' kcal';});}
 function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
  const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
@@ -2224,7 +2238,8 @@ const ACT={
  rkAll(){rkShowAll=!rkShowAll;const R=rkRanked();$('#rklist').innerHTML=rkListHTML(R,S.rkq);},
  rfSet(el){rfState()[el.dataset.k]=el.dataset.v;S.rkOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
  devk(el){S.devk=el.dataset.k;save();const m=$('#main'),y=m.scrollTop;render();if(el.dataset.scroll){const c=document.querySelector('.devchips');c&&c.scrollIntoView({block:'start'});}else m.scrollTop=y;},
- rclear(el){const k=el.dataset.k;delete JF.rt[k];const r=document.getElementById('r_'+k);if(r)r.value=5;rateUI(k);},
+ rclear(el){const k=el.dataset.k;delete JF.rt[k];rateSwap(k);},
+ rset(el){const k=el.dataset.k;JF.rt[k]=lastRating(k);rateSwap(k);const r=document.getElementById('r_'+k);if(r)r.focus({preventScroll:true});},
  jtab(el){S.jtab=el.dataset.v;save();render();$('#main').scrollTop=0;},
  sf(el){S.sf=el.dataset.v;save();render();},
  gearEvery(el){gearState(el.dataset.id).every=+el.dataset.v;save();render();},
