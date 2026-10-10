@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PadelUp</title>
+<meta name="theme-color" content="#1F5FD6">
+<meta name="description" content="Werde besser im Padel – Lektionen, Match-Missionen und Trainingstagebuch, gamifiziert.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PadelUp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap">
+<style>
+/* Layout: schmale App-Spalte (max. 640px) – Kopfleiste, scrollender Inhalt, Navigation unten. Farben: Court-Blau, Ball-Gelbgrün, Glas. */
+:root{
+  --bg:#F3F6FB; --surface:#FFFFFF; --surface-2:#E9EEF7; --line:#D8DFEC;
+  --fg:#14203A; --muted:#58637F;
+  --accent:#1F5FD6; --accent-ink:#FFFFFF;
+  --ball:#C9E52B; --ball-ink:#22300A;
+  --gold:#F2B705; --gold-ink:#3A2A00; --flame:#FF7A1A;
+  --good:#1A9A5E; --good-bg:#DDF5E8; --bad:#D23A3A; --bad-bg:#FCE4E4;
+  --locked:#CFD5E3; --locked-ink:#8A93AD; --scrim:rgba(12,16,34,.55);
+  --u1:#1A9A5E; --u2:#1F5FD6; --u3:#7A4CC2; --u4:#C8650A; --u5:#C8372A; --u6:#0F7F92;
+  --font-display:'Fredoka',ui-rounded,'Nunito',system-ui,sans-serif;
+  --font-body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1220; --surface:#141C2F; --surface-2:#1B253D; --line:#2A3654; --fg:#E7ECF7; --muted:#9CA7C4;
+    --accent:#6B9BF7; --accent-ink:#0C1220; --good:#3DCB86; --good-bg:#11372A; --bad:#FF6B6B; --bad-bg:#421A1E;
+    --locked:#2A3453; --locked-ink:#6E7899; --scrim:rgba(0,0,0,.65); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1220; --surface:#141C2F; --surface-2:#1B253D; --line:#2A3654; --fg:#E7ECF7; --muted:#9CA7C4;
+  --accent:#6B9BF7; --accent-ink:#0C1220; --good:#3DCB86; --good-bg:#11372A; --bad:#FF6B6B; --bad-bg:#421A1E;
+  --locked:#2A3453; --locked-ink:#6E7899; --scrim:rgba(0,0,0,.65); color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:16px;line-height:1.45;-webkit-tap-highlight-color:transparent;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.15}
+p{margin:0}
+svg{flex:none}
+
+.app{display:flex;flex-direction:column;height:100%;max-width:640px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:4px;padding:8px 12px;border-bottom:2px solid var(--line)}
+.stat{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:600;font-size:18px;background:none;border:0;padding:6px 8px;border-radius:12px;font-variant-numeric:tabular-nums}
+.stat:hover{background:var(--surface-2)}
+.stat svg{width:26px;height:26px}
+.c-flame{color:var(--flame)} .c-ball{color:var(--ball)} .c-gold{color:var(--gold)} .c-acc{color:var(--accent)} .c-good{color:var(--good)}
+.stat.off .c-flame{color:var(--locked-ink)}
+.ring{width:30px;height:30px}
+main{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px 40px;scroll-behavior:smooth}
+.nav{display:flex;gap:4px;border-top:2px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+.nav button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:2px solid transparent;border-radius:14px;padding:6px 2px;font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.02em;position:relative}
+.nav button svg{width:26px;height:26px}
+.nav button[aria-current="page"]{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 45%,transparent)}
+.dot{position:absolute;top:4px;right:calc(50% - 20px);min-width:18px;height:18px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;font-weight:900;display:grid;place-items:center;padding:0 4px}
+
+/* Buttons */
+.btn{--b:var(--accent);--ink:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:16px;padding:13px 20px;font-family:var(--font-display);font-weight:600;font-size:17px;letter-spacing:.04em;text-transform:uppercase;background:var(--b);color:var(--ink);box-shadow:0 4px 0 color-mix(in srgb,var(--b) 62%,#000);transition:transform .08s,box-shadow .08s,filter .15s}
+.btn:hover:not(:disabled){filter:brightness(1.06)}
+.btn:active:not(:disabled){transform:translateY(4px);box-shadow:0 0 0 color-mix(in srgb,var(--b) 62%,#000)}
+.btn:disabled{--b:var(--locked);--ink:var(--locked-ink);cursor:not-allowed}
+.btn.ghost{background:var(--surface);color:var(--accent);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.block{width:100%}
+.btn.sm{padding:9px 14px;font-size:14px;border-radius:12px}
+.btn.good{--b:var(--good);--ink:#fff}
+.btn.bad{--b:var(--bad);--ink:#fff}
+.btn.gold{--b:var(--gold);--ink:var(--gold-ink)}
+.btn.ball{--b:var(--ball);--ink:var(--ball-ink)}
+.btn svg{width:20px;height:20px}
+.linkbtn{background:none;border:0;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:13px;padding:8px}
+.linkbtn:hover{color:var(--accent)}
+
+/* Allgemein */
+.card{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:16px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px}
+.row > .grow{flex:1;min-width:0}
+.muted{color:var(--muted)} .small{font-size:13px} .b{font-weight:800}
+.sec-title{font-size:22px;margin:22px 0 12px}
+.sec-title:first-child{margin-top:4px}
+.sec-sub{color:var(--muted);font-weight:700;margin:-6px 0 14px;font-size:14px}
+.eyebrow{font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.bar{flex:1;height:14px;border-radius:99px;background:var(--surface-2);overflow:hidden;position:relative}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--gold);transition:width .5s cubic-bezier(.3,1.4,.5,1);position:relative}
+.bar i::after{content:"";position:absolute;left:8px;right:8px;top:3px;height:3px;border-radius:9px;background:rgba(255,255,255,.4)}
+.bar.green i{background:var(--good)} .bar.blue i{background:var(--accent)} .bar.ball i{background:var(--ball)}
+.bar.thin{height:10px}
+.bar.thin i::after{display:none}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800;padding:3px 9px;border-radius:99px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--fg)}
+.chip svg{width:14px;height:14px}
+.chip.good{background:var(--good-bg);color:var(--good)}
+.chip.ball{background:color-mix(in srgb,var(--ball) 35%,transparent)}
+.ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--c,var(--accent)) 16%,transparent);color:var(--c,var(--accent));flex:none}
+.ic svg{width:26px;height:26px}
+.empty{text-align:center;padding:26px 16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty .mascot{width:96px;height:96px}
+
+/* Hero */
+.hero{display:flex;gap:14px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:14px 16px;margin-bottom:12px}
+.hero .mascot{width:84px;height:84px}
+.hero-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.hero-body p{font-weight:700}
+.goal{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.mini{display:flex;gap:12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:12px;width:100%;text-align:left}
+.mini h3{font-size:16px;font-family:var(--font-body);font-weight:900}
+.mini p{font-size:13px;color:var(--muted);font-weight:700}
+.mini.done{opacity:.7}
+.mini .go{color:var(--muted)}
+.mini .go svg{width:22px;height:22px}
+
+/* Lernpfad */
+.unit{margin:26px 0 28px}
+.unit-head{background:var(--c);color:#fff;border-radius:20px;padding:14px 16px 14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 5px 0 color-mix(in srgb,var(--c) 60%,#000)}
+.unit-head h2{font-size:22px;margin-top:2px}
+.unit-head .sub{font-size:13px;font-weight:700;opacity:.9}
+.unit-head .eyebrow{opacity:.85}
+.unit-prog{font-family:var(--font-display);font-weight:700;font-size:15px;background:rgba(255,255,255,.18);border-radius:12px;padding:6px 10px;white-space:nowrap}
+.unit.locked .unit-head{--c:var(--locked);color:var(--locked-ink)}
+.path{display:flex;flex-direction:column;align-items:center;gap:26px;padding-block:58px 10px}
+.nodewrap{position:relative;transform:translateX(var(--x));display:flex;flex-direction:column;align-items:center}
+.node{scroll-margin:140px 0 60px;position:relative;width:74px;height:68px;border-radius:50%;border:0;background:var(--c);color:#fff;box-shadow:0 7px 0 color-mix(in srgb,var(--c) 58%,#000);display:grid;place-items:center;transition:transform .08s,box-shadow .08s}
+.node svg{width:34px;height:34px}
+.node:active:not(.locked){transform:translateY(6px);box-shadow:0 1px 0 color-mix(in srgb,var(--c) 58%,#000)}
+.node.locked{--c:var(--locked);color:var(--locked-ink)}
+.node.chest{border-radius:22px;width:78px;--c:var(--gold);color:var(--gold-ink)}
+.node.chest.locked{--c:var(--locked)}
+.node.chest.done{opacity:.55}
+.node.test{width:86px;height:78px}
+.node.mastered{--c:var(--gold);color:var(--gold-ink)}
+.node.current::before{content:"";position:absolute;inset:-10px;border-radius:50%;border:6px solid color-mix(in srgb,var(--c) 30%,transparent);animation:ring 1.6s ease-in-out infinite}
+.node.chest.current::before{border-radius:28px}
+.node .mbadge{position:absolute;top:-6px;right:-8px;width:26px;height:26px;border-radius:50%;background:var(--ball);color:var(--ball-ink);display:grid;place-items:center;border:3px solid var(--bg)}
+.node .mbadge svg{width:14px;height:14px}
+@keyframes ring{50%{inset:-14px;opacity:.5}}
+.startbubble{position:absolute;bottom:calc(100% + 16px);left:50%;transform:translateX(-50%);background:var(--surface);border:2px solid var(--line);color:var(--c);font-family:var(--font-display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:12px;white-space:nowrap;animation:bob 1.8s ease-in-out infinite;pointer-events:none}
+.startbubble::after{content:"";position:absolute;top:100%;left:50%;width:12px;height:12px;background:var(--surface);border-right:2px solid var(--line);border-bottom:2px solid var(--line);transform:translate(-50%,-6px) rotate(45deg)}
+@keyframes bob{50%{transform:translate(-50%,-5px)}}
+.stars{display:flex;gap:1px;margin-top:12px;color:var(--gold);height:16px}
+.stars svg{width:16px;height:16px}
+.stars .e{color:var(--locked)}
+.stars + .nodelabel{margin-top:4px}
+.nodelabel{font-size:12px;font-weight:800;color:var(--muted);margin-top:14px;max-width:120px;text-align:center;line-height:1.2}
+
+/* Missionen */
+.mission{border:2px solid var(--line);border-radius:20px;background:var(--surface);overflow:hidden}
+.mission .mh{display:flex;gap:12px;align-items:center;padding:14px 16px;background:color-mix(in srgb,var(--ball) 22%,var(--surface))}
+.mission .mh h3{font-size:18px}
+.mission .mb{padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px}
+.mission .mb p{font-weight:700}
+.tries{display:flex;gap:6px;align-items:center;font-size:12px;font-weight:800;color:var(--muted)}
+.tries i{width:14px;height:14px;border-radius:50%;background:var(--surface-2);display:block}
+.tries i.r1{background:var(--locked-ink)} .tries i.r2{background:var(--gold)} .tries i.r3{background:var(--good)}
+.plan{background:#1F5FD6;color:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.plan h2{font-size:22px}
+.plan ol{margin:0;padding-left:20px;font-weight:700;display:flex;flex-direction:column;gap:6px}
+.plan .btn{--b:#fff;--ink:#1F5FD6;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+
+/* Tagebuch */
+.statgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sg{border:2px solid var(--line);border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center;min-width:0;background:var(--surface)}
+.sg svg{width:26px;height:26px}
+.sg b{display:block;font-family:var(--font-display);font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.sg span{font-size:13px;color:var(--muted);font-weight:700}
+.chart{display:flex;align-items:flex-end;gap:8px;height:140px;padding-top:18px}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.chart .col i{display:block;width:100%;max-width:36px;border-radius:8px 8px 4px 4px;background:var(--accent);min-height:4px}
+.chart .col i.now{background:var(--ball)}
+.chart .col em{font-style:normal;font-size:11px;font-weight:800;color:var(--muted);font-variant-numeric:tabular-nums}
+.chart .col span{font-size:11px;font-weight:800;color:var(--muted)}
+.radar{width:100%;max-width:340px;display:block;margin:0 auto}
+.radar text{font-family:var(--font-body);font-size:11px;font-weight:800;fill:var(--muted)}
+.entry{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:2px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.entry:first-child{border-top:0}
+.entry h3{font-size:16px;font-family:var(--font-body);font-weight:900}
+.entry p{font-size:13px;color:var(--muted);font-weight:700}
+.res{font-family:var(--font-display);font-weight:700;font-size:13px;padding:3px 8px;border-radius:8px}
+.res.w{background:var(--good-bg);color:var(--good)} .res.l{background:var(--bad-bg);color:var(--bad)} .res.d{background:var(--surface-2);color:var(--muted)}
+
+/* Formulare */
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{border:2px solid var(--line);border-bottom-width:4px;background:var(--surface);border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px}
+.seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.seg.big button{padding:12px 14px;font-size:15px}
+.field{width:100%;border:2px solid var(--line);background:var(--surface-2);border-radius:14px;padding:12px 14px;font-weight:700}
+textarea.field{min-height:84px;resize:vertical}
+textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weight:400}
+.lab{display:block;font-size:13px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.rate{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;align-items:center}
+.rate span{font-size:14px;font-weight:800}
+.dots{display:flex;gap:6px}
+.dots button{width:34px;height:34px;border-radius:10px;border:2px solid var(--line);background:var(--surface);font-weight:900;font-size:13px;color:var(--muted)}
+.dots button.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* Liga */
+.lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
+.lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
+.lrank{width:28px;text-align:center;font-family:var(--font-display);font-size:18px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lrank.top{color:var(--good)}
+.av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:var(--font-display);font-weight:700;flex:none}
+.lxp{font-variant-numeric:tabular-nums;color:var(--muted)}
+.zone{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:6px 4px}
+.zone::before,.zone::after{content:"";flex:1;height:2px;background:currentColor;opacity:.4}
+.zone.up{color:var(--good)} .zone.down{color:var(--bad)}
+.tiers{display:flex;gap:10px;justify-content:center;margin:6px 0 16px;flex-wrap:wrap}
+.tier{width:44px;height:50px;display:grid;place-items:center;color:var(--tc);opacity:.35}
+.tier.on{opacity:1;transform:scale(1.2)}
+.tier svg{width:40px;height:44px}
+
+/* Profil */
+.profile-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.profile-head .mascot{width:110px;height:110px;background:var(--surface-2);border-radius:28px;padding:6px}
+.lvl-badge{font-family:var(--font-display);font-weight:700;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.skill{display:flex;gap:12px;align-items:center}
+.skill .ic{width:40px;height:40px;border-radius:12px}
+.skill .ic svg{width:22px;height:22px}
+.skill .grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.skill .bar{flex:none}
+.skill h3{font-size:15px;font-family:var(--font-body);font-weight:900;display:flex;justify-content:space-between;gap:8px}
+.skill h3 em{font-style:normal;font-family:var(--font-display);font-weight:600;color:var(--accent);white-space:nowrap}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.achc{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.achc .medal{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#fff;background:var(--gold)}
+.achc .medal svg{width:24px;height:24px}
+.achc.off{opacity:.55}
+.achc.off .medal{background:var(--locked);color:var(--locked-ink)}
+.achc h3{font-size:15px}
+.achc p{font-size:12px;color:var(--muted);font-weight:700}
+.item{display:flex;align-items:center;gap:14px}
+.item .pic{width:64px;height:64px;border-radius:16px;background:var(--surface-2);display:grid;place-items:center;flex:none}
+.item .pic svg{width:40px;height:40px}
+.item .pic .mascot{width:60px;height:60px}
+.item h3{font-size:17px;font-family:var(--font-body);font-weight:800}
+.item p{font-size:14px;color:var(--muted)}
+
+/* Lektion */
+.overlay{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.l-top{display:flex;align-items:center;gap:14px;padding:14px 16px;max-width:760px;width:100%;margin:0 auto}
+.l-top .bar{height:18px}
+.l-top .bar i{background:var(--good)}
+.iconbtn{background:none;border:0;color:var(--muted);padding:6px;border-radius:10px;display:grid;place-items:center}
+.iconbtn svg{width:26px;height:26px}
+.iconbtn:hover{background:var(--surface-2)}
+.combo{height:28px;display:flex;justify-content:center;align-items:center}
+.combo span{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-display);font-weight:700;font-size:15px;color:var(--flame);letter-spacing:.04em;text-transform:uppercase;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+.combo svg{width:20px;height:20px}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.l-body{flex:1;overflow-y:auto;padding:4px 16px 24px}
+.l-inner{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.l-inner.locked{pointer-events:none}
+.ex-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--c,var(--accent))}
+.ex-eyebrow svg{width:18px;height:18px}
+.ex-title{font-size:25px;font-weight:700}
+.theory{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:20px;display:flex;flex-direction:column;gap:14px;animation:pop .3s cubic-bezier(.3,1.4,.5,1)}
+.theory ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
+.theory li{display:flex;gap:10px;font-size:17px;font-weight:700;line-height:1.4}
+.theory li::before{content:"";width:12px;height:12px;border-radius:50%;background:var(--ball);border:2px solid color-mix(in srgb,var(--ball) 60%,#000);flex:none;margin-top:6px}
+.protip{display:flex;gap:12px;align-items:flex-start;background:color-mix(in srgb,var(--ball) 22%,var(--surface));border-radius:18px;padding:14px}
+.protip .mascot{width:58px;height:58px;flex:none}
+.protip b{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.protip p{font-weight:700}
+.say{display:flex;align-items:flex-end;gap:10px}
+.say .mascot{width:84px;height:84px;flex:none}
+.saybub{position:relative;border:2px solid var(--line);border-radius:18px;padding:12px 16px;font-size:18px;font-weight:800;margin-bottom:16px;min-width:0;background:var(--surface)}
+.saybub::before{content:"";position:absolute;left:-9px;bottom:16px;width:14px;height:14px;background:var(--surface);border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(45deg)}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:14px 16px;border:2px solid var(--line);border-bottom-width:5px;border-radius:16px;background:var(--surface);font-size:17px;font-weight:700;transition:transform .06s}
+.opt:active{transform:translateY(2px)}
+.opt .k{display:inline-grid;place-items:center;width:28px;height:28px;border:2px solid var(--line);border-radius:8px;font-size:13px;color:var(--muted);flex:none}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface));color:var(--accent)}
+.opt[aria-pressed="true"] .k{border-color:var(--accent);color:var(--accent)}
+.opt.ok{border-color:var(--good);background:var(--good-bg);color:var(--good)}
+.opt.no{border-color:var(--bad);background:var(--bad-bg);color:var(--bad)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid2 .opt{flex-direction:column;justify-content:center;text-align:center;padding:20px 8px;font-size:18px}
+.grid2 .opt svg{width:40px;height:40px}
+.seq{min-height:60px;display:flex;flex-direction:column;gap:8px;padding:10px;border:2px dashed var(--line);border-radius:16px}
+.seq:empty::before{content:"Tippe die Schritte in der richtigen Reihenfolge an";color:var(--muted);font-weight:700;font-size:14px;text-align:center;padding:8px}
+.tile{display:flex;gap:10px;align-items:center;padding:11px 14px;border:2px solid var(--line);border-bottom-width:4px;border-radius:12px;background:var(--surface);font-size:16px;font-weight:700;text-align:left;animation:pop .18s;width:100%}
+.tile b{font-family:var(--font-display);color:var(--accent);width:20px}
+.tile.used{opacity:.3;pointer-events:none}
+.l-foot{border-top:2px solid var(--line);padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));transition:background .2s}
+.l-foot.good{background:var(--good-bg);border-color:transparent}
+.l-foot.bad{background:var(--bad-bg);border-color:transparent}
+.foot-in{max-width:600px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.fb{display:flex;gap:12px;align-items:flex-start;animation:pop .25s}
+.fb .fic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--surface);flex:none}
+.fb .fic svg{width:26px;height:26px}
+.fb h3{font-size:22px}
+.fb p{margin:2px 0 0;font-weight:700}
+.l-foot.good .fb{color:var(--good)} .l-foot.bad .fb{color:var(--bad)}
+.foot-row{display:flex;gap:10px;align-items:center}
+.foot-row .btn{flex:1}
+
+/* Ergebnisse */
+.results{display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px;padding-top:12px}
+.results .mascot{width:140px;height:140px;animation:hop 1s ease-in-out 2}
+@keyframes hop{30%{transform:translateY(-16px) rotate(-4deg)}60%{transform:translateY(0) rotate(3deg)}}
+.results h1{font-size:30px;color:var(--gold)}
+.tiles3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%}
+.ts{border:2px solid var(--tc);border-radius:16px;overflow:hidden;background:var(--tc)}
+.ts b{display:block;color:#fff;font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:5px 2px}
+.ts span{display:flex;align-items:center;justify-content:center;gap:4px;padding:12px 4px;font-family:var(--font-display);font-size:23px;font-weight:700;color:var(--tc);background:var(--surface);border-radius:13px 13px 0 0;font-variant-numeric:tabular-nums}
+.ts span svg{width:20px;height:20px}
+.bigstars{display:flex;gap:6px;color:var(--gold)}
+.bigstars svg{width:46px;height:46px;animation:pop .5s cubic-bezier(.3,1.6,.5,1) backwards}
+.bigstars svg:nth-child(2){animation-delay:.15s} .bigstars svg:nth-child(3){animation-delay:.3s}
+.bigstars .e{color:var(--locked)}
+.mcard{width:100%;text-align:left;border:3px solid var(--ball);border-radius:22px;overflow:hidden;background:var(--surface)}
+.mcard .mt{background:var(--ball);color:var(--ball-ink);padding:10px 16px;display:flex;align-items:center;gap:8px;font-family:var(--font-display);font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:14px}
+.mcard .mt svg{width:20px;height:20px}
+.mcard .mbd{padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.mcard h3{font-size:20px}
+.mcard p{font-weight:700}
+.streakbig{display:flex;flex-direction:column;align-items:center;gap:6px}
+.streakbig svg{width:130px;height:130px;color:var(--flame);animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
+.streakbig .n{font-family:var(--font-display);font-size:68px;font-weight:700;color:var(--flame);line-height:1}
+
+/* Onboarding */
+.onb{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:18px;padding-top:8px}
+.onb h1{font-size:28px}
+.onb .hello{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;padding-top:30px}
+.onb .hello .mascot{width:170px;height:170px;animation:hop 1.2s ease-in-out 2}
+.onb .hello h1{font-size:34px}
+.choice{display:flex;flex-direction:column;gap:10px}
+.choice .opt small{display:block;font-size:13px;color:var(--muted);font-weight:700}
+.choice .opt[aria-pressed="true"] small{color:inherit}
+
+/* Modal, Toasts */
+.modal{position:fixed;inset:0;background:var(--scrim);display:grid;place-items:end center;z-index:80;padding:16px}
+.sheet{background:var(--surface);color:var(--fg);border-radius:24px;padding:22px;width:100%;max-width:480px;max-height:88vh;overflow:auto;animation:up .25s cubic-bezier(.3,1.3,.5,1);display:flex;flex-direction:column;gap:14px}
+.sheet h2{font-size:24px}
+.sheet .center{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px}
+.sheet .bigic{width:84px;height:84px}
+.sheet .mascot{width:110px;height:110px}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@media (min-width:700px){.modal{place-items:center}}
+.toasts{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:100;display:flex;flex-direction:column;gap:8px;width:min(calc(100vw - 32px),420px);pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;background:var(--fg);color:var(--bg);padding:12px 16px;border-radius:16px;font-weight:800;box-shadow:0 8px 24px rgba(0,0,0,.2);animation:drop .3s cubic-bezier(.3,1.4,.5,1)}
+.toast svg{width:22px;height:22px;flex:none}
+@keyframes drop{from{transform:translateY(-20px);opacity:0}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:120;width:100%;height:100%}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media (max-width:420px){
+  .stat{font-size:16px;padding:6px 4px;gap:4px}
+  .stat svg{width:22px;height:22px}
+  .ex-title{font-size:22px}
+  .rate{grid-template-columns:92px 1fr}
+  .dots button{width:30px;height:30px}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top" id="top"></header>
+  <main id="main"></main>
+  <nav class="nav" id="nav"></nav>
+</div>
+<div id="ov"></div>
+<div id="modal"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<canvas id="fx"></canvas>
+<script>
+/* ================= Icons ================= */
+const I={
+ flame:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.5 1.5c.6 3.6 5.5 5.9 5.5 11.4A6 6 0 0 1 6 13c0-2.6 1.3-4.4 2.6-5.6.1 2.3 1.2 3.6 2.4 3.6-.4-3.4.2-6.6 1.5-9.5z"/><path fill="#FFD34D" d="M12 21a3 3 0 0 1-3-3c0-1.8 1.4-2.8 2.2-4 .4 1.3 1.1 1.8 1.8 1.8.9.6 2 1.4 2 2.2a3 3 0 0 1-3 3z"/></svg>',
+ ball:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M4.2 6.2a10 10 0 0 1 0 11.6M19.8 6.2a10 10 0 0 0 0 11.6" stroke="#fff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".9"/></svg>',
+ bolt:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 1.5 4 14h7l-1.5 8.5L20 10h-7z"/></svg>',
+ home:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 10.5 12 3l9 7.5V21h-6.5v-6h-5v6H3z"/></svg>',
+ target:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="5" fill="none" stroke="currentColor" stroke-width="2.4"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/></svg>',
+ shield:'<svg viewBox="0 0 24 26"><path fill="currentColor" d="M12 1 3 4.5v7.2c0 6 3.9 10.7 9 12.8 5.1-2.1 9-6.8 9-12.8V4.5z"/><path fill="rgba(255,255,255,.35)" d="M12 1v23.5c-5.1-2.1-9-6.8-9-12.8V4.5z"/></svg>',
+ user:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4.5" fill="currentColor"/><path fill="currentColor" d="M3.5 21.5a8.5 8.5 0 0 1 17 0z"/></svg>',
+ lock:'<svg viewBox="0 0 24 24"><rect x="4.5" y="10" width="15" height="11" rx="3" fill="currentColor"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="currentColor" stroke-width="2.5" fill="none"/></svg>',
+ star:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.2l2.95 6.1 6.65.95-4.8 4.65 1.15 6.6L12 17.4l-5.95 3.1 1.15-6.6-4.8-4.65 6.65-.95z"/></svg>',
+ check:'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19.5 7" stroke="currentColor" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ x:'<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+ chest:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 11h18v8.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z"/><path fill="currentColor" opacity=".75" d="M3 10V8a4.5 4.5 0 0 1 4.5-4.5h9A4.5 4.5 0 0 1 21 8v2z"/><rect x="10" y="9" width="4" height="6" rx="1.2" fill="#fff" opacity=".9"/></svg>',
+ trophy:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M6.5 2.5h11v6a5.5 5.5 0 0 1-11 0z"/><path d="M6.5 4.5H3.5a3.5 3.5 0 0 0 3.5 4.5M17.5 4.5h3a3.5 3.5 0 0 1-3.5 4.5" stroke="currentColor" stroke-width="2" fill="none"/><path fill="currentColor" d="M10 14h4v3.5h3.5v4h-11v-4H10z"/></svg>',
+ book:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4.5h6.5A2.5 2.5 0 0 1 12 7v13.5a2 2 0 0 0-2-2H3zM21 4.5h-6.5A2.5 2.5 0 0 0 12 7v13.5a2 2 0 0 1 2-2h7z"/></svg>',
+ snow:'<svg viewBox="0 0 24 24"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ pen:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 3.5l5 5L9 20H4v-5z"/></svg>',
+ clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M12 7v5.5l3.5 2" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>',
+ plus:'<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
+ chev:'<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ sparkle:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l2.2 6.3L20.5 10l-6.3 2.2L12 18.5l-2.2-6.3L3.5 10l6.3-1.7zM19 15l1 2.6 2.5 1-2.5 1L19 22l-1-2.4-2.5-1 2.5-1z"/></svg>',
+ bag:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4.5 8h15l-1.2 13.5H5.7z"/><path d="M8.5 10V6.5a3.5 3.5 0 0 1 7 0V10" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>',
+ dumbbell:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M1.5 9.5h2.5v5H1.5zM20 9.5h2.5v5H20zM4.5 6.5h3.5v11H4.5zM16 6.5h3.5v11H16zM8 11h8v2H8z"/></svg>',
+ /* Padel-Schlagsymbole */
+ racket:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14.2 1.8a7 7 0 0 1 7.6 7.6c-.4 3.6-3.7 6.6-7.4 6.6-1.1 0-2.1-.2-3-.7l-5.6 5.6a1.6 1.6 0 0 1-2.3 0l-.4-.4a1.6 1.6 0 0 1 0-2.3l5.6-5.6a6.6 6.6 0 0 1-.7-3c0-3.7 3-7 6.2-7.8z"/><g fill="var(--dotc,#fff)" opacity=".75"><circle cx="13" cy="7" r="1"/><circle cx="16" cy="6" r="1"/><circle cx="17.5" cy="9" r="1"/><circle cx="14.5" cy="10" r="1"/><circle cx="12" cy="10.3" r="1"/></g></svg>',
+ serve:'<svg viewBox="0 0 24 24"><circle cx="17.5" cy="5.5" r="3" fill="currentColor"/><path d="M4 20c2-6 6-9.5 11-10.5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-dasharray="3 3.2"/><path d="M3 13h6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>',
+ wall:'<svg viewBox="0 0 24 24"><rect x="17" y="2" width="5" height="20" rx="1.5" fill="currentColor"/><path d="M2 16c4-8 9-10 13-8M15 8c-3 1-5 4-6 8" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="8.5" cy="18" r="2.4" fill="currentColor"/></svg>',
+ net:'<svg viewBox="0 0 24 24"><path d="M2 9h20" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M3 9v12M21 9v12M3 13h18M3 17h18M7 9v12M11 9v12M15 9v12M19 9v12" stroke="currentColor" stroke-width="1.3" opacity=".75"/><circle cx="12" cy="4" r="2.6" fill="currentColor"/></svg>',
+ lob:'<svg viewBox="0 0 24 24"><path d="M3 20C6 4 18 4 21 20" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-dasharray="3 3"/><circle cx="12" cy="7.8" r="3" fill="currentColor"/><path d="M2 21h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+ overhead:'<svg viewBox="0 0 24 24"><circle cx="6" cy="5" r="3" fill="currentColor"/><path d="M8.5 7.5c4 1 7.5 5 9.5 12" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M14 17.5l4.2 2.6 1.6-4.8" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ smash:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 1.5 5 13h6l-2 9.5L19.5 9H13.5z"/><circle cx="20" cy="20" r="2.5" fill="currentColor"/></svg>',
+ brain:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 2.5a3.5 3.5 0 0 0-3.4 2.7A3.6 3.6 0 0 0 3 8.7c0 .9.3 1.7.8 2.3A3.6 3.6 0 0 0 3 13.3c0 1.6 1 2.9 2.4 3.4A3.5 3.5 0 0 0 9 21.5c1 0 2-.4 2.5-1.2V3.7A3.5 3.5 0 0 0 9 2.5zM15 2.5a3.5 3.5 0 0 1 3.4 2.7A3.6 3.6 0 0 1 21 8.7c0 .9-.3 1.7-.8 2.3.5.6.8 1.4.8 2.3 0 1.6-1 2.9-2.4 3.4A3.5 3.5 0 0 1 15 21.5c-1 0-2-.4-2.5-1.2V3.7A3.5 3.5 0 0 1 15 2.5z"/></svg>',
+ tactic:'<svg viewBox="0 0 24 24"><rect x="3" y="2" width="18" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 12h18" stroke="currentColor" stroke-width="2.2"/><path d="M7 6.5l2.5 2.5M9.5 6.5 7 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="15.5" cy="17" r="2.2" fill="currentColor"/><path d="M9 16c1.5-2.5 3-3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-dasharray="2 2"/></svg>',
+ backhand:'<svg viewBox="0 0 24 24"><g transform="scale(-1,1) translate(-24,0)"><path fill="currentColor" d="M14.2 1.8a7 7 0 0 1 7.6 7.6c-.4 3.6-3.7 6.6-7.4 6.6-1.1 0-2.1-.2-3-.7l-5.6 5.6a1.6 1.6 0 0 1-2.3 0l-.4-.4a1.6 1.6 0 0 1 0-2.3l5.6-5.6a6.6 6.6 0 0 1-.7-3c0-3.7 3-7 6.2-7.8z"/></g></svg>',
+ calendar:'<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="2" fill="currentColor"/></svg>',
+ chart:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h4v8H3zM10 8h4v13h-4zM17 3h4v18h-4z"/></svg>'
+};
+
+/* ================= Maskottchen „Bolita“ ================= */
+function mascot(mood,wear){
+ const w=wear||S.wear||{};
+ const eyes=mood==='happy'
+  ?'<path d="M40 50 Q47 42 54 50" stroke="#1D2A00" stroke-width="3.6" fill="none" stroke-linecap="round"/><path d="M66 50 Q73 42 80 50" stroke="#1D2A00" stroke-width="3.6" fill="none" stroke-linecap="round"/>'
+  :mood==='sad'
+  ?'<circle cx="47" cy="50" r="9" fill="#fff"/><circle cx="73" cy="50" r="9" fill="#fff"/><circle cx="47" cy="53" r="4.5" fill="#1D2A00"/><circle cx="73" cy="53" r="4.5" fill="#1D2A00"/><path d="M38 40 l14 4M82 40 l-14 4" stroke="#5E7A06" stroke-width="3" stroke-linecap="round"/>'
+  :'<circle cx="47" cy="49" r="9" fill="#fff"/><circle cx="73" cy="49" r="9" fill="#fff"/><circle cx="49" cy="50" r="4.6" fill="#1D2A00"/><circle cx="71" cy="50" r="4.6" fill="#1D2A00"/><circle cx="50.6" cy="48.4" r="1.6" fill="#fff"/><circle cx="72.6" cy="48.4" r="1.6" fill="#fff"/>';
+ const mouth=mood==='sad'?'<path d="M50 76 Q60 69 70 76" stroke="#1D2A00" stroke-width="3.5" fill="none" stroke-linecap="round"/>'
+  :'<path d="M47 68 Q60 84 73 68 Z" fill="#7A1F2B"/><path d="M53 76 Q60 81 67 76" fill="#F27A8A"/>';
+ const A={
+  band:'<path d="M15 44 Q60 26 105 44 L104 54 Q60 36 16 54Z" fill="#E5484D"/><path d="M20 47 Q60 31 100 47" stroke="#fff" stroke-width="2.4" fill="none"/>',
+  cap:'<path d="M22 40 Q24 8 60 8 Q96 8 98 40Z" fill="#1F5FD6"/><path d="M60 38 Q90 34 116 44 Q92 48 60 44Z" fill="#163F94"/><circle cx="60" cy="9" r="4" fill="#163F94"/>',
+  krone:'<path d="M38 26 L40 6 L50 16 L60 2 L70 16 L80 6 L82 26Z" fill="#F2B705" stroke="#B88A00" stroke-width="1.5" stroke-linejoin="round"/><circle cx="60" cy="17" r="3" fill="#E5484D"/>',
+  brille:'<rect x="34" y="41" width="25" height="16" rx="7" fill="#14203A"/><rect x="61" y="41" width="25" height="16" rx="7" fill="#14203A"/><path d="M59 47 h2" stroke="#14203A" stroke-width="3"/><path d="M39 45 l7 0M66 45 l7 0" stroke="#6B9BF7" stroke-width="2" stroke-linecap="round"/>'
+ };
+ const hat=w.hat&&A[w.hat]?A[w.hat]:'';
+ const eyesOut=w.hat==='brille'?A.brille:eyes;
+ return `<svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+ <ellipse cx="60" cy="113" rx="32" ry="5" fill="#000" opacity=".12"/>
+ <circle cx="60" cy="60" r="48" fill="#C9E52B"/>
+ <path d="M60 12a48 48 0 0 1 0 96" fill="#B5D11A" opacity=".55"/>
+ <path d="M24 26c14 14 14 54 0 68M96 26c-14 14-14 54 0 68" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".9"/>
+ <ellipse cx="38" cy="66" rx="7" ry="4.5" fill="#F27A8A" opacity=".5"/><ellipse cx="82" cy="66" rx="7" ry="4.5" fill="#F27A8A" opacity=".5"/>
+ ${w.hat==='brille'?'':eyes}${mouth}${w.hat==='brille'?eyesOut:hat}
+ </svg>`;
+}
+
+/* ================= Skills ================= */
+const SK={
+ aufschlag:{n:'Aufschlag & Return',s:'Aufschlag',ic:'serve',c:'var(--u1)'},
+ vorhand:{n:'Vorhand',s:'Vorhand',ic:'racket',c:'var(--u2)'},
+ rueckhand:{n:'Rückhand',s:'Rückhand',ic:'backhand',c:'var(--u2)'},
+ volley:{n:'Volley',s:'Volley',ic:'net',c:'var(--u3)'},
+ wand:{n:'Wandspiel',s:'Wand',ic:'wall',c:'var(--u6)'},
+ lob:{n:'Lob',s:'Lob',ic:'lob',c:'var(--u4)'},
+ bandeja:{n:'Bandeja & Víbora',s:'Bandeja',ic:'overhead',c:'var(--u5)'},
+ smash:{n:'Smash',s:'Smash',ic:'smash',c:'var(--u5)'},
+ taktik:{n:'Taktik',s:'Taktik',ic:'tactic',c:'var(--u1)'},
+ kopf:{n:'Kopf & Mental',s:'Kopf',ic:'brain',c:'var(--u3)'}
+};
+const SKIDS=Object.keys(SK);
+
+/* ================= Lektionen =================
+ Frage-Typen: mc = Multiple Choice (a[0] ist richtig), tf = Stimmt/Stimmt nicht, order = Reihenfolge (a in richtiger Reihenfolge) */
+const UNITS=[
+{t:'Grundlagen',d:'Griff, Grundschläge & Aufschlag',c:'var(--u1)',L:[
+ {id:'griff',t:'Griff & Bereitschaft',sk:'vorhand',
+  cards:[['Der Kontinentalgriff',['Halte den Schläger wie einen Hammer – das ist der Kontinentalgriff.','Damit spielst du Vorhand, Rückhand, Volley und Überkopf, ohne umzugreifen.','Die Schlaufe gehört immer ums Handgelenk – Sicherheit geht vor.']],
+         ['Bereitschaftsstellung',['Schläger vor dem Körper, Schlägerkopf etwa auf Brusthöhe.','Knie leicht gebeugt, Gewicht auf den Fußballen.','Split-Step: ein kleiner Hüpfer genau dann, wenn der Gegner den Ball trifft.']]],
+  tip:'Wenn du nach jedem Schlag sofort wieder in die Bereitschaft gehst, bist du bei der Hälfte der Bälle schon einen Schritt schneller.',
+  q:[{k:'mc',q:'Welcher Griff ist im Padel der Standard für fast alle Schläge?',a:['Kontinentalgriff (Hammergriff)','Western-Griff','Semi-Western-Griff','Beidhändiger Griff'],e:'Mit dem Kontinentalgriff musst du nie umgreifen – im schnellen Padel essenziell.'},
+     {k:'tf',q:'Zwischen Vorhand und Rückhand solltest du jedes Mal umgreifen.',a:false,e:'Nein – der Kontinentalgriff funktioniert für beide Seiten.'},
+     {k:'mc',q:'Wann machst du den Split-Step?',a:['Wenn der Gegner den Ball trifft','Wenn der Ball bei dir aufspringt','Direkt nach deinem eigenen Schlag','Nur beim Return'],e:'Im Moment des gegnerischen Treffpunkts – dann kannst du in jede Richtung starten.'},
+     {k:'tf',q:'Die Schlaufe des Schlägers gehört immer ums Handgelenk.',a:true,e:'Das ist sogar Regel – und schützt deine Mitspieler.'}],
+  m:{t:'Split-Step-Check',d:'Mach im nächsten Spiel bei jedem gegnerischen Schlag einen Split-Step. Achte besonders in den ersten 3 Games bewusst darauf.'}},
+ {id:'vorhand',t:'Vorhand von hinten',sk:'vorhand',
+  cards:[['Die Technik',['Früh seitlich drehen – die Schulter zeigt Richtung Seitenwand.','Kurz ausholen: Padel ist kompakter als Tennis.','Treffpunkt vor dem Körper, etwa auf Hüfthöhe.','Ausschwingen Richtung Ziel, nicht um den Körper herum.']],
+         ['Das Ziel',['Kontrolle schlägt Power: tief und flach statt hart.','Die Mitte ist fast immer eine gute Idee.','Harte Bälle von hinten prallen von der gegnerischen Glaswand zurück – und geben dem Gegner Zeit.']]],
+  tip:'Spiel von hinten so, dass der Gegner am Netz den Ball unter Netzhöhe annehmen muss. Dann kann er nicht angreifen.',
+  q:[{k:'mc',q:'Wo triffst du den Ball bei der Vorhand idealerweise?',a:['Vor dem Körper auf Hüfthöhe','Hinter dem Körper','Über dem Kopf','Direkt neben dem Fuß'],e:'Vor dem Körper hast du Kontrolle und kannst den Ball lenken.'},
+     {k:'tf',q:'Im Padel gewinnst du die meisten Punkte mit harten Grundschlägen von hinten.',a:false,e:'Von hinten geht es um Kontrolle – Punkte werden meist am Netz gewonnen.'},
+     {k:'mc',q:'Was ist von der Grundlinie das wichtigste Ziel?',a:['Den Ball tief und kontrolliert spielen','So hart wie möglich schlagen','Immer auf die gegnerische Glaswand zielen','Den Ball hoch ins Gitter spielen'],e:'Tief und kontrolliert – und am besten so, dass der Netzspieler tief volleyen muss.'},
+     {k:'order',q:'Bring die Vorhand in die richtige Reihenfolge.',a:['Split-Step','Seitlich drehen','Kurz ausholen','Treffpunkt vor dem Körper','Ausschwingen Richtung Ziel']}],
+  m:{t:'Kontrolle statt Power',d:'Spiele im nächsten Match mindestens 10 Vorhände bewusst tief in die Mitte statt hart. Zähle, wie viele davon im Feld bleiben.'}},
+ {id:'rueckhand',t:'Rückhand',sk:'rueckhand',
+  cards:[['Die Technik',['Einhändig mit Kontinentalgriff – genau wie die Vorhand.','Die freie Hand führt den Schläger beim Ausholen am Schlägerhals und hilft beim Drehen.','Schulter früh zur Seitenwand drehen.']],
+         ['Der Schwung',['Von hoch nach tief schwingen – mit leichtem Unterschnitt (Slice).','Der Slice hält den Ball flach und kontrolliert.','Treffpunkt etwas weiter vorn als bei der Vorhand.']]],
+  tip:'Viele Hobbyspieler laufen die Rückhand um – und stehen dann falsch. Eine solide Slice-Rückhand ist Gold wert.',
+  q:[{k:'tf',q:'Die Rückhand wird im Padel meist einhändig gespielt.',a:true,e:'Richtig – einhändig mit Kontinentalgriff, die freie Hand hilft beim Ausholen.'},
+     {k:'mc',q:'Welche Aufgabe hat die freie Hand bei der Rückhand?',a:['Sie führt den Schläger beim Ausholen und hilft beim Drehen','Sie hält das Gleichgewicht weit hinter dem Körper','Sie greift für mehr Kraft mit','Keine – sie bleibt in der Tasche'],e:'Sie stabilisiert das Ausholen und sorgt für die Schulterdrehung.'},
+     {k:'mc',q:'Welcher Schnitt passt bei der Rückhand am besten?',a:['Leichter Unterschnitt (Slice)','Starker Topspin','Gar kein Schnitt','Seitwärtsdrall nach außen'],e:'Der Slice hält den Ball flach und kontrolliert.'},
+     {k:'tf',q:'Wo der Treffpunkt liegt, ist bei der Rückhand egal.',a:false,e:'Der Treffpunkt liegt vor dem Körper – sogar etwas weiter vorn als bei der Vorhand.'}],
+  m:{t:'Rückhand-Mut',d:'Lauf im nächsten Spiel keine Rückhand um. Spiele jede Rückhand mit Slice tief zurück – Hauptsache kontrolliert.'}},
+ {id:'aufschlag',t:'Aufschlag & Return',sk:'aufschlag',
+  cards:[['Die Regeln',['Ball hinter der Aufschlaglinie einmal aufspringen lassen.','Treffpunkt auf oder unter Hüfthöhe.','Diagonal ins gegenüberliegende Aufschlagfeld – du hast zwei Versuche.','Springt der Ball nach dem Aufschlag ins Gitter, ist es ein Fehler; die Glaswand ist erlaubt.']],
+         ['Taktik',['Platzierung schlägt Tempo: auf die Rückhand oder an die Seitenwand.','Nach dem Aufschlag sofort ans Netz vorrücken.','Return: flach auf die Füße des vorrückenden Aufschlägers oder ein Lob.']]],
+  tip:'Ein Aufschlag in die Glasecke zwingt den Returnspieler, mit der Wand zu arbeiten – das kostet ihn Zeit und dir verschafft es den Netzangriff.',
+  q:[{k:'mc',q:'Auf welcher Höhe musst du den Ball beim Aufschlag treffen?',a:['Auf oder unter Hüfthöhe','Über Schulterhöhe','Ganz egal','Über Kopfhöhe'],e:'Padel-Aufschläge sind Unterhand – Treffpunkt maximal auf Hüfthöhe.'},
+     {k:'tf',q:'Springt der Aufschlag im Feld auf und trifft dann das Gitter, ist es ein Fehler.',a:true,e:'Genau. Glas ist ok, Gitter nicht.'},
+     {k:'mc',q:'Was machst du direkt nach dem Aufschlag?',a:['Ans Netz vorrücken','An der Grundlinie bleiben','Zur Seitenwand gehen','Stehen bleiben und schauen'],e:'Der Aufschläger hat den Vorteil, zuerst am Netz zu sein – nutze ihn.'},
+     {k:'mc',q:'Bester Return gegen einen Aufschläger, der ans Netz läuft?',a:['Flach auf die Füße oder ein Lob','Hart auf Brusthöhe in die Mitte','Ein kurzer Stopp ins Gitter','Möglichst hoch ans Gitter'],e:'Auf die Füße zwingt ihn zum Volley von unten, ein Lob schickt ihn wieder zurück.'}],
+  m:{t:'Aufschlag-Plan',d:'Schlage im nächsten Match jeden ersten Aufschlag mit klarem Ziel (Rückhand oder Seitenwand-Ecke) und rücke danach sofort ans Netz.'}}
+]},
+{t:'Die Wände',d:'Glas lesen und nutzen',c:'var(--u6)',L:[
+ {id:'rueckwand',t:'Rückwand Vorhand',sk:'wand',
+  cards:[['Lass die Wand arbeiten',['Geht der Ball klar Richtung Rückwand: nicht vorher panisch schlagen – lass ihn an die Wand.','Seitlich rückwärts gehen und Abstand zur Wand halten (gut ein Schritt).','Warte, bis der Ball nach der Wand herunterkommt, und triff ihn vor dem Körper.']],
+         ['Faustregeln',['Je höher und schneller der Ball an die Wand prallt, desto weiter kommt er zurück.','Geh mit dem Ball nach vorn – nicht rückwärts in die Wand hinein.','Nach dem Schlag: zurück in die Bereitschaft.']]],
+  tip:'Die Wand ist kein Feind, sondern eine zweite Chance. Profis spielen die Mehrheit der Bälle von hinten nach der Wand.',
+  q:[{k:'mc',q:'Wie bewegst du dich, wenn ein Ball Richtung Rückwand kommt?',a:['Seitlich rückwärts, mit Abstand zur Wand','Direkt an die Wand ran','Frontal rückwärts laufen','Nach vorn ans Netz'],e:'Seitlich bist du schon zum Schlag gedreht und hast Platz.'},
+     {k:'tf',q:'Je höher der Ball die Rückwand trifft, desto weiter springt er zurück ins Feld.',a:true,e:'Genau – solche Bälle kommen weit raus. Geh mit nach vorn.'},
+     {k:'mc',q:'Wann triffst du den Ball nach der Wand?',a:['Wenn er wieder herunterkommt, vor dem Körper','Am höchsten Punkt direkt nach der Wand','Hinter dem Körper','So spät wie möglich direkt an der Wand'],e:'Nach dem Herunterkommen hast du Zeit und Kontrolle.'},
+     {k:'order',q:'Bring den Ablauf am Rückwand-Ball in die richtige Reihenfolge.',a:['Ball lesen','Seitlich zurück drehen','Wand arbeiten lassen','Mit dem Ball nach vorn gehen','Schlag vor dem Körper']}],
+  m:{t:'Wand ist dein Freund',d:'Lass im nächsten Spiel jeden Ball, der klar zur Rückwand geht, zuerst an die Wand – mindestens 5 Mal ganz bewusst.'}},
+ {id:'rueckwand2',t:'Rückwand Rückhand',sk:'wand',
+  cards:[['Die schwierige Seite',['Früh mit der Schulter zur Wand drehen – die freie Hand führt den Schläger nach hinten.','Kleine Schritte, damit du den Abstand anpassen kannst.','Lieber ein sicherer, hoher Ball (Lob) als ein riskanter Angriff.']],
+         ['Optionen danach',['Lob über die Netzspieler – der Klassiker.','Flach in die Mitte, wenn der Ball tief genug ist.','Chiquita: langsam auf die Füße, wenn die Gegner nah am Netz stehen.']]],
+  tip:'Aus der Rückhand-Ecke ist der Lob fast nie falsch. Er kauft dir Zeit und den Weg ans Netz.',
+  q:[{k:'mc',q:'Was ist aus der Rückhand-Ecke nach der Wand meist die sicherste Option?',a:['Ein Lob über die Netzspieler','Ein harter Winner die Linie entlang','Ein Smash','Ein Stopp ans Netz'],e:'Der Lob ist sicher und bringt euch zurück ans Netz.'},
+     {k:'tf',q:'Bei der Rückhand an der Rückwand drehst du dich früh mit der Schulter zur Wand.',a:true,e:'Früh drehen = Zeit gewinnen.'},
+     {k:'mc',q:'Warum kleine Schritte an der Wand?',a:['Damit du den Abstand zum Ball fein anpassen kannst','Weil große Schritte verboten sind','Damit du müde wirst','Um den Gegner zu täuschen'],e:'Feine Anpassung ist an der Wand alles.'},
+     {k:'tf',q:'Die freie Hand spielt an der Rückwand keine Rolle.',a:false,e:'Sie führt den Schläger und hilft dir, die Schulter zu drehen.'}],
+  m:{t:'Rückhand-Ecke meistern',d:'Spiele im nächsten Match jeden Rückhandball nach der Rückwand als Lob oder flach in die Mitte – kein Risiko-Winner.'}},
+ {id:'seitenwand',t:'Seiten- & Doppelwand',sk:'wand',
+  cards:[['Seitenwand',['Ein Ball an die Seitenwand ändert die Richtung – er kommt Richtung Mitte zurück.','Nicht zu nah an die Seitenwand stellen: Lass dem Ball Platz.','Den Winkel lesen: Wo trifft er die Wand, wohin läuft er danach?']],
+         ['Doppelwand',['Seiten- und Rückwand nacheinander: Der Ball wird langsamer.','Er kommt meist aus der Ecke Richtung Mitte.','Geduld! Warte in der Mitte und geh mit dem Ball mit.']]],
+  tip:'Bei Doppelwand-Bällen ist die häufigste Fehlerquelle Ungeduld. Der Ball kommt fast immer zu dir – warte auf ihn.',
+  q:[{k:'mc',q:'Wohin kommt ein Ball nach der Seitenwand typischerweise?',a:['Richtung Mitte des Feldes','Direkt ins Gitter','Immer zurück zum Netz','Er bleibt an der Wand kleben'],e:'Die Seitenwand lenkt den Ball zur Mitte.'},
+     {k:'tf',q:'Bei einem Doppelwand-Ball wird der Ball schneller.',a:false,e:'Jeder Wandkontakt kostet Tempo – der Ball wird langsamer.'},
+     {k:'mc',q:'Wo wartest du bei einem Doppelwand-Ball am besten?',a:['Eher in der Mitte, mit Abstand zur Ecke','Tief in der Ecke','Am Netz','An der Seitenwand'],e:'Der Ball kommt aus der Ecke heraus – also nicht hinein laufen.'},
+     {k:'tf',q:'Geduld ist bei Doppelwand-Bällen der Schlüssel.',a:true,e:'Genau – warten, lesen, dann schlagen.'}],
+  m:{t:'Geduld in der Ecke',d:'Warte im nächsten Spiel bei jedem Ball aus der Ecke, bis er herauskommt. Zähle, wie oft du ihn sauber zurückspielst.'}},
+ {id:'bajada',t:'Bajada de pared',sk:'wand',
+  cards:[['Angriff nach der Wand',['Kommt ein hoher Ball (z. B. ein zu harter Smash oder langer Lob) weit von der Rückwand zurück, kannst du ihn angreifen.','Die Bajada: Ball nach der Wand in der Luft, über Schulterhöhe, nach unten schlagen.']],
+         ['So geht\'s',['Seitlich stellen, Schläger früh hoch.','Den Ball vor dem Körper treffen.','Ziel: auf die Füße der Gegner oder in die Mitte.','Nicht übertreiben: lieber platziert als brutal.']]],
+  tip:'Die Bajada verwandelt die Verteidigung in Angriff. Nutze sie bei hohen Bällen, die weit ins Feld zurückkommen.',
+  q:[{k:'mc',q:'Wann bietet sich eine Bajada an?',a:['Wenn ein hoher Ball weit von der Rückwand zurückkommt','Bei jedem flachen Ball','Beim Aufschlag','Wenn der Ball ins Gitter geht'],e:'Hoch und weit zurück = Angriffschance.'},
+     {k:'tf',q:'Bei der Bajada schlägst du den Ball nach unten Richtung Gegner.',a:true,e:'Genau – Richtung Füße oder Mitte.'},
+     {k:'mc',q:'Wo triffst du den Ball bei der Bajada?',a:['Vor dem Körper über Schulterhöhe','Hinter dem Rücken','Unter Kniehöhe','Direkt an der Wand'],e:'Hoch und vor dem Körper – sonst fehlt dir die Kontrolle.'},
+     {k:'order',q:'Bring die Bajada in die richtige Reihenfolge.',a:['Hohen Ball erkennen','Seitlich stellen','Schläger früh hoch','Ball nach der Wand vor dem Körper treffen','Nach unten Richtung Füße']}],
+  m:{t:'Bajada wagen',d:'Versuche im nächsten Spiel mindestens 2 Bajadas, wenn ein hoher Ball weit von der Rückwand zurückkommt.'}}
+]},
+{t:'Am Netz',d:'Volleys & Netzposition',c:'var(--u3)',L:[
+ {id:'volleyvh',t:'Vorhand-Volley',sk:'volley',
+  cards:[['Die Technik',['Kaum ausholen: Der Volley ist ein Block, kein Schwung.','Schlägerkopf oben, Handgelenk fest.','Treffpunkt vor dem Körper mit leichtem Unterschnitt.']],
+         ['Die Ziele',['Auf die Füße der Gegner oder in die Mitte.','Tief in die Ecken, damit sie mit der Wand arbeiten müssen.','Nicht auf die Glaswand knallen – der Ball kommt zurück.']]],
+  tip:'Ein Volley braucht keine Kraft – der Ball bringt sie mit. Je kürzer dein Ausholen, desto sicherer der Volley.',
+  q:[{k:'tf',q:'Beim Volley holst du weit aus, um Kraft zu erzeugen.',a:false,e:'Kurz blocken – der Ball bringt die Energie mit.'},
+     {k:'mc',q:'Wo zielst du mit dem Volley am liebsten hin?',a:['Füße der Gegner oder die Mitte','Mit voller Kraft an die gegnerische Glaswand','Hoch über die Gegner','Ins Netz'],e:'Füße und Mitte erzeugen schwierige Bälle.'},
+     {k:'mc',q:'Wie ist das Handgelenk beim Volley?',a:['Fest und stabil','Locker und schlackernd','Weit abgeknickt','Spielt keine Rolle'],e:'Ein festes Handgelenk gibt Kontrolle.'},
+     {k:'tf',q:'Der Treffpunkt beim Volley liegt vor dem Körper.',a:true,e:'Vor dem Körper – so kannst du den Ball lenken.'}],
+  m:{t:'Kurzer Block',d:'Spiele im nächsten Match jeden Vorhand-Volley ohne Ausholen und mit Ziel Füße oder Mitte.'}},
+ {id:'volleyrh',t:'Rückhand-Volley',sk:'volley',
+  cards:[['Die Technik',['Schulter leicht eindrehen, freie Hand stützt am Schläger.','Kurzer Block von oben nach unten mit Slice.','Schlägerfläche leicht offen, Treffpunkt vor dem Körper.']],
+         ['Häufige Fehler',['Zu spät dran – deshalb Split-Step!','Ellbogen klebt am Körper: Gib dem Arm Platz.','Zu viel Risiko: Sicher tief spielen reicht.']]],
+  tip:'Viele Punkte am Netz entscheiden sich über die Rückhand-Volley in der Mitte. Wer dort sicher ist, gewinnt Matches.',
+  q:[{k:'mc',q:'Welche Bewegung macht der Schläger beim Rückhand-Volley?',a:['Kurzer Block von oben nach unten mit Slice','Großer Schwung von unten nach oben','Kreisbewegung um den Kopf','Gar keine – nur hinhalten mit offenem Handgelenk'],e:'Kurz, von oben nach unten, mit Slice.'},
+     {k:'tf',q:'Die freie Hand hilft auch beim Rückhand-Volley.',a:true,e:'Sie stabilisiert und dreht die Schulter mit ein.'},
+     {k:'mc',q:'Was hilft am meisten gegen „zu spät dran“?',a:['Ein sauberer Split-Step','Härter schlagen','Weiter weg vom Netz stehen','Die Augen schließen'],e:'Mit Split-Step bist du rechtzeitig bereit.'},
+     {k:'tf',q:'Am Netz solltest du jeden Volley als Winner spielen.',a:false,e:'Geduld – tief und sicher, bis eine echte Chance kommt.'}],
+  m:{t:'Sichere Mitte',d:'Spiele im nächsten Spiel jeden Rückhand-Volley tief und sicher zurück. Ziel: kein einziger Rückhand-Volley ins Netz.'}},
+ {id:'netzpos',t:'Netzposition',sk:'taktik',
+  cards:[['Wo du stehst',['Etwa 2–3 m vom Netz entfernt – nicht kleben!','Zu nah = leicht zu überlobben, zu weit = Bälle auf die Füße.','Bei jedem Schlag des Gegners: Split-Step.']],
+         ['Als Team',['Bewegt euch wie mit einem Seil verbunden, etwa 3 m Abstand.','Geht der Ball zur Seite, verschiebt ihr beide in diese Richtung.','Nach einem Lob: gemeinsam zurück, gemeinsam wieder vor.']]],
+  tip:'Das Netz ist die Machtposition im Padel. Das Team, das das Netz kontrolliert, gewinnt die meisten Punkte.',
+  q:[{k:'mc',q:'Wie weit vom Netz stehst du ungefähr?',a:['Etwa 2–3 Meter','Direkt am Netz','An der Aufschlaglinie','Ganz egal'],e:'2–3 m: nah genug zum Angreifen, weit genug gegen den Lob.'},
+     {k:'tf',q:'Als Team am Netz bewegt ihr euch gemeinsam, wie mit einem Seil verbunden.',a:true,e:'So entstehen keine Lücken.'},
+     {k:'mc',q:'Was passiert, wenn du zu nah am Netz stehst?',a:['Du wirst leicht überlobbt','Du gewinnst jeden Punkt','Nichts','Du kannst besser lobben'],e:'Zu nah = leichtes Ziel für den Lob.'},
+     {k:'mc',q:'Wo gewinnt man im Padel die meisten Punkte?',a:['Am Netz','An der Rückwand','Beim Aufschlag','Hinter dem Court'],e:'Das Netz ist die Angriffsposition.'}],
+  m:{t:'Das Seil',d:'Achte im nächsten Match darauf, dass du dich mit deinem Partner wie mit einem Seil verbunden bewegst. Sprich es vor dem Match mit ihm/ihr ab.'}},
+ {id:'volleyziele',t:'Volley-Ziele',sk:'volley',
+  cards:[['Die drei Ziele',['Mitte: Zwischen beiden Gegnern entsteht Verwirrung.','Füße: Zwingt den Gegner, von unten zu spielen.','Winkel: Nur wenn der Ball hoch ist und du nah am Netz stehst.']],
+         ['Tief vs. kurz',['Tief in die Ecke: hält die Gegner hinten.','Kurz/Winkel: Punktgewinn, aber Risiko.','Faustregel: Ball unter Netzhöhe = tief und sicher; über Netzhöhe = angreifen.']]],
+  tip:'Ball unter Netzhöhe? Sicher tief spielen. Ball über Netzhöhe? Jetzt darfst du angreifen.',
+  q:[{k:'mc',q:'Der Ball kommt unter Netzhöhe zu dir. Was tust du?',a:['Sicher tief spielen','Hart nach unten angreifen','Einen Stopp versuchen','Smash spielen'],e:'Von unten kannst du nicht angreifen – also sicher tief.'},
+     {k:'tf',q:'Ein Volley in die Mitte kann für Verwirrung bei den Gegnern sorgen.',a:true,e:'„Deiner oder meiner?“ – die Mitte ist oft die beste Wahl.'},
+     {k:'mc',q:'Wann spielst du einen Winkel-Volley?',a:['Wenn der Ball hoch ist und du nah am Netz stehst','Immer','Wenn der Ball an deinen Füßen ist','Aus der Rückwand-Ecke'],e:'Winkel nur mit hohem Ball und guter Position.'},
+     {k:'order',q:'Sortiere: Was tust du am Netz?',a:['Split-Step beim Gegnerschlag','Ballhöhe erkennen','Ziel wählen','Kurzer Block','Zurück in Bereitschaft']}],
+  m:{t:'Netzhöhe lesen',d:'Entscheide im nächsten Spiel bei jedem Volley bewusst: unter Netzhöhe → tief & sicher, über Netzhöhe → angreifen.'}}
+]},
+{t:'Lob & Defensive',d:'Zeit kaufen, Netz zurückholen',c:'var(--u4)',L:[
+ {id:'lob',t:'Der Lob',sk:'lob',
+  cards:[['Der wichtigste Schlag',['Der Lob ist der wichtigste Schlag im Padel: Er schickt die Gegner vom Netz weg.','Hoch und tief spielen – über die Köpfe, nah an die Rückwand.','Ideal: über die Rückhandseite oder in die Mitte.']],
+         ['Technik',['Offene Schlagfläche, Schwung von unten nach oben.','Lange begleiten, nicht abhacken.','Danach: beide sofort ans Netz vorrücken!']]],
+  tip:'Ein guter Lob ist kein Notschlag, sondern eine Angriffswaffe: Er holt dir das Netz zurück.',
+  q:[{k:'tf',q:'Der Lob gilt als einer der wichtigsten Schläge im Padel.',a:true,e:'Er ist DAS Mittel, um das Netz zurückzuerobern.'},
+     {k:'mc',q:'Was macht ihr direkt nach einem guten Lob?',a:['Beide rücken ans Netz vor','Ihr bleibt hinten stehen','Nur einer geht vor','Ihr wartet auf den Smash'],e:'Wenn die Gegner zurückmüssen, gehört euch das Netz.'},
+     {k:'mc',q:'Wie ist die Schlagfläche beim Lob?',a:['Offen, Schwung von unten nach oben','Geschlossen, Schwung nach unten','Senkrecht, flacher Schwung','Egal'],e:'Offene Fläche + Aufwärtsschwung = Höhe.'},
+     {k:'tf',q:'Ein kurzer Lob mitten ins Feld ist ideal.',a:false,e:'Kurze Lobs werden gesmasht – tief und hoch ist das Ziel.'}],
+  m:{t:'Lob & Vor',d:'Spiele im nächsten Match mindestens 5 Lobs aus der Defensive und rücke nach jedem guten Lob mit deinem Partner ans Netz vor.'}},
+ {id:'lobtaktik',t:'Wann lobben?',sk:'lob',
+  cards:[['Gute Momente',['Die Gegner stehen sehr nah am Netz.','Du bist unter Druck und brauchst Zeit.','Der Gegner hat einen schwachen Überkopf (oft die Rückhandseite).']],
+         ['Schlechte Momente',['Gegen Wind oder in einer sehr niedrigen Halle.','Wenn du den Ball ganz tief vor dem Körper hast und keinen Platz zum Ausholen.','Ohne Plan: Ein Lob ohne Vorrücken verschenkt den Vorteil.']]],
+  tip:'Beobachte in den ersten Games, welcher Gegner beim Überkopf unsicher ist. Dorthin geht ab dann jeder Lob.',
+  q:[{k:'mc',q:'Wann ist ein Lob besonders sinnvoll?',a:['Wenn die Gegner sehr nah am Netz stehen','Wenn die Gegner beide hinten stehen','Wenn du einen leichten Ball über Netzhöhe hast','Beim Aufschlag'],e:'Nah am Netz = schwer, nach hinten zu kommen.'},
+     {k:'tf',q:'Bei einer sehr niedrigen Hallendecke solltest du eher weniger lobben.',a:true,e:'Die Decke verkürzt die Höhe – das Risiko steigt.'},
+     {k:'mc',q:'Wohin lobbst du, wenn ein Gegner einen schwachen Überkopf hat?',a:['Zu genau diesem Gegner','Zum stärkeren Gegner','Ins Gitter','Ins Aus'],e:'Spiel die Schwäche an!'},
+     {k:'mc',q:'Was verschenkt den Vorteil eines Lobs?',a:['Nicht vorrücken danach','Hoch spielen','Tief spielen','Zur Rückhand spielen'],e:'Nach dem Lob gehört ihr ans Netz.'}],
+  m:{t:'Schwäche suchen',d:'Finde im nächsten Spiel heraus, welcher Gegner beim Überkopf schwächer ist – und lobbe ab dann gezielt zu ihm.'}},
+ {id:'chiquita',t:'Die Chiquita',sk:'taktik',
+  cards:[['Was ist das?',['Ein langsamer, flacher Ball von hinten auf die Füße der Netzspieler.','Er zwingt die Gegner, den Ball von unten zu spielen.','Danach kannst du ans Netz vorrücken.']],
+         ['So geht\'s',['Wenig Tempo, viel Gefühl – mit leichtem Unterschnitt.','Der Ball soll knapp übers Netz und dann absinken.','Am besten in die Mitte oder auf die Füße des Spielers, der am weitesten vorn steht.']]],
+  tip:'Chiquita + Vorrücken ist eine der elegantesten Methoden, das Netz zu erobern – ohne Lob.',
+  q:[{k:'mc',q:'Was ist eine Chiquita?',a:['Ein langsamer, flacher Ball auf die Füße der Netzspieler','Ein harter Smash','Ein hoher Lob','Ein Aufschlag ins Gitter'],e:'Langsam, flach, auf die Füße.'},
+     {k:'tf',q:'Die Chiquita wird mit möglichst viel Tempo gespielt.',a:false,e:'Gefühl statt Tempo – der Ball soll absinken.'},
+     {k:'mc',q:'Was machst du nach einer guten Chiquita?',a:['Ans Netz vorrücken','Zur Rückwand laufen','Den Schläger wechseln','Stehen bleiben'],e:'Der Gegner muss von unten spielen – deine Chance, vorzurücken.'},
+     {k:'tf',q:'Die Chiquita zwingt den Gegner, den Ball von unten zu spielen.',a:true,e:'Genau das macht sie so wertvoll.'}],
+  m:{t:'Chiquita-Versuch',d:'Spiele im nächsten Match mindestens 3 Chiquitas auf die Füße der Netzspieler und rücke danach vor.'}},
+ {id:'contrapared',t:'Contrapared & Notschläge',sk:'wand',
+  cards:[['Contrapared',['Notschlag: Du spielst den Ball gegen deine eigene Rückwand, damit er übers Netz fliegt.','Nur, wenn du sonst keine Chance hast.','Hoch genug an die Wand spielen, damit er die Höhe bekommt.']],
+         ['Lieber vermeiden',['Meist ist ein früher Lob die bessere Lösung.','Contrapared ist eine Kunst – aber kein Plan.','Trainiere ihn, damit du in Not noch eine Option hast.']]],
+  tip:'Die beste Verteidigung ist, gar nicht erst in die Not zu kommen: Ball früh lesen, früh drehen.',
+  q:[{k:'mc',q:'Was ist ein Contrapared?',a:['Ein Schlag gegen die eigene Rückwand, damit der Ball übers Netz fliegt','Ein Schlag an die gegnerische Wand','Ein Aufschlag','Ein Volley am Netz'],e:'Gegen die eigene Wand – der Notschlag.'},
+     {k:'tf',q:'Der Contrapared sollte dein Standardschlag sein.',a:false,e:'Nur im Notfall – ein früher Lob ist meist besser.'},
+     {k:'mc',q:'Was verhindert Notsituationen am besten?',a:['Ball früh lesen und früh drehen','Härter schlagen','Näher an der Wand stehen','Später reagieren'],e:'Früh dran sein ist die beste Verteidigung.'},
+     {k:'tf',q:'Beim Contrapared muss der Ball hoch genug an die Wand, um übers Netz zu kommen.',a:true,e:'Sonst fällt er vor dem Netz runter.'}],
+  m:{t:'Nie aufgeben',d:'Spiele im nächsten Spiel jeden scheinbar verlorenen Ball noch zurück – zur Not per Contrapared. Zähle, wie viele du rettest.'}}
+]},
+{t:'Überkopf',d:'Bandeja, Víbora & Smash',c:'var(--u5)',L:[
+ {id:'bandeja',t:'Die Bandeja',sk:'bandeja',
+  cards:[['Wofür?',['Ein kontrollierter Überkopf mit Slice – damit hältst du nach einem Lob das Netz.','Kein Smash! Ziel ist Kontrolle, nicht Punktgewinn.']],
+         ['Technik',['Seitlich stellen, Schläger früh hoch hinter den Kopf.','Ball vor dem Körper auf Kopf-/Schulterhöhe treffen.','Mit Unterschnitt von hinten-oben nach vorn-unten.','Ziel: tief in die Ecke oder an die Seitenwand, damit der Ball niedrig bleibt.']]],
+  tip:'Die Bandeja ist der Schlag, der Padel von Tennis unterscheidet. Wer sie beherrscht, bleibt am Netz.',
+  q:[{k:'mc',q:'Was ist das Hauptziel der Bandeja?',a:['Das Netz halten mit einem kontrollierten Ball','Den Punkt sofort beenden','Den Ball ins Aus schlagen','Die Rückwand treffen, damit der Ball hoch abspringt'],e:'Kontrolle und Netzposition – nicht Power.'},
+     {k:'tf',q:'Die Bandeja wird mit Unterschnitt (Slice) gespielt.',a:true,e:'Der Slice hält den Ball nach der Wand niedrig.'},
+     {k:'mc',q:'Wohin zielst du mit der Bandeja?',a:['Tief in die Ecke oder an die Seitenwand','Hart an die Rückwand, damit er weit zurückspringt','Mitten ins Feld vor die Füße','Ins Netz'],e:'Ecke/Seitenwand – so bleibt der Ball niedrig.'},
+     {k:'order',q:'Bring die Bandeja in die richtige Reihenfolge.',a:['Lob erkennen','Seitlich stellen','Schläger hoch hinter den Kopf','Ball vor dem Körper treffen','Mit Slice in die Ecke']}],
+  m:{t:'Netz halten',d:'Beantworte im nächsten Match mittelhohe Lobs mit einer Bandeja statt einem Smash – und bleib danach am Netz.'}},
+ {id:'vibora',t:'Die Víbora',sk:'bandeja',
+  cards:[['Die aggressive Schwester',['Mehr Tempo und mehr Seitenschnitt als die Bandeja.','Treffpunkt etwas seitlicher, neben dem Kopf.','Ziel: Seitenwand-Ecke – der Ball wird flach und springt kaum ab.']],
+         ['Wann?',['Bei Lobs, die nicht ganz tief sind.','Wenn du gut stehst und Zeit hast.','Nicht aus der Rückwärtsbewegung – dann lieber Bandeja.']]],
+  tip:'Die Víbora (spanisch: Viper) „beißt“ durch den Seitenschnitt in die Wand. Erst die Bandeja sicher können, dann die Víbora.',
+  q:[{k:'mc',q:'Was unterscheidet die Víbora von der Bandeja?',a:['Mehr Tempo und mehr Seitenschnitt','Sie wird von unten gespielt','Sie ist ein Lob','Gar nichts'],e:'Aggressiver, mit mehr Seitendrall.'},
+     {k:'tf',q:'Die Víbora spielst du am besten aus der Rückwärtsbewegung.',a:false,e:'Aus der Rückwärtsbewegung lieber die sichere Bandeja.'},
+     {k:'mc',q:'Wohin zielt die Víbora?',a:['In die Seitenwand-Ecke','Direkt ins Gitter','Mitten aufs Netz','Hoch an die Rückwand'],e:'Durch den Seitendrall bleibt der Ball nach der Ecke flach.'},
+     {k:'mc',q:'Was solltest du zuerst sicher beherrschen?',a:['Die Bandeja','Den Smash por 4','Den Contrapared','Den Aufschlag mit Topspin'],e:'Erst Kontrolle, dann Aggression.'}],
+  m:{t:'Viper-Test',d:'Probiere im nächsten Spiel 3 Víboras bei nicht ganz tiefen Lobs. Notiere, wie viele in die Seitenwand-Ecke gehen.'}},
+ {id:'smash',t:'Smash: por 3 & por 4',sk:'smash',
+  cards:[['Der Punktschlag',['Smash nur bei kurzen, langsamen Lobs nahe am Netz.','Flacher Power-Smash ist riskant: Der Ball kommt von der Glaswand zurück.']],
+         ['Die Spezialitäten',['Por 3: Der Ball springt so ab, dass er über die Seitenwand das Feld verlässt.','Por 4: Der Ball springt so hoch ab, dass er über die Rückwand (Glas + Gitter) das Feld verlässt.','Ohne Platz und Timing: lieber Bandeja.']]],
+  tip:'Viele Hobbyspieler verlieren Punkte durch zu viele Smashes. Ein Smash ist eine Belohnung, kein Reflex.',
+  q:[{k:'mc',q:'Wann spielst du einen Smash?',a:['Bei kurzen, langsamen Lobs nahe am Netz','Bei jedem Lob','Bei Bällen auf Kniehöhe','Aus der Rückwand-Ecke'],e:'Nur wenn die Bedingungen stimmen.'},
+     {k:'tf',q:'Bei einem „por 3“ verlässt der Ball das Feld über die Seitenwand.',a:true,e:'Genau – drei Meter Seitenwand, daher der Name.'},
+     {k:'mc',q:'Was ist das Risiko eines flachen Power-Smashs?',a:['Der Ball kommt von der Glaswand zurück','Er ist immer im Aus','Er ist verboten','Keins'],e:'Ohne Winkel/Höhe kann der Gegner den Ball nach der Wand spielen.'},
+     {k:'tf',q:'Ohne Zeit und gutes Timing ist die Bandeja die bessere Wahl.',a:true,e:'Sicherheit vor Spektakel.'}],
+  m:{t:'Smash-Disziplin',d:'Smashe im nächsten Spiel NUR bei kurzen, langsamen Lobs. Alles andere wird eine Bandeja.'}},
+ {id:'ueberkopf',t:'Überkopf-Entscheidung',sk:'smash',
+  cards:[['Die Entscheidung',['Lob tief und gut: zurück, Ball an die Wand lassen.','Lob mittel: Bandeja oder Víbora – Netz halten.','Lob kurz und langsam: Smash!']],
+         ['Kommunikation',['„Mía!“ / „Tuya!“ – sagt laut, wer den Lob nimmt.','Meist nimmt der Spieler auf der linken Seite Überkopfbälle in der Mitte (die Vorhand-Überkopfseite für Rechtshänder).','Wenn einer zurückgeht, geht der andere mit.']]],
+  tip:'Drei Optionen, eine Frage: Wie tief ist der Lob? Wer das in einem Sekundenbruchteil entscheidet, spielt clever.',
+  q:[{k:'mc',q:'Der Lob ist tief und sehr gut. Was tust du?',a:['Zurück und den Ball an die Wand lassen','Einen Smash versuchen','Eine Víbora im Rückwärtslaufen','Stehen bleiben'],e:'Gute Lobs nicht erzwingen – Wand nutzen.'},
+     {k:'mc',q:'Der Lob ist mittelhoch. Beste Wahl?',a:['Bandeja oder Víbora','Por 4','Contrapared','Chiquita'],e:'Netz halten mit Kontrolle.'},
+     {k:'tf',q:'Ein kurzer, langsamer Lob ist eine Smash-Chance.',a:true,e:'Jetzt darfst du!'},
+     {k:'order',q:'Ordne von defensiv nach offensiv.',a:['Ball an die Wand lassen','Bandeja','Víbora','Smash']}],
+  m:{t:'Drei-Optionen-Regel',d:'Entscheide im nächsten Match bei jedem Lob bewusst: Wand, Bandeja/Víbora oder Smash. Sag vorher „Mía!“ oder „Tuya!“.'}}
+]},
+{t:'Taktik & Kopf',d:'Clever spielen, stark bleiben',c:'var(--u2)',L:[
+ {id:'mitte',t:'Spiel durch die Mitte',sk:'taktik',
+  cards:[['Warum die Mitte?',['Die Mitte erzeugt Abstimmungsprobleme: „Deiner oder meiner?“','Der Winkel für den Gegner ist kleiner.','Du riskierst kein Aus an der Seite.']],
+         ['Wer nimmt die Mitte?',['Sprecht es vorher ab!','Oft: Wer die Vorhand in der Mitte hat, nimmt den Ball.','Bei Lobs in die Mitte meist der linke Spieler (bei zwei Rechtshändern).']]],
+  tip:'„Im Zweifel durch die Mitte“ ist eine der ältesten Padel-Weisheiten – und sie stimmt.',
+  q:[{k:'mc',q:'Warum ist die Mitte oft das beste Ziel?',a:['Sie erzeugt Abstimmungsprobleme und verringert Winkel','Weil dort das Netz am höchsten ist','Weil es verboten ist, an die Seite zu spielen','Wegen der Glaswand'],e:'Verwirrung + kleiner Winkel + wenig Risiko.'},
+     {k:'tf',q:'Ihr solltet vor dem Match absprechen, wer Bälle in der Mitte nimmt.',a:true,e:'Klare Absprachen sparen Punkte.'},
+     {k:'mc',q:'Wer nimmt einen Ball in der Mitte häufig?',a:['Der Spieler, der dort die Vorhand hat','Immer der Ältere','Wer gerade näher am Netz steht – egal mit welcher Seite','Niemand'],e:'Die Vorhand ist meist die stärkere und sicherere Seite.'},
+     {k:'tf',q:'Die Netzkante ist in der Mitte am niedrigsten.',a:true,e:'Ein weiterer Grund, durch die Mitte zu spielen.'}],
+  m:{t:'Mitte-Modus',d:'Spiele im nächsten Match jeden unklaren Ball durch die Mitte. Sprich vorher mit deinem Partner ab, wer die Mitte nimmt.'}},
+ {id:'kommunikation',t:'Kommunikation',sk:'kopf',
+  cards:[['Kurz & klar',['„Mía!“ (meiner), „Tuya!“ (deiner), „Voy!“ (ich gehe).','Bei Lobs: „Atrás!“ oder „Zurück!“ – gemeinsam zurück.','Lieber zu viel sagen als zu wenig.']],
+         ['Positive Energie',['Nach jedem Punkt kurz abklatschen – auch nach verlorenen.','Fehler des Partners nicht kommentieren, sondern abhaken.','Zwischen den Punkten: ein Satz Plan für den nächsten Punkt.']]],
+  tip:'Teams, die viel und positiv kommunizieren, gewinnen messbar mehr enge Punkte. Padel ist ein Teamsport.',
+  q:[{k:'mc',q:'Was bedeutet „Mía!“?',a:['„Meiner!“ – ich nehme den Ball','„Deiner!“','„Aus!“','„Zurück!“'],e:'Mía = meiner.'},
+     {k:'tf',q:'Nach einem Fehler des Partners solltest du ihm erklären, was falsch war.',a:false,e:'Abhaken, abklatschen, nächster Punkt.'},
+     {k:'mc',q:'Was macht ihr nach einem verlorenen Punkt?',a:['Kurz abklatschen und den nächsten Punkt planen','Schweigen','Diskutieren, wer schuld war','Schläger werfen'],e:'Positive Routine hält euch im Spiel.'},
+     {k:'tf',q:'Bei einem Lob über euch hilft ein klares „Zurück!“.',a:true,e:'So bewegt ihr euch gemeinsam.'}],
+  m:{t:'Lautes Team',d:'Sag im nächsten Spiel bei JEDEM Ball in die Mitte und jedem Lob laut „Mía“ oder „Tuya“. Klatscht nach jedem Punkt ab.'}},
+ {id:'geduld',t:'Geduld & Fehlerquote',sk:'kopf',
+  cards:[['Padel ist ein Fehlersport',['Die meisten Punkte im Amateurbereich enden durch Fehler, nicht durch Winner.','Wer einen Ball mehr zurückspielt, gewinnt.','Risiko nur bei klarer Chance (Ball hoch, du nah am Netz).']],
+         ['Die 3-Schlag-Regel',['Spiele mindestens drei sichere Bälle, bevor du ein Risiko eingehst.','Baue den Punkt auf: tief, Mitte, Netz.','Ungeduld ist der größte Gegner.']]],
+  tip:'Zähl in deinem nächsten Match deine unerzwungenen Fehler. Wenn du sie halbierst, gewinnst du mehr Spiele – garantiert.',
+  q:[{k:'mc',q:'Wie enden die meisten Punkte im Hobby-Padel?',a:['Durch Fehler','Durch Asse','Durch Smash-Winner','Durch Contrapared'],e:'Fehler entscheiden – also weniger Fehler machen!'},
+     {k:'tf',q:'Wer einen Ball mehr zurückspielt, gewinnt oft den Punkt.',a:true,e:'Geduld ist eine Waffe.'},
+     {k:'mc',q:'Wann gehst du ein Risiko ein?',a:['Bei klarer Chance: Ball hoch, du nah am Netz','Bei jedem Ball','Aus der Rückwand-Ecke','Beim zweiten Aufschlag'],e:'Risiko nur, wenn die Chance klar ist.'},
+     {k:'tf',q:'Ungeduld ist einer der größten Gegner im Padel.',a:true,e:'Darum: Punkte aufbauen.'}],
+  m:{t:'Fehler-Diät',d:'Zähle im nächsten Spiel deine unerzwungenen Fehler und versuche, in jedem Satz weniger als im vorherigen zu machen.'}},
+ {id:'routine',t:'Matchroutine',sk:'kopf',
+  cards:[['Vor dem Match',['10 Minuten aufwärmen: Mobilisation, lockeres Einspielen, ein paar Überköpfe.','Einen einfachen Plan festlegen: 1–2 Fokuspunkte (z. B. deine aktiven Missionen).','Gegner beobachten: Wer hat welche Schwäche?']],
+         ['Zwischen den Punkten',['Atmen: 4 Sekunden ein, 6 Sekunden aus.','Fehler abhaken: Saite richten, kurz durchatmen, Reset.','Nächster Punkt, ein Plan – mit dem Partner absprechen.']]],
+  tip:'Profis haben zwischen den Punkten immer dieselbe Routine. Das beruhigt den Kopf und schärft den Fokus.',
+  q:[{k:'mc',q:'Was gehört in die Vorbereitung vor dem Match?',a:['Aufwärmen und 1–2 Fokuspunkte festlegen','Gar nichts – gleich loslegen','10 Fokuspunkte gleichzeitig','Nur Smash üben'],e:'Warm, mit klarem Mini-Plan.'},
+     {k:'tf',q:'Langes Ausatmen hilft, nach einem Fehler ruhiger zu werden.',a:true,e:'Das aktiviert das Entspannungssystem.'},
+     {k:'order',q:'Ordne die Routine nach einem Fehler.',a:['Fehler akzeptieren','Durchatmen','Saiten/Schläger richten','Plan für nächsten Punkt','Bereitschaftsstellung']},
+     {k:'mc',q:'Wie viele Fokuspunkte sind für ein Match sinnvoll?',a:['1–2','8–10','Keiner','So viele wie möglich'],e:'Weniger ist mehr – 1–2 klare Ziele.'}],
+  m:{t:'Reset-Routine',d:'Mach im nächsten Spiel nach jedem eigenen Fehler deine Reset-Routine: durchatmen, Schläger richten, Plan für den nächsten Punkt.'}}
+]}
+];
+const LESSONS=[];UNITS.forEach((u,ui)=>u.L.forEach((l,li)=>{l.ui=ui;l.li=li;l.idx=LESSONS.length;LESSONS.push(l);}));
+const LBYID=Object.fromEntries(LESSONS.map(l=>[l.id,l]));
+
+/* ================= Tagesdrills ================= */
+const DRILLS=[
+ {t:'Ball-Tippen',d:'100× den Ball auf dem Schläger tippen – abwechselnd Vorder- und Rückseite.',sk:'volley',min:5},
+ {t:'Schatten-Vorhand',d:'3×15 Vorhand-Schattenschläge: drehen, kurz ausholen, Treffpunkt vorn.',sk:'vorhand',min:6},
+ {t:'Schatten-Rückhand',d:'3×15 Rückhand-Schattenschläge – die freie Hand führt den Schläger.',sk:'rueckhand',min:6},
+ {t:'Split-Step-Reaktion',d:'3×1 Min: Split-Step, dann blitzschnell nach links oder rechts starten.',sk:'taktik',min:5},
+ {t:'Wand-Volleys',d:'3×30 Volleys gegen eine Hauswand – kein Ausholen, Handgelenk fest.',sk:'volley',min:8},
+ {t:'Rückwand-Beinarbeit',d:'4× 10 m seitlich rückwärts, dann vorwärts zurück. Kleine Schritte!',sk:'wand',min:6},
+ {t:'Bandeja-Schatten',d:'3×10: seitlich stellen, Schläger hoch hinter den Kopf, Slice vor dem Körper.',sk:'bandeja',min:6},
+ {t:'Lob-Zielwurf',d:'Wirf 20 Bälle mit Unterhand-Bogen in einen Korb 5 m entfernt – Gefühl für Höhe.',sk:'lob',min:6},
+ {t:'Aufschlag-Routine',d:'20 Schatten-Aufschläge: Ball fallen lassen, Hüfthöhe, Ziel laut ansagen.',sk:'aufschlag',min:5},
+ {t:'Atem-Reset',d:'5 Min Box-Breathing (4 ein – 4 halten – 4 aus – 4 halten). Dein Werkzeug nach Fehlern.',sk:'kopf',min:5},
+ {t:'Visualisierung',d:'5 Min: Spiele im Kopf 10 Punkte – vom Return bis zur Netzeroberung.',sk:'kopf',min:5},
+ {t:'Profi-Analyse',d:'Schau 10 Min Profi-Padel-Highlights und zähle, wie oft gelobbt wird.',sk:'taktik',min:10},
+ {t:'Ausfallschritt-Volley',d:'3×10 tiefe Ausfallschritte, jeweils mit einem Schatten-Volley.',sk:'volley',min:6},
+ {t:'Smash-Schatten',d:'3×10: drehen, freie Hand zeigt zum Ball, Treffpunkt hoch vor dem Kopf.',sk:'smash',min:5},
+ {t:'Matchplan schreiben',d:'Schreib 3 Dinge auf, die du im nächsten Match taktisch umsetzen willst.',sk:'taktik',min:4},
+ {t:'Wand-Fangen',d:'Wirf einen Ball an eine Wand, lass ihn aufspringen und fange ihn seitlich gedreht – 3×10.',sk:'wand',min:6},
+ {t:'Chiquita-Gefühl',d:'20 Bälle mit dem Schläger ganz sanft in einen Eimer 3 m vor dir spielen.',sk:'taktik',min:6},
+ {t:'Mobility',d:'8 Min Hüft- & Schultermobilität: Armkreisen, Ausfallschritt mit Rotation, Hüftöffner.',sk:'kopf',min:8}
+];
+
+/* ================= Hilfsfunktionen ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function today(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseD(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);}
+const dayDiff=(a,b)=>Math.round((parseD(b)-parseD(a))/864e5);
+function addDays(s,n){const d=parseD(s);d.setDate(d.getDate()+n);return today(d);}
+function weekKey(s=today()){const d=parseD(s);d.setDate(d.getDate()-(d.getDay()+6)%7);return today(d);}
+function hash(str){let h=2166136261;for(const c of String(str)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
+function rng(seed){let s=seed||1;return()=>{s=Math.imul(s^s>>>15,1|s);s^=s+Math.imul(s^s>>>7,61|s);return((s^s>>>14)>>>0)/4294967296;};}
+function shuffle(a,r=Math.random){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const WD=['So','Mo','Di','Mi','Do','Fr','Sa'];
+function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)return'Heute';if(diff===1)return'Gestern';return WD[d.getDay()]+', '+d.getDate()+'.'+(d.getMonth()+1)+'.';}
+
+/* ================= Zustand ================= */
+const KEY='padelup-v1';
+function defaults(){return{v:1,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockFrom:0,
+ xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
+ lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
+ day:{d:null,lessons:0,drills:0,xp:0,perfect:0,logs:0,missions:0,claimed:[],chest:false,goalHit:false},
+ extra:[],league:null,leagueMsg:null,ach:{},cnt:{perfect:0,missions:0},wear:{},owned:[],sound:true,theme:'auto',tab:'learn'};}
+let S;
+try{const raw=localStorage.getItem(KEY);S=Object.assign(defaults(),raw?JSON.parse(raw):{});}catch(e){S=defaults();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+/* ================= Sound & Effekte ================= */
+let actx;
+function beep(kind){
+ if(!S.sound)return;
+ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const seqs={ok:[[660,0],[990,.08]],bad:[[220,0],[165,.12]],done:[[523,0],[659,.1],[784,.2],[1046,.32]],coin:[[988,0],[1319,.07]],tap:[[520,0]],pop:[[330,0],[660,.05]]};
+  const seq=seqs[kind]||seqs.tap,t0=actx.currentTime,vol=kind==='bad'?.07:.16;
+  seq.forEach(([f,d])=>{const o=actx.createOscillator(),g=actx.createGain();o.type=kind==='bad'?'square':'triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(vol,t0+d+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.2);o.connect(g).connect(actx.destination);o.start(t0+d);o.stop(t0+d+.22);});
+ }catch(e){}
+}
+function toast(html,ic){const t=document.createElement('div');t.className='toast';t.innerHTML=(ic||'')+'<span>'+html+'</span>';$('#toasts').appendChild(t);setTimeout(()=>t.remove(),3400);}
+function confetti(){
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const c=$('#fx'),ctx=c.getContext('2d'),dpr=window.devicePixelRatio||1;
+ c.width=innerWidth*dpr;c.height=innerHeight*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+ const cols=['#1F5FD6','#C9E52B','#F2B705','#1A9A5E','#FF7A1A','#7A4CC2','#E5484D'];
+ const P=Array.from({length:140},()=>({x:innerWidth/2+(Math.random()-.5)*120,y:innerHeight*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:Math.random()*6+4,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,va:(Math.random()-.5)*.4}));
+ const t0=performance.now();
+ (function f(t){ctx.clearRect(0,0,innerWidth,innerHeight);const k=(t-t0)/2400;P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a);ctx.globalAlpha=Math.max(0,1-k);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);ctx.restore();});if(k<1)requestAnimationFrame(f);else ctx.clearRect(0,0,innerWidth,innerHeight);})(t0);
+}
+function applyTheme(){if(S.theme==='auto')document.documentElement.removeAttribute('data-theme');else document.documentElement.dataset.theme=S.theme;}
+
+/* ================= Spiellogik ================= */
+function lvl(x){let L=1,need=60;while(x>=need){x-=need;L++;need=60+(L-1)*20;}return{L,cur:x,need};}
+const TITLES=[[1,'Novato'],[3,'Aficionado'],[6,'Jugador'],[10,'Competidor'],[15,'Avanzado'],[20,'Experto'],[30,'Profesional'],[40,'Leyenda']];
+const title=L=>TITLES.filter(t=>L>=t[0]).pop()[1];
+function skLv(x){x=x||0;let L=0,need=30;while(x>=need&&L<10){x-=need;L++;need=30+L*20;}return{L,cur:x,need,max:L>=10};}
+const doubleOn=()=>Date.now()<S.dbl;
+const lessonDone=id=>!!S.lessons[id];
+function stars(id){const r=S.lessons[id];if(!r)return 0;return 1+(r.perfect?1:0)+(S.missions[id]&&S.missions[id].st==='done'?1:0);}
+function unlocked(idx){if(idx<=S.unlockFrom||(S.extra||[]).includes(LESSONS[idx].id))return true;return lessonDone(LESSONS[idx-1].id);}
+/* Personalisierung: Schwäche/Fokus schaltet die erste Lektion dieses Skills frei */
+function unlockSkill(k){if(LESSONS.some(l=>l.sk===k&&unlocked(l.idx)))return null;const l=LESSONS.find(l=>l.sk===k);if(!l)return null;S.extra=S.extra||[];S.extra.push(l.id);save();return l;}
+const nDone=()=>LESSONS.filter(l=>lessonDone(l.id)).length;
+const activeMissions=()=>Object.entries(S.missions).filter(([id,m])=>m.st==='active'&&LBYID[id]).map(([id,m])=>({id,m,l:LBYID[id]}));
+const doneMissions=()=>Object.entries(S.missions).filter(([id,m])=>m.st==='done'&&LBYID[id]).map(([id,m])=>({id,m,l:LBYID[id]}));
+const drillOfDay=()=>DRILLS[hash('drill'+today())%DRILLS.length];
+
+function tick(){
+ const t=today(),msgs=[];
+ if(S.day.d!==t)S.day={d:t,lessons:0,drills:0,xp:0,perfect:0,logs:0,missions:0,claimed:[],chest:false,goalHit:false};
+ if(S.last&&S.streak>0){
+  const gap=dayDiff(S.last,t);
+  if(gap>1){const miss=gap-1;
+   if(S.freezes>=miss){S.freezes-=miss;S.last=addDays(t,-1);msgs.push(['Streak-Schutz eingesetzt – deine '+S.streak+'-Tage-Serie lebt!',I.snow]);}
+   else{msgs.push(['Deine Serie ist gerissen. Heute startet eine neue!',I.flame]);S.streak=0;}
+  }
+ }
+ leagueTick(msgs);
+ save();return msgs;
+}
+function addXP(n,sk){
+ if(doubleOn())n*=2;
+ const t=today();
+ S.xp+=n;S.days[t]=(S.days[t]||0)+n;S.day.xp+=n;
+ leagueEnsure();S.league.me+=n;
+ if(sk)S.skillXp[sk]=(S.skillXp[sk]||0)+n;
+ let streakUp=false;
+ if(S.last!==t){S.streak=(S.last===addDays(t,-1))?S.streak+1:1;S.last=t;S.best=Math.max(S.best,S.streak);streakUp=true;}
+ let goal=false;
+ if(!S.day.goalHit&&S.day.xp>=S.goal){S.day.goalHit=true;S.gems+=10;goal=true;}
+ save();
+ return{n,streakUp,goal};
+}
+
+/* ----- Liga ----- */
+const TIERS=[{n:'Club',c:'#B07A3A'},{n:'Regional',c:'#8E9AAF'},{n:'National',c:'#E0A800'},{n:'Challenger',c:'#1A9A5E'},{n:'Premier',c:'#1F5FD6'},{n:'Major',c:'#7A4CC2'}];
+const BOTN=['Carla M.','Javi','Lena K.','Tim B.','Sofía','Marco','Jule','Ahmet','Nora','Lukas','Pablo','Mia','Ben','Elif','Dani','Paula','Jonas','Inés','Felix','Alba'];
+const AVC=['#1F5FD6','#1A9A5E','#C8650A','#C8372A','#7A4CC2','#0F7F92','#B43A72','#557F17'];
+function leagueNew(tier){const wk=weekKey();const r=rng(hash(wk+':'+tier));return{wk,tier,me:0,bots:shuffle(BOTN,r).slice(0,9).map(n=>({n,rate:Math.round((14+tier*9)*(0.35+r()*1.4))}))};}
+function leagueEnsure(){if(!S.league)S.league=leagueNew(0);}
+function botXp(b,final){const el=final?7:Math.min(7,(Date.now()-parseD(S.league.wk).getTime())/864e5);return Math.floor(b.rate*el);}
+function ranking(final){leagueEnsure();return [...S.league.bots.map(b=>({n:b.n,xp:botXp(b,final)})),{n:S.name||'Du',xp:S.league.me,me:true}].sort((a,b)=>b.xp-a.xp||(a.me?-1:1));}
+function leagueTick(msgs){
+ leagueEnsure();
+ if(S.league.wk!==weekKey()){
+  const rank=ranking(true).findIndex(x=>x.me)+1,tier=S.league.tier;let nt=tier;
+  if(rank<=3&&S.league.me>0&&tier<TIERS.length-1){nt=tier+1;S.leagueMsg={k:'up',rank,t:TIERS[nt].n};}
+  else if(rank>=9&&tier>0){nt=tier-1;S.leagueMsg={k:'down',rank,t:TIERS[nt].n};}
+  else S.leagueMsg={k:'stay',rank,t:TIERS[tier].n};
+  if(rank<=3&&S.league.me>0)S.gems+=[0,50,30,20][rank];
+  S.league=leagueNew(nt);
+  msgs&&msgs.push([S.leagueMsg.k==='up'?'Aufstieg in die '+S.leagueMsg.t+'-Liga!':S.leagueMsg.k==='down'?'Abstieg in die '+S.leagueMsg.t+'-Liga.':'Neue Ligawoche gestartet.',I.trophy]);
+ }
+}
+
+/* ----- Quests ----- */
+const QUESTS={
+ lesson:{t:'Schließe 1 Lektion ab',n:1,k:'lessons',ic:'book'},
+ lesson2:{t:'Schließe 2 Lektionen ab',n:2,k:'lessons',ic:'book'},
+ drill:{t:'Erledige den Tagesdrill',n:1,k:'drills',ic:'dumbbell'},
+ xp40:{t:'Sammle 40 XP',n:40,k:'xp',ic:'bolt'},
+ xp80:{t:'Sammle 80 XP',n:80,k:'xp',ic:'bolt'},
+ perfect:{t:'Mach eine Lektion fehlerfrei',n:1,k:'perfect',ic:'star'},
+ log:{t:'Trage eine Session ins Tagebuch ein',n:1,k:'logs',ic:'pen'},
+ mission:{t:'Werte eine Mission aus',n:1,k:'missions',ic:'target'}
+};
+function questsToday(){if(S.day.q)return S.day.q;const r=rng(hash('q'+today()));const pool=Object.keys(QUESTS).filter(k=>k!=='mission'||Object.keys(S.missions).length);const ids=shuffle(pool,r);const out=[];for(const id of ids){if(out.some(o=>o.slice(0,2)===id.slice(0,2)))continue;out.push(id);if(out.length===3)break;}S.day.q=out;save();return out;}
+const qProg=id=>Math.min(QUESTS[id].n,S.day[QUESTS[id].k]||0);
+
+/* ----- Erfolge ----- */
+const wins=()=>S.journal.filter(j=>j.res==='w').length;
+const hours=()=>S.journal.reduce((a,j)=>a+(+j.dur||0),0)/60;
+const ACH=[
+ {id:'l1',t:'Erster Aufschlag',d:'Erste Lektion abgeschlossen',f:()=>nDone()>=1},
+ {id:'l10',t:'Wissbegierig',d:'10 Lektionen abgeschlossen',f:()=>nDone()>=10},
+ {id:'lall',t:'Padel-Professor',d:'Alle Lektionen abgeschlossen',f:()=>nDone()>=LESSONS.length},
+ {id:'s3',t:'Warmgespielt',d:'3 Tage Streak',f:()=>S.best>=3},
+ {id:'s7',t:'Wochen-Warrior',d:'7 Tage Streak',f:()=>S.best>=7},
+ {id:'s30',t:'Unaufhaltsam',d:'30 Tage Streak',f:()=>S.best>=30},
+ {id:'j1',t:'Tagebuch eröffnet',d:'Erste Session eingetragen',f:()=>S.journal.length>=1},
+ {id:'j10',t:'Court-Stammgast',d:'10 Sessions eingetragen',f:()=>S.journal.length>=10},
+ {id:'j50',t:'Padel-Süchtig',d:'50 Sessions eingetragen',f:()=>S.journal.length>=50},
+ {id:'w5',t:'Siegertyp',d:'5 Matches gewonnen',f:()=>wins()>=5},
+ {id:'h10',t:'10 Stunden Court',d:'10 Stunden gespielt',f:()=>hours()>=10},
+ {id:'m1',t:'Mission erfüllt',d:'Erste Mission gemeistert',f:()=>S.cnt.missions>=1},
+ {id:'m10',t:'Spezialagent',d:'10 Missionen gemeistert',f:()=>S.cnt.missions>=10},
+ {id:'p5',t:'Perfektionist',d:'5 fehlerfreie Lektionen',f:()=>S.cnt.perfect>=5},
+ {id:'d7',t:'Drill-Maschine',d:'7 Tagesdrills erledigt',f:()=>Object.keys(S.drills).length>=7},
+ {id:'sk3',t:'Allrounder',d:'Alle Skills auf Level 3',f:()=>SKIDS.every(k=>skLv(S.skillXp[k]).L>=3)},
+ {id:'t1',t:'Unit-Meister',d:'Erste Meisterprüfung bestanden',f:()=>Object.keys(S.tests).length>=1},
+ {id:'lg',t:'Aufsteiger',d:'Erster Liga-Aufstieg',f:()=>S.league&&S.league.tier>=1}
+];
+function checkAch(){ACH.forEach(a=>{if(!S.ach[a.id]&&a.f()){S.ach[a.id]=today();S.gems+=15;setTimeout(()=>{toast('Erfolg: <b>'+esc(a.t)+'</b> · +15 Bälle',I.trophy);beep('coin');},600);}});save();}
+
+/* ----- Personalisierung ----- */
+function selfRating(){
+ const out={};SKIDS.forEach(k=>{const r=S.journal.filter(j=>j.rt&&j.rt[k]).slice(0,5).map(j=>j.rt[k]);out[k]=r.length?r.reduce((a,b)=>a+b,0)/r.length:null;});return out;
+}
+function weakest(){
+ const sr=selfRating(),lost={};S.journal.slice(0,8).forEach(j=>{if(j.lost)lost[j.lost]=(lost[j.lost]||0)+1;});
+ const score=k=>(sr[k]??3)-(S.focus.includes(k)?.8:0)-(lost[k]||0)*.4+skLv(S.skillXp[k]).L*.15;
+ return [...SKIDS].sort((a,b)=>score(a)-score(b));
+}
+function recommend(){
+ for(const k of weakest()){const l=LESSONS.find(l=>l.sk===k&&unlocked(l.idx)&&stars(l.id)<3&&!(S.missions[l.id]&&S.missions[l.id].st==='active'));if(l)return{l,k};}
+ return null;
+}
+
+/* ================= Rendering ================= */
+const TABS=[['learn','Lernen','home'],['missions','Missionen','target'],['journal','Tagebuch','book'],['league','Liga','trophy'],['profile','Profil','user']];
+function render(){
+ applyTheme();
+ if(!S.onb){renderOnboarding();return;}
+ renderTop();renderNav();
+ const m=$('#main');
+ m.innerHTML={learn:viewLearn,missions:viewMissions,journal:viewJournal,league:viewLeague,profile:viewProfile}[S.tab]();
+ afterRender();
+}
+function ringSvg(p){const r=12,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 30 30"><circle cx="15" cy="15" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="4"/><circle cx="15" cy="15" r="${r}" fill="none" stroke="${p>=1?'var(--good)':'var(--gold)'}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-Math.min(1,p))}" transform="rotate(-90 15 15)"/>${p>=1?'<path d="M10 15.5l3.2 3.2L20 12" stroke="var(--good)" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>':''}</svg>`;}
+function renderTop(){
+ const lv=lvl(S.xp);const on=S.last===today();
+ $('#top').innerHTML=`
+ <button class="stat" data-act="lvlInfo" aria-label="Level ${lv.L}"><span class="c-acc">${I.racket}</span>${lv.L}</button>
+ <button class="stat ${on?'':'off'}" data-act="streakInfo" aria-label="Streak ${S.streak} Tage"><span class="c-flame">${I.flame}</span>${S.streak}</button>
+ <button class="stat" data-act="shop" aria-label="${S.gems} Bälle"><span class="c-ball">${I.ball}</span>${S.gems}</button>
+ <button class="stat" data-act="goalInfo" aria-label="Tagesziel">${ringSvg(S.day.xp/S.goal)}<span style="font-size:15px">${S.day.xp}/${S.goal}</span>${doubleOn()?'<span class="chip ball">2×</span>':''}</button>`;
+}
+function renderNav(){
+ const am=activeMissions().length;
+ const qOpen=questsToday().filter(id=>qProg(id)>=QUESTS[id].n&&!S.day.claimed.includes(id)).length;
+ $('#nav').innerHTML=TABS.map(([id,n,ic])=>`<button data-act="tab" data-id="${id}" ${S.tab===id?'aria-current="page"':''}>${I[ic]}<span>${n}</span>${id==='missions'&&am?`<i class="dot">${am}</i>`:''}${id==='league'&&qOpen?`<i class="dot">${qOpen}</i>`:''}</button>`).join('');
+}
+const starRow=(n,max=3)=>`<div class="stars">${Array.from({length:max},(_,i)=>`<span class="${i<n?'':'e'}">${I.star}</span>`).join('')}</div>`;
+
+function heroTip(){
+ const am=activeMissions();const h=new Date().getHours();
+ const hi=(h<11?'Guten Morgen':h<18?'Hey':'Guten Abend')+(S.name?', '+esc(S.name):'')+'!';
+ if(!S.day.goalHit&&S.day.xp===0&&S.streak>0)return hi+' Halte deine '+S.streak+'-Tage-Serie am Leben!';
+ if(am.length)return hi+' Nächstes Match: „'+esc(am[0].l.m.t)+'“ – du schaffst das!';
+ if(S.day.goalHit)return 'Tagesziel geschafft! Vamos! Jede Extra-Lektion bringt dich weiter.';
+ return hi+' Bereit für deine nächste Lektion?';
+}
+function viewLearn(){
+ const d=drillOfDay(),dd=S.drills[today()];
+ const rec=recommend();
+ let cur=LESSONS.findIndex(l=>l.idx>=S.unlockFrom&&unlocked(l.idx)&&!lessonDone(l.id));if(cur<0)cur=LESSONS.findIndex(l=>unlocked(l.idx)&&!lessonDone(l.id));
+ let h=`<div class="hero">${mascot(S.day.goalHit?'happy':'')}<div class="hero-body"><p>${heroTip()}</p>
+  <div class="goal"><span>Tagesziel</span><div class="bar"><i style="width:${Math.min(100,S.day.xp/S.goal*100)}%"></i></div><span>${S.day.xp}/${S.goal} XP</span></div></div></div>
+ <button class="mini ${dd?'done':''}" data-act="drill"><span class="ic" style="--c:var(--u4)">${dd?I.check:I.dumbbell}</span><span class="grow"><span class="eyebrow muted">Tagesdrill · ${d.min} Min</span><h3>${esc(d.t)}</h3><p>${dd?'Erledigt – stark!':esc(d.d)}</p></span><span class="go">${I.chev}</span></button>`;
+ if(rec)h+=`<button class="mini" data-act="lesson" data-id="${rec.l.id}"><span class="ic" style="--c:${SK[rec.k].c}">${I[SK[rec.k].ic]}</span><span class="grow"><span class="eyebrow muted">Empfohlen für dich · ${esc(SK[rec.k].s)}</span><h3>${esc(rec.l.t)}</h3><p>${lessonDone(rec.l.id)?'Mission offen – hol dir den 3. Stern':'Deine Baustelle – jetzt verbessern'}</p></span><span class="go">${I.chev}</span></button>`;
+ const xs=[0,44,64,44,0,-44,-64,-44];
+ UNITS.forEach((u,ui)=>{
+  const doneN=u.L.filter(l=>lessonDone(l.id)).length,uLocked=!u.L.some(l=>unlocked(l.idx));
+  h+=`<section class="unit ${uLocked?'locked':''}" style="--c:${u.c}"><div class="unit-head"><div><div class="eyebrow">Einheit ${ui+1}</div><h2>${esc(u.t)}</h2><div class="sub">${esc(u.d)}</div></div><div class="unit-prog">${doneN}/${u.L.length}</div></div><div class="path">`;
+  const items=[];u.L.forEach((l,li)=>{items.push({k:'l',l});if(li===1)items.push({k:'chest'});});items.push({k:'test'});
+  items.forEach((it,i)=>{
+   const x=xs[i%xs.length];
+   if(it.k==='l'){const l=it.l,ul=unlocked(l.idx),st=stars(l.id),isCur=l.idx===cur,ma=S.missions[l.id]&&S.missions[l.id].st==='active';
+    h+=`<div class="nodewrap" style="--x:${x}px">${isCur?'<span class="startbubble">Los!</span>':''}<button class="node ${ul?'':'locked'} ${isCur?'current':''} ${st===3?'mastered':''}" data-act="lesson" data-id="${l.id}" aria-label="${esc(l.t)}">${ul?I[SK[l.sk].ic]:I.lock}${ma?`<span class="mbadge">${I.target}</span>`:''}</button>${ul&&lessonDone(l.id)?starRow(st):''}<div class="nodelabel">${esc(l.t)}</div></div>`;}
+   else if(it.k==='chest'){const key='c'+ui,ok=lessonDone(u.L[1].id),got=S.chests[key];
+    h+=`<div class="nodewrap" style="--x:${x}px"><button class="node chest ${ok?'':'locked'} ${got?'done':''} ${ok&&!got?'current':''}" data-act="chest" data-key="${key}" aria-label="Schatztruhe">${I.chest}</button></div>`;}
+   else{const ok=u.L.every(l=>lessonDone(l.id)),passed=S.tests[ui];
+    h+=`<div class="nodewrap" style="--x:${x}px"><button class="node test ${ok?'':'locked'} ${passed?'mastered':''} ${ok&&!passed?'current':''}" data-act="test" data-ui="${ui}" aria-label="Meisterprüfung">${I.trophy}</button><div class="nodelabel">Meisterprüfung</div></div>`;}
+  });
+  h+='</div></section>';
+ });
+ h+=`<div class="card empty">${mascot('happy')}<h3>Mehr Lektionen folgen</h3><p class="muted small">Wiederhole Lektionen, sammle alle Sterne und erfülle deine Missionen auf dem Court.</p></div>`;
+ return h;
+}
+
+function missionCard(x,showBtn=true){
+ const tr=(x.m.tries||[]);
+ return `<div class="mission"><div class="mh"><span class="ic" style="--c:${SK[x.l.sk].c}">${I[SK[x.l.sk].ic]}</span><div class="grow"><div class="eyebrow muted">${esc(SK[x.l.sk].n)} · ${esc(x.l.t)}</div><h3>${esc(x.l.m.t)}</h3></div></div>
+ <div class="mb"><p>${esc(x.l.m.d)}</p><div class="tries">${tr.length?'Versuche:':'Noch nicht ausprobiert'} ${tr.map(t=>`<i class="r${t.r}" title="${['','Versucht','Teilweise','Gemeistert'][t.r]}"></i>`).join('')}</div>
+ ${showBtn?`<div class="row"><button class="btn sm ball grow" data-act="rateMission" data-id="${x.id}">${I.check} Auswerten</button><button class="btn sm ghost" data-act="dropMission" data-id="${x.id}" aria-label="Mission pausieren">${I.x}</button></div>`:''}</div></div>`;
+}
+function viewMissions(){
+ const am=activeMissions(),dm=doneMissions();
+ let h=`<h2 class="sec-title">Match-Missionen</h2><p class="sec-sub">Lektionen lernen ist gut – auf dem Court anwenden macht dich besser. Bis zu 3 Missionen gleichzeitig.</p>`;
+ if(am.length){
+  h+=`<div class="plan"><div class="eyebrow" style="opacity:.85">Dein Plan fürs nächste Match</div><h2>Fokus auf ${am.length===1?'eine Sache':am.length+' Dinge'}</h2><ol>${am.map(x=>`<li>${esc(x.l.m.t)}</li>`).join('')}</ol><button class="btn block" data-act="journalNew">${I.pen} Match eintragen & auswerten</button></div>`;
+  h+=`<div class="stack">${am.map(x=>missionCard(x)).join('')}</div>`;
+ }else{
+  h+=`<div class="card empty">${mascot()}<h3>Keine aktive Mission</h3><p class="muted">Schließe eine Lektion ab – danach bekommst du eine konkrete Aufgabe für dein nächstes Spiel.</p><button class="btn" data-act="tab" data-id="learn">Zur nächsten Lektion</button></div>`;
+ }
+ const paused=Object.entries(S.missions).filter(([id,m])=>m.st==='paused'&&LBYID[id]);
+ if(paused.length)h+=`<h2 class="sec-title">Pausiert</h2><div class="card stack">${paused.map(([id])=>`<div class="row"><span class="grow b">${esc(LBYID[id].m.t)}</span><button class="btn sm ghost" data-act="startMission" data-id="${id}">Aktivieren</button></div>`).join('')}</div>`;
+ h+=`<h2 class="sec-title">Gemeistert · ${dm.length}</h2>`;
+ h+=dm.length?`<div class="card stack">${dm.map(x=>`<div class="row"><span class="ic" style="--c:var(--gold)">${I.trophy}</span><div class="grow"><b>${esc(x.l.m.t)}</b><div class="muted small">${esc(SK[x.l.sk].n)} · ${x.m.doneAt?fmtDate(x.m.doneAt):''}</div></div></div>`).join('')}</div>`:`<p class="muted">Deine gemeisterten Missionen landen hier als Trophäen.</p>`;
+ return h;
+}
+
+function radarSvg(vals){
+ const n=SKIDS.length,cx=170,cy=150,R=105;
+ const pt=(i,v)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*v,cy+Math.sin(a)*R*v];};
+ let g='';[.2,.4,.6,.8,1].forEach(f=>{g+=`<polygon points="${SKIDS.map((_,i)=>pt(i,f).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1.5"/>`;});
+ SKIDS.forEach((k,i)=>{const [x,y]=pt(i,1);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--line)" stroke-width="1.5"/>`;const [tx,ty]=pt(i,1.2);g+=`<text x="${tx}" y="${ty+4}" text-anchor="middle">${esc(SK[k].s)}</text>`;});
+ const has=SKIDS.some(k=>vals[k]!=null);
+ if(has){const poly=SKIDS.map((k,i)=>pt(i,(vals[k]??0)/5).join(',')).join(' ');g+=`<polygon points="${poly}" fill="color-mix(in srgb,var(--accent) 28%,transparent)" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>`;SKIDS.forEach((k,i)=>{if(vals[k]!=null){const [x,y]=pt(i,vals[k]/5);g+=`<circle cx="${x}" cy="${y}" r="4" fill="var(--accent)"/>`;}});}
+ return `<svg class="radar" viewBox="0 0 340 300" role="img" aria-label="Selbsteinschätzung pro Skill">${g}</svg>`;
+}
+function viewJournal(){
+ const J=S.journal,matches=J.filter(j=>j.res),w=wins();
+ const wk=weekKey(),thisWeek=J.filter(j=>weekKey(j.date)===wk).length;
+ let streakW=0;for(const j of [...matches].sort((a,b)=>b.date.localeCompare(a.date))){if(j.res==='w')streakW++;else break;}
+ let h=`<h2 class="sec-title">Trainingstagebuch</h2>
+ <div class="card stack" style="margin-bottom:14px"><div class="row"><div class="grow"><div class="eyebrow muted">Wochenziel</div><b>${thisWeek} von ${S.weekGoal} Sessions</b></div>${thisWeek>=S.weekGoal?'<span class="chip good">'+I.check+' geschafft</span>':''}</div><div class="bar green"><i style="width:${Math.min(100,thisWeek/S.weekGoal*100)}%"></i></div>
+ <button class="btn block" data-act="journalNew">${I.plus} Session eintragen</button></div>
+ <div class="statgrid">
+  <div class="sg"><span class="c-acc">${I.racket}</span><div><b>${J.length}</b><span>Sessions</span></div></div>
+  <div class="sg"><span class="c-gold">${I.trophy}</span><div><b>${matches.length?Math.round(w/matches.length*100)+'%':'–'}</b><span>Siegquote (${w}/${matches.length})</span></div></div>
+  <div class="sg"><span class="c-good">${I.clock}</span><div><b>${hours().toFixed(1).replace('.',',')} h</b><span>auf dem Court</span></div></div>
+  <div class="sg"><span class="c-flame">${I.flame}</span><div><b>${streakW}</b><span>Siege in Folge</span></div></div>
+ </div>`;
+ // Aktivität: letzte 8 Wochen in Minuten
+ const weeks=[];for(let i=7;i>=0;i--){const k=addDays(wk,-7*i);weeks.push({k,m:J.filter(j=>weekKey(j.date)===k).reduce((a,j)=>a+(+j.dur||0),0)});}
+ const mx=Math.max(60,...weeks.map(x=>x.m));
+ h+=`<h2 class="sec-title">Spielzeit pro Woche</h2><div class="card"><div class="chart">${weeks.map((x,i)=>`<div class="col"><em>${x.m?Math.round(x.m/6)/10+'h':''}</em><i class="${i===7?'now':''}" style="height:${x.m/mx*100}%"></i><span>${i===7?'Jetzt':parseD(x.k).getDate()+'.'+(parseD(x.k).getMonth()+1)+'.'}</span></div>`).join('')}</div></div>`;
+ const sr=selfRating(),wk1=weakest()[0];
+ h+=`<h2 class="sec-title">Dein Spielerprofil</h2><div class="card stack">${radarSvg(sr)}
+  ${SKIDS.some(k=>sr[k]!=null)?'':'<p class="muted small" style="text-align:center">Bewerte nach deinen Sessions deine Schläge (1–5) – hier entsteht dann dein persönliches Spielerprofil.</p>'}
+  <div class="row"><span class="ic" style="--c:var(--bad)">${I.target}</span><div class="grow"><div class="eyebrow muted">Deine Baustelle</div><b>${esc(SK[wk1].n)}</b></div>${(()=>{const l=LESSONS.find(l=>l.sk===wk1&&unlocked(l.idx));return l?`<button class="btn sm" data-act="lesson" data-id="${l.id}">Üben</button>`:'';})()}</div></div>`;
+ h+=`<h2 class="sec-title">Einträge</h2>`;
+ if(!J.length)h+=`<div class="card empty">${mascot()}<h3>Noch keine Einträge</h3><p class="muted">Trag dein nächstes Match oder Training ein – mit Ergebnis, Gefühl und Selbsteinschätzung.</p></div>`;
+ else h+=`<div class="card">${J.map((j,i)=>`<button class="entry" data-act="journalView" data-i="${i}"><span class="ic" style="--c:${j.type==='Match'||j.type==='Turnier'?'var(--accent)':'var(--u4)'}">${j.type==='Training'||j.type==='Trainerstunde'?I.dumbbell:I.racket}</span><div class="grow"><h3>${esc(j.type)}${j.score?' · '+esc(j.score):''}</h3><p>${fmtDate(j.date)} · ${j.dur} Min${j.partner?' · mit '+esc(j.partner):''}</p></div>${j.res?`<span class="res ${j.res}">${{w:'Sieg',l:'Niederlage',d:'Remis'}[j.res]}</span>`:''}</button>`).join('')}</div>`;
+ return h;
+}
+
+function tierIcon(t){return `<svg viewBox="0 0 24 26"><path fill="${TIERS[t].c}" d="M12 1 3 4.5v7.2c0 6 3.9 10.7 9 12.8 5.1-2.1 9-6.8 9-12.8V4.5z"/><path fill="rgba(255,255,255,.35)" d="M12 1v23.5c-5.1-2.1-9-6.8-9-12.8V4.5z"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="900" fill="#fff" font-family="Nunito,sans-serif">${t+1}</text></svg>`;}
+function viewLeague(){
+ const qs=questsToday();
+ let h=`<h2 class="sec-title">Tägliche Quests</h2><div class="card stack">`;
+ qs.forEach(id=>{const q=QUESTS[id],p=qProg(id),ok=p>=q.n,cl=S.day.claimed.includes(id);
+  h+=`<div class="row"><span class="ic" style="--c:var(--gold)">${I[q.ic]}</span><div class="grow"><b>${esc(q.t)}</b><div class="goal"><div class="bar thin"><i style="width:${p/q.n*100}%"></i></div><span>${p}/${q.n}</span></div></div>${cl?`<span class="chip good">${I.check}</span>`:ok?`<button class="btn sm gold" data-act="claim" data-id="${id}">+10</button>`:`<span class="chip">${I.ball} 10</span>`}</div>`;});
+ const all=qs.every(id=>S.day.claimed.includes(id));
+ h+=`<button class="btn ${S.day.chest?'ghost':'gold'} block" data-act="questChest" ${all&&!S.day.chest?'':'disabled'}>${I.chest} ${S.day.chest?'Bonustruhe geöffnet':'Bonustruhe (alle 3 Quests)'}</button></div>`;
+ leagueEnsure();const L=S.league,rk=ranking(),days=7-Math.floor((Date.now()-parseD(L.wk).getTime())/864e5);
+ h+=`<h2 class="sec-title">${TIERS[L.tier].n}-Liga</h2><div class="tiers">${TIERS.map((t,i)=>`<span class="tier ${i===L.tier?'on':''}">${tierIcon(i)}</span>`).join('')}</div>
+ <p class="sec-sub" style="text-align:center">Top 3 steigen auf · noch ${days} ${days===1?'Tag':'Tage'} · XP zählen ab Montag</p><div class="card" style="padding:8px">`;
+ rk.forEach((r,i)=>{
+  if(i===3&&L.tier<TIERS.length-1)h+='<div class="zone up">Aufstiegszone</div>';
+  if(i===8&&L.tier>0)h+='<div class="zone down">Abstiegszone</div>';
+  h+=`<div class="lrow ${r.me?'me':''}"><span class="lrank ${i<3?'top':''}">${i+1}</span><span class="av" style="background:${r.me?'var(--ball)':AVC[hash(r.n)%AVC.length]};${r.me?'color:var(--ball-ink)':''}">${esc((r.n||'?')[0])}</span><span class="grow">${esc(r.n)}${r.me?' (du)':''}</span><span class="lxp">${r.xp} XP</span></div>`;});
+ h+='</div>';
+ return h;
+}
+
+function viewProfile(){
+ const lv=lvl(S.xp);
+ let h=`<div class="profile-head">${mascot('happy')}<div class="grow"><div class="lvl-badge">Level ${lv.L} · ${title(lv.L)}</div><h2 style="font-size:26px">${esc(S.name||'Padel-Spieler')}</h2><div class="muted b small">${{rechts:'Spielt rechts (Drive)',links:'Spielt links (Revés)',beide:'Spielt beide Seiten'}[S.side]}</div>
+ <div class="goal" style="margin-top:8px"><div class="bar blue"><i style="width:${lv.cur/lv.need*100}%"></i></div><span>${lv.cur}/${lv.need} XP</span></div></div></div>
+ <div class="statgrid" style="margin-top:16px">
+  <div class="sg"><span class="c-flame">${I.flame}</span><div><b>${S.best}</b><span>Längste Serie</span></div></div>
+  <div class="sg"><span class="c-acc">${I.bolt}</span><div><b>${S.xp}</b><span>XP gesamt</span></div></div>
+  <div class="sg"><span class="c-gold">${I.star}</span><div><b>${LESSONS.reduce((a,l)=>a+stars(l.id),0)}/${LESSONS.length*3}</b><span>Sterne</span></div></div>
+  <div class="sg"><span class="c-good">${I.target}</span><div><b>${S.cnt.missions}</b><span>Missionen</span></div></div>
+ </div>
+ <h2 class="sec-title">Skills</h2><p class="sec-sub">Lektionen, Drills und Missionen trainieren deine Skills bis Level 10.</p><div class="card stack">`;
+ SKIDS.forEach(k=>{const s=skLv(S.skillXp[k]);h+=`<div class="skill"><span class="ic" style="--c:${SK[k].c}">${I[SK[k].ic]}</span><div class="grow"><h3><span>${esc(SK[k].n)}${S.focus.includes(k)?' <span class="chip">Fokus</span>':''}</span><em>Lv ${s.L}</em></h3><div class="bar thin blue"><i style="width:${s.max?100:s.cur/s.need*100}%"></i></div></div></div>`;});
+ h+=`</div><h2 class="sec-title">Erfolge · ${Object.keys(S.ach).length}/${ACH.length}</h2><div class="ach">${ACH.map(a=>`<div class="achc ${S.ach[a.id]?'':'off'}"><span class="medal">${S.ach[a.id]?I.trophy:I.lock}</span><h3>${esc(a.t)}</h3><p>${esc(a.d)}</p></div>`).join('')}</div>
+ <h2 class="sec-title">Shop</h2><button class="btn ball block" data-act="shop">${I.bag} Shop öffnen · ${S.gems} Bälle</button>
+ <h2 class="sec-title">Einstellungen</h2><div class="card stack">
+  <div><label class="lab" for="nm">Name</label><input id="nm" class="field" value="${esc(S.name)}" maxlength="24" data-act="noop"></div>
+  <div><span class="lab">Seite</span><div class="seg">${[['rechts','Rechts'],['links','Links'],['beide','Beide']].map(([v,n])=>`<button data-act="set" data-k="side" data-v="${v}" aria-pressed="${S.side===v}">${n}</button>`).join('')}</div></div>
+  <div><span class="lab">Tagesziel</span><div class="seg">${[10,20,30,50].map(v=>`<button data-act="set" data-k="goal" data-v="${v}" aria-pressed="${S.goal===v}">${v} XP</button>`).join('')}</div></div>
+  <div><span class="lab">Sessions pro Woche</span><div class="seg">${[1,2,3,4,5].map(v=>`<button data-act="set" data-k="weekGoal" data-v="${v}" aria-pressed="${S.weekGoal===v}">${v}</button>`).join('')}</div></div>
+  <div><span class="lab">Fokus-Skills</span><div class="seg">${SKIDS.map(k=>`<button data-act="focus" data-k="${k}" aria-pressed="${S.focus.includes(k)}">${esc(SK[k].s)}</button>`).join('')}</div></div>
+  <div><span class="lab">Design</span><div class="seg">${[['auto','System'],['light','Hell'],['dark','Dunkel']].map(([v,n])=>`<button data-act="set" data-k="theme" data-v="${v}" aria-pressed="${S.theme===v}">${n}</button>`).join('')}</div></div>
+  <div><span class="lab">Sound</span><div class="seg"><button data-act="set" data-k="sound" data-v="1" aria-pressed="${S.sound}">An</button><button data-act="set" data-k="sound" data-v="0" aria-pressed="${!S.sound}">Aus</button></div></div>
+ </div>
+ <h2 class="sec-title">Fortschritt sichern</h2><div class="card stack"><p class="muted small">Dein Fortschritt liegt nur auf diesem Gerät. Mit dem Code kannst du ihn sichern oder auf ein anderes Gerät übertragen.</p>
+ <div class="row"><button class="btn sm ghost grow" data-act="export">Code kopieren</button><button class="btn sm ghost grow" data-act="import">Code einfügen</button></div>
+ <button class="linkbtn" data-act="reset">Alles zurücksetzen</button></div>`;
+ return h;
+}
+function afterRender(){
+ const nm=$('#nm');if(nm)nm.addEventListener('change',()=>{S.name=nm.value.trim().slice(0,24);save();renderTop();});
+ if(S.tab==='learn'&&scrollCur){scrollCur=false;const c=document.querySelector('.node.current');if(c)setTimeout(()=>c.scrollIntoView({block:'center',behavior:'smooth'}),60);}
+}
+let scrollCur=true;
+
+/* ================= Modals ================= */
+function modal(html){$('#modal').innerHTML=`<div class="modal" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;}
+function closeModal(){$('#modal').innerHTML='';}
+
+function lessonSheet(id){
+ const l=LBYID[id],ul=unlocked(l.idx),st=stars(id),m=S.missions[id];
+ if(!ul){modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--locked-ink)">${I.lock}</span><h2>${esc(l.t)}</h2><p class="muted">Schließe zuerst „${esc(LESSONS[l.idx-1].t)}“ ab.</p></div><button class="btn block" data-act="closeModal">OK</button>`);return;}
+ const ms=m?{active:'Mission aktiv',done:'Mission gemeistert',paused:'Mission pausiert'}[m.st]:lessonDone(id)?'Mission noch nicht gestartet':'Mission nach der Lektion';
+ modal(`<div class="row"><span class="ic" style="--c:${SK[l.sk].c}">${I[SK[l.sk].ic]}</span><div class="grow"><div class="eyebrow muted">Einheit ${l.ui+1} · ${esc(SK[l.sk].n)}</div><h2>${esc(l.t)}</h2></div></div>
+ ${lessonDone(id)?starRow(st):''}
+ <div class="stack small b"><div class="row"><span class="c-good">${st>=1?I.check:I.book}</span> Theorie & Quiz abschließen</div><div class="row"><span class="c-gold">${st>=2||(S.lessons[id]&&S.lessons[id].perfect)?I.check:I.star}</span> Quiz fehlerfrei</div><div class="row"><span class="c-acc">${m&&m.st==='done'?I.check:I.target}</span> ${esc(ms)}: „${esc(l.m.t)}“</div></div>
+ <button class="btn block" data-act="startLesson" data-id="${id}">${lessonDone(id)?'Wiederholen · +10 XP':'Start · +15 XP'}</button>
+ ${lessonDone(id)&&(!m||m.st==='paused')?`<button class="btn ball block" data-act="startMission" data-id="${id}">${I.target} Mission starten</button>`:''}
+ ${m&&m.st==='active'?`<button class="btn ball block" data-act="rateMission" data-id="${id}">${I.target} Mission auswerten</button>`:''}`);
+}
+
+/* ================= Lektion / Quiz ================= */
+let LS=null;
+function prepQ(q,r){const o={...q};if(q.k==='mc')o.opts=shuffle(q.a,r);if(q.k==='order')o.opts=shuffle(q.a,r);return o;}
+function startLesson(id){
+ const l=LBYID[id];closeModal();
+ LS={id,l,phase:'cards',ci:0,queue:shuffle(l.q).map(q=>prepQ(q)),qi:0,ok:0,miss:0,first:l.q.length,combo:0,state:'ask',sel:null,seq:[]};
+ drawLesson();
+}
+function startTest(ui){
+ const u=UNITS[ui];closeModal();
+ const pool=shuffle(u.L.flatMap(l=>l.q)).slice(0,8);
+ LS={test:ui,l:{t:'Meisterprüfung: '+u.t,sk:null},phase:'quiz',queue:pool.map(q=>prepQ(q)),qi:0,ok:0,miss:0,first:pool.length,combo:0,state:'ask',sel:null,seq:[]};
+ drawLesson();
+}
+function totalSteps(){return LS.test!=null?LS.first:(LS.l.cards.length+LS.first);}
+function doneSteps(){if(LS.phase==='cards')return LS.ci;return (LS.test!=null?0:LS.l.cards.length)+Math.min(LS.first,LS.ok);}
+function drawLesson(){
+ const ov=$('#ov');
+ if(LS.phase==='done'){ov.innerHTML=`<div class="overlay"><div class="l-body"><div class="l-inner">${LS.result}</div></div></div>`;return;}
+ const pct=doneSteps()/totalSteps()*100;
+ let body='',foot='';
+ const col=LS.l.sk?SK[LS.l.sk].c:'var(--gold)';
+ if(LS.phase==='cards'){
+  const c=LS.l.cards[LS.ci],last=LS.ci===LS.l.cards.length-1;
+  body=`<span class="ex-eyebrow" style="--c:${col}">${I.book} Theorie ${LS.ci+1}/${LS.l.cards.length}</span><h1 class="ex-title">${esc(c[0])}</h1>
+  <div class="theory"><ul>${c[1].map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>
+  ${last?`<div class="protip">${mascot()}<div><b>Profi-Tipp</b><p>${esc(LS.l.tip)}</p></div></div>`:''}`;
+  foot=`<div class="foot-row"><button class="btn block" data-act="nextCard">${last?'Zum Quiz':'Weiter'}</button></div>`;
+ }else{
+  const q=LS.queue[LS.qi],st=LS.state;
+  body=`<div class="combo">${LS.combo>=3?`<span>${I.flame} ${LS.combo} in Folge!</span>`:''}</div><span class="ex-eyebrow" style="--c:${col}">${I.sparkle} ${q.k==='tf'?'Stimmt das?':q.k==='order'?'Reihenfolge':'Quiz'}</span>`;
+  body+=`<div class="say">${mascot(st==='bad'?'sad':st==='good'?'happy':'')}<div class="saybub">${esc(q.q)}</div></div>`;
+  if(q.k==='mc'){
+   body+=`<div class="opts">${q.opts.map((o,i)=>{let cls='';if(st!=='ask'){if(o===q.a[0])cls='ok';else if(LS.sel===o)cls='no';}return `<button class="opt ${cls}" data-act="sel" data-v="${esc(o)}" aria-pressed="${LS.sel===o}"><span class="k">${i+1}</span>${esc(o)}</button>`;}).join('')}</div>`;
+  }else if(q.k==='tf'){
+   body+=`<div class="grid2">${[[true,'Stimmt',I.check],[false,'Stimmt nicht',I.x]].map(([v,n,ic])=>{let cls='';if(st!=='ask'){if(v===q.a)cls='ok';else if(LS.sel===String(v))cls='no';}return `<button class="opt ${cls}" data-act="sel" data-v="${v}" aria-pressed="${LS.sel===String(v)}">${ic}${n}</button>`;}).join('')}</div>`;
+  }else{
+   body+=`<div class="seq">${LS.seq.map((o,i)=>`<button class="tile" data-act="unseq" data-i="${i}"><b>${i+1}</b>${esc(o)}</button>`).join('')}</div>
+   <div class="opts">${q.opts.map(o=>`<button class="tile ${LS.seq.includes(o)?'used':''}" data-act="seq" data-v="${esc(o)}"><b>·</b>${esc(o)}</button>`).join('')}</div>`;
+   if(st==='bad')body+=`<div class="card"><div class="eyebrow muted">Richtig wäre</div><ol style="margin:6px 0 0;padding-left:20px;font-weight:700">${q.a.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></div>`;
+  }
+  const can=q.k==='order'?LS.seq.length===q.opts.length:LS.sel!=null;
+  if(st==='ask')foot=`<div class="foot-row"><button class="btn block" data-act="check" ${can?'':'disabled'}>Prüfen</button></div>`;
+  else foot=`<div class="fb"><span class="fic">${st==='good'?I.check:I.x}</span><div><h3>${st==='good'?['Stark!','Vamos!','Perfekt!','Genau so!'][LS.qi%4]:'Nicht ganz.'}</h3>${q.e?`<p>${esc(q.e)}</p>`:''}</div></div><div class="foot-row"><button class="btn block ${st==='good'?'good':'bad'}" data-act="nextQ">Weiter</button></div>`;
+ }
+ ov.innerHTML=`<div class="overlay"><div class="l-top"><button class="iconbtn" data-act="quitLesson" aria-label="Schließen">${I.x}</button><div class="bar"><i style="width:${pct}%"></i></div></div>
+ <div class="l-body"><div class="l-inner ${LS.state!=='ask'&&LS.phase==='quiz'?'locked':''}">${body}</div></div>
+ <div class="l-foot ${LS.phase==='quiz'&&LS.state!=='ask'?LS.state:''}"><div class="foot-in">${foot}</div></div></div>`;
+}
+function checkAnswer(){
+ const q=LS.queue[LS.qi];let ok;
+ if(q.k==='mc')ok=LS.sel===q.a[0];
+ else if(q.k==='tf')ok=LS.sel===String(q.a);
+ else ok=LS.seq.every((x,i)=>x===q.a[i]);
+ LS.state=ok?'good':'bad';
+ if(ok){LS.ok++;LS.combo++;beep('ok');}
+ else{LS.miss++;LS.combo=0;beep('bad');LS.queue.push(prepQ(q));try{navigator.vibrate&&navigator.vibrate(60);}catch(e){}}
+ drawLesson();
+}
+function nextQ(){LS.qi++;LS.sel=null;LS.seq=[];LS.state='ask';if(LS.qi>=LS.queue.length)finishLesson();else drawLesson();}
+function finishLesson(){
+ const perfect=LS.miss===0,acc=Math.round(LS.first/(LS.first+LS.miss)*100);
+ let xp,res,extra='';
+ if(LS.test!=null){
+  const passed=acc>=70,ui=LS.test,first=!S.tests[ui];
+  xp=passed?(first?40:15):5;
+  if(passed){S.tests[ui]=today();if(first)S.gems+=30;}
+  const r=addXP(xp,null);
+  res=`<div class="results">${mascot(passed?'happy':'sad')}<h1>${passed?'Prüfung bestanden!':'Fast!'}</h1><p class="b muted">${passed?(first?'Trophäe für „'+esc(UNITS[ui].t)+'“ + 30 Bälle':'Wissen aufgefrischt'):'Du brauchst mindestens 70 % – versuch es nochmal.'}</p>
+  <div class="tiles3"><div class="ts" style="--tc:var(--gold)"><b>XP</b><span>${I.bolt}${r.n}</span></div><div class="ts" style="--tc:var(--good)"><b>Treffer</b><span>${acc}%</span></div><div class="ts" style="--tc:var(--accent)"><b>Fehler</b><span>${LS.miss}</span></div></div>
+  <button class="btn block" data-act="closeLesson">Weiter</button></div>`;
+  LS.phase='done';LS.result=res;LS.after=r;checkAch();drawLesson();if(passed){beep('done');confetti();}return;
+ }
+ const id=LS.id,l=LS.l,firstTime=!S.lessons[id],prevStars=stars(id);
+ xp=(firstTime?15:10)+(perfect?5:0);
+ const rec=S.lessons[id]||{n:0};rec.n++;rec.perfect=rec.perfect||perfect;rec.date=today();S.lessons[id]=rec;
+ S.day.lessons++;if(perfect){S.day.perfect++;S.cnt.perfect++;}
+ const r=addXP(xp,l.sk);
+ const st=stars(id),m=S.missions[id];
+ if(!m||m.st==='paused'){
+  extra=`<div class="mcard"><div class="mt">${I.target} Deine Mission fürs nächste Spiel</div><div class="mbd"><h3>${esc(l.m.t)}</h3><p>${esc(l.m.d)}</p><p class="muted small">Gemeistert = 3. Stern + 30 XP</p></div></div>
+  <button class="btn ball block" data-act="acceptMission" data-id="${id}">${I.target} Mission annehmen</button><button class="linkbtn" data-act="closeLesson">Später</button>`;
+ }else extra=`<button class="btn block" data-act="closeLesson">Weiter</button>`;
+ res=`<div class="results">${mascot('happy')}<h1>${perfect?'Fehlerfrei!':'Lektion geschafft!'}</h1>
+ <div class="bigstars">${[0,1,2].map(i=>`<span class="${i<st?'':'e'}">${I.star}</span>`).join('')}</div>
+ <div class="tiles3"><div class="ts" style="--tc:var(--gold)"><b>XP</b><span>${I.bolt}${r.n}</span></div><div class="ts" style="--tc:var(--good)"><b>Treffer</b><span>${acc}%</span></div><div class="ts" style="--tc:${SK[l.sk].c}"><b>${esc(SK[l.sk].s)}</b><span>Lv ${skLv(S.skillXp[l.sk]).L}</span></div></div>
+ ${extra}</div>`;
+ LS.phase='done';LS.result=res;LS.after=r;checkAch();save();drawLesson();beep('done');if(st>prevStars||perfect)confetti();
+}
+function closeLesson(){
+ const r=LS&&LS.after;LS=null;$('#ov').innerHTML='';scrollCur=true;render();
+ if(r)afterXP(r);
+}
+function afterXP(r){
+ if(r.streakUp){showStreak();return;}
+ if(r.goal){toast('Tagesziel erreicht! +10 Bälle',I.target);beep('coin');}
+}
+function showStreak(){
+ const t=today();const days=[];for(let i=6;i>=0;i--){const d=addDays(t,-i);days.push({d,on:!!S.days[d]});}
+ modal(`<div class="center"><div class="streakbig">${I.flame}<span class="n">${S.streak}</span></div><h2>${S.streak===1?'Serie gestartet!':S.streak+' Tage in Folge!'}</h2><p class="muted b">${S.streak===1?'Komm morgen wieder, um sie auszubauen.':'Weiter so – jeden Tag ein bisschen besser.'}</p>
+ <div class="row" style="justify-content:center;gap:8px">${days.map(x=>`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:800;color:var(--muted)"><span style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:${x.on?'var(--flame)':'var(--surface-2)'};color:#fff">${x.on?I.check.replace('<svg','<svg width="16" height="16"'):''}</span>${WD[parseD(x.d).getDay()]}</div>`).join('')}</div></div>
+ <button class="btn block" data-act="closeModal">Weiter</button>`);
+ beep('done');
+}
+
+/* ================= Missionen ================= */
+function acceptMission(id){
+ const am=activeMissions();
+ if(am.length>=3){
+  modal(`<h2>Maximal 3 Missionen</h2><p class="muted b">Konzentration schlägt Masse. Pausiere eine Mission, um diese zu starten:</p><div class="stack">${am.map(x=>`<button class="btn ghost block" data-act="swapMission" data-out="${x.id}" data-in="${id}">${esc(x.l.m.t)} pausieren</button>`).join('')}</div><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);
+  return false;
+ }
+ S.missions[id]=Object.assign(S.missions[id]||{tries:[]},{st:'active',since:today()});save();
+ toast('Mission aktiv: <b>'+esc(LBYID[id].m.t)+'</b>',I.target);beep('pop');return true;
+}
+const RATE=[[1,'Versucht','Ich hab\'s probiert, klappt noch nicht',5],[2,'Teilweise','Hat manchmal funktioniert',15],[3,'Gemeistert','Hat richtig gut geklappt',30]];
+function rateMission(id,r){
+ const m=S.missions[id],l=LBYID[id];if(!m)return null;
+ m.tries=(m.tries||[]);m.tries.push({d:today(),r});
+ S.day.missions++;
+ const xp=RATE[r-1][3];let done=false;
+ if(r===3){m.st='done';m.doneAt=today();S.cnt.missions++;S.gems+=15;done=true;}
+ const res=addXP(xp,l.sk);save();
+ return{res,done,l};
+}
+function rateMissionSheet(id){
+ const l=LBYID[id];
+ modal(`<div class="eyebrow muted">Mission auswerten</div><h2>${esc(l.m.t)}</h2><p class="muted b">${esc(l.m.d)}</p><p class="b">Wie lief's im Spiel?</p>
+ <div class="choice">${RATE.map(([v,n,d,xp])=>`<button class="opt" data-act="doRate" data-id="${id}" data-r="${v}"><span class="k">${v}</span><span class="grow">${n}<small>${d}</small></span><span class="chip">+${xp} XP</span></button>`).join('')}</div>
+ <button class="linkbtn" data-act="closeModal">Abbrechen</button>`);
+}
+function missionDoneFx(out){
+ if(!out)return;
+ if(out.done){modal(`<div class="center">${mascot('happy')}<h2>Mission gemeistert!</h2><p class="b">„${esc(out.l.m.t)}“</p><p class="muted b">+${out.res.n} XP · +15 Bälle · 3. Stern für „${esc(out.l.t)}“</p></div><button class="btn block" data-act="closeModal">Vamos!</button>`);confetti();beep('done');}
+ else{toast('+'+out.res.n+' XP – dranbleiben!',I.target);beep('coin');}
+}
+
+/* ================= Tagebuch ================= */
+let JF=null;
+function journalNew(){
+ JF={type:'Match',date:today(),dur:90,res:null,score:'',partner:'',opp:'',feel:3,rt:{},lost:null,mr:{},notes:''};
+ drawJournal();
+}
+function drawJournal(){
+ const am=activeMissions(),isMatch=JF.type==='Match'||JF.type==='Turnier';
+ const feels=['Mies','Naja','Okay','Gut','Top'];
+ $('#ov').innerHTML=`<div class="overlay"><div class="l-top"><button class="iconbtn" data-act="closeJournal" aria-label="Schließen">${I.x}</button><h2 class="grow" style="font-size:20px">Session eintragen</h2></div>
+ <div class="l-body"><div class="l-inner">
+  <div><span class="lab">Art</span><div class="seg big">${['Match','Training','Trainerstunde','Turnier'].map(t=>`<button data-act="jf" data-k="type" data-v="${t}" aria-pressed="${JF.type===t}">${t}</button>`).join('')}</div></div>
+  <div class="row"><div class="grow"><label class="lab" for="jdate">Datum</label><input id="jdate" type="date" class="field" value="${JF.date}" max="${today()}"></div><div class="grow"><label class="lab" for="jdur">Dauer (Min)</label><input id="jdur" type="number" min="10" max="600" step="5" class="field" value="${JF.dur}"></div></div>
+  ${isMatch?`<div><span class="lab">Ergebnis</span><div class="seg big">${[['w','Sieg'],['l','Niederlage'],['d','Remis']].map(([v,n])=>`<button data-act="jf" data-k="res" data-v="${v}" aria-pressed="${JF.res===v}">${n}</button>`).join('')}</div></div>
+  <div><label class="lab" for="jscore">Satzergebnis</label><input id="jscore" class="field" placeholder="z. B. 6:4 3:6 7:5" value="${esc(JF.score)}"></div>`:''}
+  <div class="row"><div class="grow"><label class="lab" for="jpart">Partner/in</label><input id="jpart" class="field" value="${esc(JF.partner)}" placeholder="optional"></div>${isMatch?`<div class="grow"><label class="lab" for="jopp">Gegner</label><input id="jopp" class="field" value="${esc(JF.opp)}" placeholder="optional"></div>`:''}</div>
+  <div><span class="lab">Wie hast du dich gefühlt?</span><div class="seg">${feels.map((f,i)=>`<button data-act="jf" data-k="feel" data-v="${i+1}" aria-pressed="${JF.feel===i+1}">${f}</button>`).join('')}</div></div>
+  ${am.length?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
+  <div><span class="lab">Selbsteinschätzung (1 = schwach, 5 = top)</span><p class="muted small" style="margin-bottom:8px">Bewerte, was du heute gespielt hast – daraus entsteht dein Spielerprofil.</p><div class="rate">${SKIDS.map(k=>`<span>${esc(SK[k].s)}</span><div class="dots">${[1,2,3,4,5].map(v=>`<button class="${JF.rt[k]===v?'on':''}" data-act="jrt" data-k="${k}" data-v="${v}" aria-label="${esc(SK[k].n)} ${v}">${v}</button>`).join('')}</div>`).join('')}</div></div>
+  <div><span class="lab">Wo hast du die meisten Punkte verloren?</span><div class="seg">${SKIDS.map(k=>`<button data-act="jf" data-k="lost" data-v="${k}" aria-pressed="${JF.lost===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
+  <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
+ </div></div>
+ <div class="l-foot"><div class="foot-in"><button class="btn block" data-act="saveJournal">${I.check} Speichern</button></div></div></div>`;
+}
+function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
+ const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
+ ['score','partner','opp','notes'].forEach(k=>{const v=g('j'+({partner:'part'}[k]||k));if(v!=null)JF[k]=v.trim();});}
+function saveJournal(){
+ syncJF();
+ const e={id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
+ if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;}
+ e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
+ const newL=e.lost?unlockSkill(e.lost):null;
+ S.journal.unshift(e);S.journal.sort((a,b)=>b.date.localeCompare(a.date));
+ S.day.logs++;
+ const xp=10+Math.min(10,Math.floor(e.dur/15));
+ const res=addXP(xp,null);
+ let outs=e.missions.map(x=>rateMission(x.id,x.r)).filter(Boolean);
+ JF=null;$('#ov').innerHTML='';checkAch();save();
+ S.tab='journal';render();
+ const done=outs.filter(o=>o.done);
+ const mx=outs.reduce((a,o)=>a+o.res.n,0);
+ const streak=res.streakUp;if(res.goal)setTimeout(()=>toast('Tagesziel erreicht! +10 Bälle',I.target),300);
+ modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">+${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
+ ${e.lost?`<div class="card stack"><div class="eyebrow muted">Dein nächster Schritt</div><b>Du hast viele Punkte bei „${esc(SK[e.lost].n)}“ verloren.</b>${newL?`<p class="muted b small">Dafür habe ich dir „${esc(newL.t)}“ freigeschaltet.</p>`:''}${(()=>{const l=LESSONS.find(l=>l.sk===e.lost&&unlocked(l.idx));return l?`<button class="btn ball block" data-act="lesson" data-id="${l.id}">${esc(l.t)} üben</button>`:'';})()}</div>`:''}
+ <button class="btn block" data-act="${streak?'showStreak':'closeModal'}">Weiter</button>`);
+ beep('done');if(done.length||e.res==='w')confetti();
+}
+function journalView(i){
+ const j=S.journal[i];if(!j)return;
+ const rt=Object.entries(j.rt||{});
+ modal(`<div class="eyebrow muted">${fmtDate(j.date)} · ${j.dur} Min</div><h2>${esc(j.type)}${j.res?` <span class="res ${j.res}">${{w:'Sieg',l:'Niederlage',d:'Remis'}[j.res]}</span>`:''}</h2>
+ ${j.score?`<p class="b">${esc(j.score)}</p>`:''}${j.partner?`<p class="muted b">Partner/in: ${esc(j.partner)}</p>`:''}${j.opp?`<p class="muted b">Gegner: ${esc(j.opp)}</p>`:''}
+ <p class="b">Gefühl: ${['Mies','Naja','Okay','Gut','Top'][(j.feel||3)-1]}</p>
+ ${rt.length?`<div class="stack">${rt.map(([k,v])=>`<div class="row"><span style="width:90px" class="b small">${esc(SK[k].s)}</span><div class="bar thin blue"><i style="width:${v*20}%"></i></div><span class="b small">${v}/5</span></div>`).join('')}</div>`:''}
+ ${j.lost?`<p class="b">Punkte verloren vor allem bei: ${esc(SK[j.lost].n)}</p>`:''}
+ ${(j.missions||[]).length?`<p class="b">Missionen: ${j.missions.map(m=>LBYID[m.id]?esc(LBYID[m.id].m.t)+' ('+RATE[m.r-1][1]+')':'').join(', ')}</p>`:''}
+ ${j.notes?`<div class="card" style="white-space:pre-wrap">${esc(j.notes)}</div>`:''}
+ <div class="row"><button class="btn ghost grow" data-act="closeModal">Schließen</button><button class="btn bad sm" data-act="journalDel" data-i="${i}">Löschen</button></div>`);
+}
+
+/* ================= Shop ================= */
+const SHOP=[
+ {id:'freeze',t:'Streak-Schutz',d:'Rettet deine Serie, wenn du einen Tag aussetzt. Max. 2.',p:50,ic:()=>`<span class="c-acc">${I.snow}</span>`},
+ {id:'dbl',t:'Doppel-XP · 30 Min',d:'Alle XP zählen doppelt.',p:40,ic:()=>`<span class="c-gold">${I.bolt}</span>`},
+ {id:'band',t:'Schweißband für Bolita',d:'Echter Profi-Look.',p:60,w:1,ic:()=>mascot('',{hat:'band'})},
+ {id:'cap',t:'Cap für Bolita',d:'Für Outdoor-Courts.',p:80,w:1,ic:()=>mascot('',{hat:'cap'})},
+ {id:'brille',t:'Sonnenbrille',d:'Cool bleiben im Tie-Break.',p:100,w:1,ic:()=>mascot('',{hat:'brille'})},
+ {id:'krone',t:'Krone',d:'Für Champions.',p:250,w:1,ic:()=>mascot('',{hat:'krone'})}
+];
+function shopSheet(){
+ modal(`<div class="row"><h2 class="grow">Shop</h2><span class="stat"><span class="c-ball">${I.ball}</span>${S.gems}</span></div><p class="muted small b">Bälle verdienst du mit Tageszielen, Quests, Truhen, Erfolgen und gemeisterten Missionen.</p>
+ <div class="stack">${SHOP.map(it=>{const own=it.w&&S.owned.includes(it.id),worn=it.w&&S.wear.hat===it.id;
+  let btn;if(it.w&&own)btn=`<button class="btn sm ${worn?'good':'ghost'}" data-act="wear" data-id="${it.id}">${worn?'Trägt':'Anziehen'}</button>`;
+  else if(it.id==='freeze'&&S.freezes>=2)btn=`<span class="chip">${S.freezes}/2</span>`;
+  else btn=`<button class="btn sm ball" data-act="buy" data-id="${it.id}" ${S.gems<it.p?'disabled':''}>${I.ball}${it.p}</button>`;
+  return `<div class="item"><span class="pic">${it.ic()}</span><div class="grow"><h3>${esc(it.t)}${it.id==='freeze'?` · ${S.freezes}`:''}</h3><p>${esc(it.d)}</p></div>${btn}</div>`;}).join('')}</div>
+ <button class="btn ghost block" data-act="closeModal">Schließen</button>`);
+}
+
+/* ================= Onboarding ================= */
+let OB={step:0,name:'',lvl:null,side:null,focus:[],goal:20,weekGoal:2};
+const LEVELS=[['Einsteiger','Weniger als ein halbes Jahr dabei',0],['Hobby','Spiele regelmäßig, kenne die Basics',4],['Fortgeschritten','Wandspiel & Bandeja klappen meistens',8],['Turnier','Spiele Turniere / Ranglisten',12]];
+function renderOnboarding(){
+ $('#top').innerHTML='';$('#nav').innerHTML='';
+ const s=OB.step;let h='',canNext=true;
+ if(s===0)h=`<div class="hello">${mascot('happy')}<h1>Hola! Ich bin Bolita.</h1><p class="b muted">Ich mach dich jeden Tag ein bisschen besser im Padel – mit kurzen Lektionen, Missionen für deine Matches und deinem Trainingstagebuch.</p><button class="btn block" data-act="obNext">Los geht's</button></div>`;
+ else{
+  if(s===1){h=`<span class="eyebrow muted">Schritt 1/5</span><h1>Wie heißt du?</h1><input id="obname" class="field" maxlength="24" placeholder="Dein Name" value="${esc(OB.name)}" autocomplete="given-name">`;}
+  if(s===2){h=`<span class="eyebrow muted">Schritt 2/5</span><h1>Wie gut spielst du?</h1><div class="choice">${LEVELS.map((l,i)=>`<button class="opt" data-act="ob" data-k="lvl" data-v="${i}" aria-pressed="${OB.lvl===i}"><span class="grow">${l[0]}<small>${l[1]}</small></span></button>`).join('')}</div>`;canNext=OB.lvl!=null;}
+  if(s===3){h=`<span class="eyebrow muted">Schritt 3/5</span><h1>Auf welcher Seite spielst du?</h1><div class="choice">${[['rechts','Rechts (Drive)','Meist Vorhand in der Mitte'],['links','Links (Revés)','Oft Überkopf in der Mitte'],['beide','Beide / weiß nicht','Kein Problem']].map(([v,n,d])=>`<button class="opt" data-act="ob" data-k="side" data-v="${v}" aria-pressed="${OB.side===v}"><span class="grow">${n}<small>${d}</small></span></button>`).join('')}</div>`;canNext=!!OB.side;}
+  if(s===4){h=`<span class="eyebrow muted">Schritt 4/5</span><h1>Woran willst du am meisten arbeiten?</h1><p class="muted b">Wähle bis zu 3 – ich empfehle dir passende Lektionen.</p><div class="seg big">${SKIDS.map(k=>`<button data-act="obFocus" data-k="${k}" aria-pressed="${OB.focus.includes(k)}">${esc(SK[k].n)}</button>`).join('')}</div>`;}
+  if(s===5){h=`<span class="eyebrow muted">Schritt 5/5</span><h1>Dein Ziel</h1><span class="lab">Tägliches Lernziel</span><div class="choice">${[[10,'Locker','≈ 1 Lektion'],[20,'Normal','≈ 1 Lektion + Drill'],[30,'Ernsthaft','≈ 2 Lektionen'],[50,'Profi-Modus','Volle Kraft']].map(([v,n,d])=>`<button class="opt" data-act="ob" data-k="goal" data-v="${v}" aria-pressed="${OB.goal===v}"><span class="grow">${n}<small>${d}</small></span><span class="chip">${v} XP</span></button>`).join('')}</div>
+   <span class="lab">Wie oft spielst du pro Woche?</span><div class="seg big">${[1,2,3,4,5].map(v=>`<button data-act="ob" data-k="weekGoal" data-v="${v}" aria-pressed="${OB.weekGoal===v}">${v}×</button>`).join('')}</div>`;}
+  h+=`<div class="row" style="margin-top:8px"><button class="btn ghost" data-act="obBack">Zurück</button><button class="btn grow" data-act="obNext" ${canNext?'':'disabled'}>${s===5?'Fertig':'Weiter'}</button></div>`;
+ }
+ $('#main').innerHTML=`<div class="onb">${h}</div>`;
+ const n=$('#obname');if(n){n.focus();n.addEventListener('input',()=>OB.name=n.value);n.addEventListener('keydown',e=>{if(e.key==='Enter')ACT.obNext();});}
+}
+
+/* ================= Aktionen ================= */
+const ACT={
+ noop(){},
+ tab(el){S.tab=el.dataset.id;save();closeModal();$('#main').scrollTop=0;scrollCur=S.tab==='learn';render();},
+ lesson(el){closeModal();lessonSheet(el.dataset.id);},
+ startLesson(el){startLesson(el.dataset.id);},
+ nextCard(){if(LS.ci<LS.l.cards.length-1){LS.ci++;}else{LS.phase='quiz';}beep('tap');drawLesson();$('.l-body').scrollTop=0;},
+ sel(el){if(LS.state!=='ask')return;LS.sel=el.dataset.v;beep('tap');drawLesson();},
+ seq(el){if(LS.state!=='ask')return;LS.seq.push(el.dataset.v);beep('tap');drawLesson();},
+ unseq(el){if(LS.state!=='ask')return;LS.seq.splice(+el.dataset.i,1);drawLesson();},
+ check(){checkAnswer();},
+ nextQ(){nextQ();},
+ quitLesson(){if(confirm('Lektion wirklich abbrechen? Dein Fortschritt in dieser Lektion geht verloren.')){LS=null;$('#ov').innerHTML='';}},
+ closeLesson(){closeLesson();},
+ acceptMission(el){const id=el.dataset.id;const r=LS&&LS.after;if(acceptMission(id)){LS=null;$('#ov').innerHTML='';S.tab='missions';render();if(r)afterXP(r);}else{/* Auswahl-Dialog offen */}},
+ swapMission(el){S.missions[el.dataset.out].st='paused';closeModal();if(acceptMission(el.dataset.in)){const r=LS&&LS.after;LS=null;$('#ov').innerHTML='';S.tab='missions';render();if(r)afterXP(r);}},
+ startMission(el){closeModal();if(acceptMission(el.dataset.id)){S.tab='missions';render();}},
+ dropMission(el){const id=el.dataset.id;S.missions[id].st='paused';save();render();toast('Mission pausiert',I.target);},
+ rateMission(el){rateMissionSheet(el.dataset.id);},
+ doRate(el){closeModal();const out=rateMission(el.dataset.id,+el.dataset.r);checkAch();render();missionDoneFx(out);if(out&&out.res.streakUp&&!out.done)setTimeout(showStreak,400);},
+ test(el){const ui=+el.dataset.ui,u=UNITS[ui];if(!u.L.every(l=>lessonDone(l.id))){modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.trophy}</span><h2>Meisterprüfung</h2><p class="muted b">Schließe alle Lektionen von „${esc(u.t)}“ ab, um die Prüfung freizuschalten.</p></div><button class="btn block" data-act="closeModal">OK</button>`);return;}
+  modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.trophy}</span><h2>Meisterprüfung: ${esc(u.t)}</h2><p class="muted b">8 gemischte Fragen aus der Einheit. Ab 70 % bestanden.${S.tests[ui]?' Bereits bestanden ✓':' Belohnung: 40 XP + 30 Bälle.'}</p></div><button class="btn gold block" data-act="startTest" data-ui="${ui}">Prüfung starten</button><button class="linkbtn" data-act="closeModal">Später</button>`);},
+ startTest(el){startTest(+el.dataset.ui);},
+ chest(el){const k=el.dataset.key,ui=+k.slice(1);if(S.chests[k]){toast('Schon geöffnet',I.chest);return;}if(!lessonDone(UNITS[ui].L[1].id)){toast('Schließe zuerst die Lektionen davor ab',I.lock);return;}
+  const g=20+(hash(k+S.name)%3)*5;S.chests[k]=today();S.gems+=g;save();beep('coin');confetti();modal(`<div class="center"><span class="ic" style="width:84px;height:84px;--c:var(--gold)">${I.chest}</span><h2>+${g} Bälle!</h2><p class="muted b">Gib sie im Shop aus.</p></div><button class="btn gold block" data-act="closeModal">Super</button>`);render();},
+ drill(){const d=drillOfDay(),done=S.drills[today()];
+  modal(`<div class="row"><span class="ic" style="--c:var(--u4)">${I.dumbbell}</span><div class="grow"><div class="eyebrow muted">Tagesdrill · ${d.min} Min · ${esc(SK[d.sk].n)}</div><h2>${esc(d.t)}</h2></div></div><p class="b" style="font-size:18px">${esc(d.d)}</p><p class="muted small b">Kein Court nötig – mach's zu Hause, im Park oder vor dem Match.</p>
+  ${done?`<button class="btn good block" disabled>${I.check} Heute erledigt</button>`:`<button class="btn block" data-act="drillDone">${I.check} Erledigt · +10 XP</button>`}<button class="linkbtn" data-act="closeModal">Schließen</button>`);},
+ drillDone(){if(S.drills[today()])return;const d=drillOfDay();S.drills[today()]=d.t;S.day.drills++;const r=addXP(10,d.sk);checkAch();closeModal();render();toast('Drill erledigt! +'+r.n+' XP',I.dumbbell);beep('coin');if(r.streakUp)setTimeout(showStreak,300);else if(r.goal)toast('Tagesziel erreicht! +10 Bälle',I.target);},
+ claim(el){const id=el.dataset.id;if(S.day.claimed.includes(id)||qProg(id)<QUESTS[id].n)return;S.day.claimed.push(id);S.gems+=10;save();beep('coin');render();},
+ questChest(){if(S.day.chest)return;S.day.chest=true;S.gems+=30;save();beep('coin');confetti();toast('Bonustruhe: +30 Bälle',I.chest);render();},
+ journalNew(){closeModal();journalNew();},
+ jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
+ jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
+ jrt(el){syncJF();const k=el.dataset.k,v=+el.dataset.v;if(JF.rt[k]===v)delete JF.rt[k];else JF.rt[k]=v;drawJournal();},
+ closeJournal(){JF=null;$('#ov').innerHTML='';},
+ saveJournal(){saveJournal();},
+ journalView(el){journalView(+el.dataset.i);},
+ journalDel(el){if(!confirm('Eintrag löschen?'))return;S.journal.splice(+el.dataset.i,1);save();closeModal();render();},
+ shop(){shopSheet();},
+ buy(el){const it=SHOP.find(x=>x.id===el.dataset.id);if(!it||S.gems<it.p)return;
+  if(it.id==='freeze'){if(S.freezes>=2)return;S.freezes++;}
+  else if(it.id==='dbl'){S.dbl=Math.max(Date.now(),S.dbl)+30*60e3;}
+  else{S.owned.push(it.id);S.wear={hat:it.id};}
+  S.gems-=it.p;save();beep('coin');toast(esc(it.t)+' gekauft!',I.bag);shopSheet();renderTop();},
+ wear(el){S.wear=S.wear.hat===el.dataset.id?{}:{hat:el.dataset.id};save();render();shopSheet();},
+ set(el){const k=el.dataset.k;let v=el.dataset.v;if(k==='goal'||k==='weekGoal')v=+v;if(k==='sound')v=v==='1';S[k]=v;save();render();},
+ focus(el){const k=el.dataset.k;if(S.focus.includes(k))S.focus=S.focus.filter(x=>x!==k);else if(S.focus.length<3){S.focus.push(k);const l=unlockSkill(k);if(l)toast('Freigeschaltet: <b>'+esc(l.t)+'</b>',I.sparkle);}else{toast('Maximal 3 Fokus-Skills',I.target);return;}save();render();},
+ lvlInfo(){const lv=lvl(S.xp);modal(`<div class="center">${mascot('happy')}<h2>Level ${lv.L} · ${title(lv.L)}</h2><div class="goal" style="width:100%"><div class="bar blue"><i style="width:${lv.cur/lv.need*100}%"></i></div><span>${lv.cur}/${lv.need}</span></div><p class="muted b">Nächster Titel: ${(TITLES.find(t=>t[0]>lv.L)||['','Du bist eine Legende!'])[1]}${TITLES.find(t=>t[0]>lv.L)?' ab Level '+TITLES.find(t=>t[0]>lv.L)[0]:''}</p></div><button class="btn block" data-act="closeModal">OK</button>`);},
+ streakInfo(){showStreak();},
+ showStreak(){showStreak();},
+ goalInfo(){modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.target}</span><h2>Tagesziel: ${S.goal} XP</h2><div class="goal" style="width:100%"><div class="bar"><i style="width:${Math.min(100,S.day.xp/S.goal*100)}%"></i></div><span>${S.day.xp}/${S.goal}</span></div><p class="muted b">Lektion +15 · Fehlerfrei +5 · Drill +10 · Session +10–20 · Mission bis +30${doubleOn()?'<br>Doppel-XP aktiv!':''}</p></div><button class="btn block" data-act="closeModal">OK</button>`);},
+ closeModal(){closeModal();},
+ closeModalBg(el,e){if(e.target===el)closeModal();},
+ export(){const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));const done=()=>toast('Code kopiert – gut aufbewahren!',I.check);
+  if(navigator.clipboard)navigator.clipboard.writeText(code).then(done,()=>showCode(code));else showCode(code);},
+ import(){modal(`<h2>Code einfügen</h2><p class="muted b small">Achtung: überschreibt deinen aktuellen Fortschritt.</p><textarea id="imp" class="field code" placeholder="Code hier einfügen"></textarea><button class="btn block" data-act="doImport">Laden</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);},
+ doImport(){try{const o=JSON.parse(decodeURIComponent(escape(atob($('#imp').value.trim()))));if(!o||typeof o!=='object'||!('xp' in o))throw 0;S=Object.assign(defaults(),o);save();closeModal();tick();render();toast('Fortschritt geladen!',I.check);}catch(e){toast('Ungültiger Code',I.x);}},
+ reset(el){if(el.dataset.armed){try{localStorage.removeItem(KEY);}catch(e){}S=defaults();OB={step:0,name:'',lvl:null,side:null,focus:[],goal:20,weekGoal:2};save();render();return;}el.dataset.armed=1;el.textContent='Wirklich? Nochmal tippen zum Löschen';el.style.color='var(--bad)';},
+ ob(el){const k=el.dataset.k;let v=el.dataset.v;if(k!=='side')v=+v;OB[k]=v;beep('tap');renderOnboarding();},
+ obFocus(el){const k=el.dataset.k;if(OB.focus.includes(k))OB.focus=OB.focus.filter(x=>x!==k);else if(OB.focus.length<3)OB.focus.push(k);renderOnboarding();},
+ obBack(){OB.step=Math.max(0,OB.step-1);renderOnboarding();},
+ obNext(){if(OB.step===1){const n=$('#obname');OB.name=(n?n.value:OB.name).trim().slice(0,24);}
+  if(OB.step<5){OB.step++;renderOnboarding();return;}
+  Object.assign(S,{onb:true,name:OB.name,lvl:OB.lvl,side:OB.side,focus:OB.focus,goal:OB.goal,weekGoal:OB.weekGoal,unlockFrom:LEVELS[OB.lvl][2]});
+  S.focus.forEach(unlockSkill);leagueEnsure();save();scrollCur=true;render();
+  setTimeout(()=>{modal(`<div class="center">${mascot('happy')}<h2>Vamos${S.name?', '+esc(S.name):''}!</h2><p class="muted b">So funktioniert's:</p></div><div class="stack b"><div class="row"><span class="ic">${I.book}</span><span class="grow">Lektion lernen: Theorie + Quiz</span></div><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><span class="grow">Mission im nächsten Match anwenden</span></div><div class="row"><span class="ic" style="--c:var(--u4)">${I.pen}</span><span class="grow">Match ins Tagebuch eintragen & Mission auswerten</span></div><div class="row"><span class="ic" style="--c:var(--flame)">${I.flame}</span><span class="grow">Jeden Tag etwas tun – Streak, Liga, Skills leveln</span></div></div><button class="btn block" data-act="closeModal">Los geht's</button>`);},250);}
+};
+function showCode(code){modal(`<h2>Dein Sicherungscode</h2><textarea class="field code" readonly onclick="this.select()">${esc(code)}</textarea><button class="btn block" data-act="closeModal">Fertig</button>`);}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;const f=ACT[el.dataset.act];if(f)f(el,e);});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&$('#modal').innerHTML){closeModal();return;}
+ if(!LS||LS.phase!=='quiz')return;
+ if(e.key==='Enter'){e.preventDefault();if(LS.state==='ask'){const b=document.querySelector('[data-act="check"]');if(b&&!b.disabled)checkAnswer();}else nextQ();return;}
+ const q=LS.queue[LS.qi];if(LS.state!=='ask')return;const n=parseInt(e.key);
+ if(q.k==='mc'&&n>=1&&n<=q.opts.length){LS.sel=q.opts[n-1];drawLesson();}
+ if(q.k==='tf'&&(n===1||n===2)){LS.sel=String(n===1);drawLesson();}
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S.onb&&!LS&&!JF){if(S.day.d!==today()){tick();render();}}});
+
+/* ================= Start ================= */
+const startMsgs=tick();
+render();
+if(S.onb)checkAch();
+startMsgs.forEach((m,i)=>setTimeout(()=>toast(m[0],m[1]),400+i*700));
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}
+</script>
+</body>
+</html>

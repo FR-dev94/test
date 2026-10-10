@@ -1,6 +1,8 @@
 # ¡Vamos! Spanisch
 
 Eine kostenlose, stark gamifizierte Spanisch-Lern-App im Stil von Duolingo – für Deutschsprachige.
+
+> Neu im Repo: **[PadelUp](padel/)** – die gamifizierte Padel-Trainings-App (`padel/`), erreichbar unter https://fr-dev94.github.io/test/padel/
 Alles steckt in einer einzigen Datei (`index.html`): kein Konto, keine Werbung, keine Installation.
 
 ## Starten
