@@ -1,6 +1,6 @@
 // Offline-Unterstützung: App-Dateien werden beim ersten Besuch gespeichert.
 // Bei neuen Versionen VERSION erhöhen.
-const VERSION = 'padelup-v13';
+const VERSION = 'padelup-v14';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

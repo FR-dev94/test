@@ -359,6 +359,31 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .goalc.done{border-color:var(--gold)}
 .qbtns{display:grid;grid-template-columns:1fr auto;gap:10px}
 
+/* Coach & Tests */
+.coach{background:#1F5FD6;color:#fff;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.coach h2{font-size:24px}.coach p{font-weight:700;margin:0;opacity:.95}
+.coach .bar{background:rgba(255,255,255,.25)}.coach .bar i{background:var(--ball)}.coach .goal span{color:#fff}
+.citems{display:flex;flex-direction:column;gap:6px}
+.citem{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.1);border-radius:14px;padding:8px 10px}
+.citem .ck{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.7);background:none;color:#1F5FD6;display:grid;place-items:center;flex:none;padding:0}
+.citem.done .ck{background:var(--ball);border-color:var(--ball)}
+.citem .ck svg{width:16px;height:16px}
+.cbody{background:none;border:0;color:#fff;text-align:left;padding:0;display:flex;flex-direction:column;min-width:0}
+.cbody b{font-size:15px}.cbody span{font-size:12px;opacity:.85;font-weight:700;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.citem.done .cbody b{text-decoration:line-through;opacity:.75}
+.coach .btn{--b:#fff;--ink:#1F5FD6;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.ttb{display:flex;align-items:flex-end;gap:2px;height:30px;width:44px;flex:none}
+.ttb i{flex:1;background:var(--accent);border-radius:2px;display:block;opacity:.8}
+.stepper{display:flex;align-items:center;gap:18px;justify-content:center}
+.stepper b{font-family:var(--font-display);font-size:60px;min-width:80px;text-align:center;color:var(--accent);font-variant-numeric:tabular-nums}
+.stepper .btn{font-size:28px;width:64px;height:64px;padding:0}
+.tthist{display:flex;align-items:flex-end;gap:6px;height:110px}
+.tthist div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px;font-size:11px;font-weight:800;color:var(--muted)}
+.tthist i{display:block;width:100%;max-width:28px;background:var(--accent);border-radius:6px 6px 2px 2px}
+.tthist em{font-style:normal;font-size:10px}
+.revf{border-left:4px solid var(--accent);padding:4px 0 4px 12px}.revf.bad{border-color:var(--bad)}.revf.good{border-color:var(--good)}
+.revf b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.revf p{margin:2px 0 0;font-weight:700}
+
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
 .lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -1338,7 +1363,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-const APPVER='2026-10-10 · v13';
+const APPVER='2026-10-10 · v14';
 function defaults(){return{v:3,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
@@ -1486,6 +1511,7 @@ const ACH=[
  {id:'ms5',t:'Praxistest',d:'5 Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=5},
  {id:'ms25',t:'Bewiesen auf dem Court',d:'Alle Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=MSALL.length},
  ...STAGES.map((st,si)=>({id:'st'+(si+1),t:'Stufe '+(si+1)+': '+st.t,d:'Stufe „'+st.t+'“ gemeistert',f:()=>stageDone(si)})),
+ {id:'tt1',t:'Messlatte',d:'Ersten Techniktest gemacht',f:()=>(S.cnt.tt||0)>=1},
  {id:'backup1',t:'Abgesichert',d:'Erstes Backup gespeichert',f:()=>(S.cnt.backup||0)>=1},
  {id:'goal1',t:'Zielstrebig',d:'Erstes persönliches Ziel erreicht',f:()=>(S.cnt.goals||0)>=1},
  {id:'plan1',t:'Trainingsfleißig',d:'Ersten Trainingsplan absolviert',f:()=>(S.cnt.plans||0)>=1},
@@ -1537,6 +1563,7 @@ const TABS=[['learn','Lernen','home'],['missions','Missionen','target'],['journa
 function render(){
  applyTheme();
  if(!S.onb){renderOnboarding();return;}
+ if(S.focusMode&&S.tab==='league')S.tab='learn';
  renderTop();renderNav();
  const m=$('#main');
  m.innerHTML={learn:viewLearn,missions:viewMissions,journal:viewJournal,league:viewLeague,profile:viewProfile}[S.tab]();
@@ -1548,13 +1575,13 @@ function renderTop(){
  $('#top').innerHTML=`
  <button class="stat" data-act="lvlInfo" aria-label="Level ${lv.L}"><span class="c-acc">${I.racket}</span>${lv.L}</button>
  <button class="stat ${on?'':'off'}" data-act="streakInfo" aria-label="Streak ${S.streak} Tage"><span class="c-flame">${I.flame}</span>${S.streak}</button>
- <button class="stat" data-act="shop" aria-label="${S.gems} Bälle"><span class="c-ball">${I.ball}</span>${S.gems}</button>
+ ${S.focusMode?'':`<button class="stat" data-act="shop" aria-label="${S.gems} Bälle"><span class="c-ball">${I.ball}</span>${S.gems}</button>`}
  <button class="stat" data-act="goalInfo" aria-label="Tagesziel">${ringSvg(S.day.xp/S.goal)}<span style="font-size:15px">${S.day.xp}/${S.goal}</span>${doubleOn()?'<span class="chip ball">2×</span>':''}</button>`;
 }
 function renderNav(){
  const am=activeMissions().length;
  const qOpen=questsToday().filter(id=>qProg(id)>=QUESTS[id].n&&!S.day.claimed.includes(id)).length;
- $('#nav').innerHTML=TABS.map(([id,n,ic])=>`<button data-act="tab" data-id="${id}" ${S.tab===id?'aria-current="page"':''}>${I[ic]}<span>${n}</span>${id==='missions'&&am?`<i class="dot">${am}</i>`:''}${id==='league'&&qOpen?`<i class="dot">${qOpen}</i>`:''}${id==='journal'&&gearDue().length?`<i class="dot">${gearDue().length}</i>`:''}</button>`).join('');
+ $('#nav').innerHTML=TABS.filter(t=>!(S.focusMode&&t[0]==='league')).map(([id,n,ic])=>`<button data-act="tab" data-id="${id}" ${S.tab===id?'aria-current="page"':''}>${I[ic]}<span>${n}</span>${id==='missions'&&am?`<i class="dot">${am}</i>`:''}${id==='league'&&qOpen?`<i class="dot">${qOpen}</i>`:''}${id==='journal'&&gearDue().length?`<i class="dot">${gearDue().length}</i>`:''}</button>`).join('');
 }
 const starRow=(n,max=3)=>`<div class="stars">${Array.from({length:max},(_,i)=>`<span class="${i<n?'':'e'}">${I.star}</span>`).join('')}</div>`;
 
@@ -1572,6 +1599,7 @@ function viewLearn(){
  let cur=LESSONS.findIndex(l=>l.idx>=(LBYID[S.unlockId]||LESSONS[0]).idx&&unlocked(l.idx)&&!lessonDone(l.id));if(cur<0)cur=LESSONS.findIndex(l=>unlocked(l.idx)&&!lessonDone(l.id));
  let h=`<div class="hero">${mascot(S.day.goalHit?'happy':'')}<div class="hero-body"><p>${heroTip()}</p>
   <div class="goal"><span>Tagesziel</span><div class="bar"><i style="width:${Math.min(100,S.day.xp/S.goal*100)}%"></i></div><span>${S.day.xp}/${S.goal} XP</span></div></div></div>
+ ${coachCard()}
  <button class="mini ${dd?'done':''}" data-act="drill"><span class="ic" style="--c:var(--u4)">${dd?I.check:I.dumbbell}</span><span class="grow"><span class="eyebrow muted">Tagesdrill · ${d.min} Min</span><h3>${esc(d.t)}</h3><p>${dd?'Erledigt – stark!':esc(d.d)}</p></span><span class="go">${I.chev}</span></button>`;
  if(rec)h+=`<button class="mini" data-act="lesson" data-id="${rec.l.id}"><span class="ic" style="--c:${SK[rec.k].c}">${I[SK[rec.k].ic]}</span><span class="grow"><span class="eyebrow muted">Empfohlen für dich · ${esc(SK[rec.k].s)}</span><h3>${esc(rec.l.t)}</h3><p>${lessonDone(rec.l.id)?'Mission offen – hol dir den 3. Stern':'Deine Baustelle – jetzt verbessern'}</p></span><span class="go">${I.chev}</span></button>`;
  h+=`<button class="mini" data-act="lexicon"><span class="ic" style="--c:var(--u3)">${I.play}</span><span class="grow"><span class="eyebrow muted">Schlag-Lexikon</span><h3>${Object.keys(ANIM).length} Schläge animiert</h3><p>Chiquita, Bandeja, Víbora, Bajada … zum Nachschauen</p></span><span class="go">${I.chev}</span></button>`;
@@ -1617,7 +1645,7 @@ function viewMissions(){
  if(paused.length)h+=`<h2 class="sec-title">Pausiert</h2><div class="card stack">${paused.map(([id])=>`<div class="row"><span class="grow b">${esc(LBYID[id].m.t)}</span><button class="btn sm ghost" data-act="startMission" data-id="${id}">Aktivieren</button></div>`).join('')}</div>`;
  h+=`<h2 class="sec-title">Gemeistert · ${dm.length}</h2>`;
  h+=dm.length?`<div class="card stack">${dm.map(x=>`<div class="row"><span class="ic" style="--c:var(--gold)">${I.trophy}</span><div class="grow"><b>${esc(x.l.m.t)}</b><div class="muted small">${esc(SK[x.l.sk].n)} · ${x.m.doneAt?fmtDate(x.m.doneAt):''}</div></div></div>`).join('')}</div>`:`<p class="muted">Deine gemeisterten Missionen landen hier als Trophäen.</p>`;
- h+=goalsSection()+plansSection();
+ h+=goalsSection()+ttSection()+plansSection();
  return h;
 }
 
@@ -1924,7 +1952,7 @@ function viewProfile(){
  <h2 class="sec-title">Skills</h2><p class="sec-sub">Lektionen, Drills und Missionen trainieren deine Skills bis Level 10.</p><div class="card stack">`;
  SKIDS.forEach(k=>{const s=skLv(S.skillXp[k]);h+=`<div class="skill"><span class="ic" style="--c:${SK[k].c}">${I[SK[k].ic]}</span><div class="grow"><h3><span>${esc(SK[k].n)}${S.focus.includes(k)?' <span class="chip">Fokus</span>':''}</span><em>Lv ${s.L}</em></h3><div class="bar thin blue"><i style="width:${s.max?100:s.cur/s.need*100}%"></i></div></div></div>`;});
  h+=`</div><h2 class="sec-title">Erfolge · ${Object.keys(S.ach).length}/${ACH.length}</h2><div class="ach">${ACH.map(a=>`<div class="achc ${S.ach[a.id]?'':'off'}"><span class="medal">${S.ach[a.id]?I.trophy:I.lock}</span><h3>${esc(a.t)}</h3><p>${esc(a.d)}</p></div>`).join('')}</div>
- <h2 class="sec-title">Shop</h2><button class="btn ball block" data-act="shop">${I.bag} Shop öffnen · ${S.gems} Bälle</button>
+ ${S.focusMode?'':`<h2 class="sec-title">Shop</h2><button class="btn ball block" data-act="shop">${I.bag} Shop öffnen · ${S.gems} Bälle</button>`}
  <h2 class="sec-title">Einstellungen</h2><div class="card stack">
   <div><label class="lab" for="nm">Name</label><input id="nm" class="field" value="${esc(S.name)}" maxlength="24" data-act="noop"></div>
   <div class="row"><div class="grow"><label class="lab" for="wkg">Gewicht (kg)</label><input id="wkg" class="field" type="text" inputmode="decimal" autocomplete="off" value="${String(S.weight).replace('.',',')}"></div><div class="grow"><label class="lab" for="hcm">Größe (cm)</label><input id="hcm" class="field" type="number" inputmode="numeric" min="120" max="230" value="${S.height}"></div></div>
@@ -1935,6 +1963,7 @@ function viewProfile(){
   <div><span class="lab">Sessions pro Woche</span><div class="seg">${[1,2,3,4,5].map(v=>`<button data-act="set" data-k="weekGoal" data-v="${v}" aria-pressed="${S.weekGoal===v}">${v}</button>`).join('')}</div></div>
   <div><span class="lab">Fokus-Skills</span><div class="seg">${SKIDS.map(k=>`<button data-act="focus" data-k="${k}" aria-pressed="${S.focus.includes(k)}">${esc(SK[k].s)}</button>`).join('')}</div></div>
   <div><span class="lab">Design</span><div class="seg">${[['auto','System'],['light','Hell'],['dark','Dunkel']].map(([v,n])=>`<button data-act="set" data-k="theme" data-v="${v}" aria-pressed="${S.theme===v}">${n}</button>`).join('')}</div></div>
+  <div><span class="lab">Fokus-Modus</span><div class="seg"><button data-act="set" data-k="focusMode" data-v="0" aria-pressed="${!S.focusMode}">Aus</button><button data-act="set" data-k="focusMode" data-v="1" aria-pressed="${!!S.focusMode}">An – ohne Liga & Shop</button></div><p class="muted small b" style="margin-top:4px">Blendet Liga, Quests und Shop aus. Lernen, Coach, Tagebuch und Statistik bleiben.</p></div>
   <div><span class="lab">Sound</span><div class="seg"><button data-act="set" data-k="sound" data-v="1" aria-pressed="${S.sound}">An</button><button data-act="set" data-k="sound" data-v="0" aria-pressed="${!S.sound}">Aus</button></div></div>
  </div>
  <h2 class="sec-title">Datensicherung</h2><div class="card stack"><p class="muted small b">Alles liegt nur auf diesem Gerät. ${S.lastBackup?'Letztes Backup: '+fmtDate(S.lastBackup)+(dayDiff(S.lastBackup,today())>=14?' – <span style="color:var(--bad)">Zeit für ein neues!</span>':''):'<span style="color:var(--bad)">Noch kein Backup.</span>'} Speichere die Datei z. B. in iCloud Drive oder „Dateien“.</p>
@@ -2425,6 +2454,84 @@ function drawPlanRun(){if(!PR)return;const p=PR.p,b=p.blocks[PR.bi],over=PR.left
 function planFinish(p,real){S.plansDone=S.plansDone||{};S.plansDone[p.id]=(S.plansDone[p.id]||0)+1;S.cnt.plans=(S.cnt.plans||0)+1;const r=addXP(25,p.sk);checkAch();save();
  toast(`${esc(p.t)} geschafft! +${r.n} XP`,I.check);journalNew({type:p.n===4?'Training':'Training',dur:60,notes:'Trainingsplan: '+p.t});}
 
+/* ================= Techniktests (objektiv, 0–10 Treffer) ================= */
+const TT=[
+ {id:'lobtief',sk:'lob',t:'Lob-Tiefe',d:'Partner spielt dir 10 Bälle zu, du spielst jeden als Lob. Zähle, wie viele hinter der gegnerischen Aufschlaglinie aufspringen.'},
+ {id:'aufschlag',sk:'aufschlag',t:'Aufschlag-Ziel',d:'10 Aufschläge auf die Rückhand oder in die Glasecke des Returnspielers. Zähle, wie viele in der Zielhälfte des Aufschlagfelds landen.'},
+ {id:'return',sk:'aufschlag',t:'Return auf die Füße',d:'Partner schlägt 10× auf und rückt vor. Zähle, wie viele Returns flach auf seine Füße oder als guter Lob kommen.'},
+ {id:'bandeja',sk:'bandeja',t:'Bandeja tief',d:'Partner lobbt dir 10 Bälle zu. Zähle, wie viele Bandejas im letzten Drittel landen und nach dem Glas nicht hoch abspringen.'},
+ {id:'vibora',sk:'bandeja',t:'Víbora in die Ecke',d:'10 Víboras nach Zuspiel-Lob. Zähle, wie viele die Ecke aus Seitenwand und Boden treffen.'},
+ {id:'volley',sk:'volley',t:'Volley auf die Füße',d:'Partner spielt von hinten 10 Bälle ans Netz. Zähle, wie viele Volleys tief oder auf seine Füße gehen.'},
+ {id:'wand',sk:'wand',t:'Rückwand-Kontrolle',d:'Partner spielt 10 lange Bälle an deine Rückwand. Zähle, wie viele du nach der Wand kontrolliert und tief zurückspielst.'},
+ {id:'chiquita',sk:'taktik',t:'Chiquita',d:'Partner steht am Netz. 10 Chiquitas von hinten: Zähle, wie viele vor seinen Füßen (zwischen Netz und Aufschlaglinie) landen.'},
+ {id:'smash',sk:'smash',t:'Smash-Abschluss',d:'Partner spielt 10 kurze Lobs. Zähle, wie viele Smashes im Feld bleiben und so viel Druck haben, dass der Partner sie nicht kontrolliert zurückbringt.'},
+ {id:'vorhand',sk:'vorhand',t:'Vorhand tief',d:'10 Vorhände von der Grundlinie nach Zuspiel. Zähle, wie viele hinter der gegnerischen Aufschlaglinie landen.'}
+];
+const TBYID=Object.fromEntries(TT.map(t=>[t.id,t]));
+const ttRes=id=>(S.tt&&S.tt[id])||[];
+const ttLast=id=>{const r=ttRes(id);return r.length?r[r.length-1]:null;};
+function ttTrend(id){const r=ttRes(id);if(r.length<2)return null;const a=r.slice(-3),b=r.slice(-6,-3);if(!b.length)return r[r.length-1].v-r[0].v;return a.reduce((s,x)=>s+x.v,0)/a.length-b.reduce((s,x)=>s+x.v,0)/b.length;}
+function ttSection(){let h=`<h2 class="sec-title">Techniktests</h2><p class="sec-sub">Objektiv statt Gefühl: 10 Versuche, Treffer zählen, Verlauf sehen. Am besten alle 2–3 Wochen.</p><div class="stack">`;
+ const wk=weekKey();
+ TT.forEach(t=>{const r=ttRes(t.id),l=r[r.length-1],tr=ttTrend(t.id),best=r.length?Math.max(...r.map(x=>x.v)):null;
+  h+=`<button class="mini ttrow" data-act="ttOpen" data-id="${t.id}" style="margin:0"><span class="ic" style="--c:${SK[t.sk].c}">${I[SK[t.sk].ic]}</span><span class="grow"><span class="eyebrow muted">${esc(SK[t.sk].s)}${l&&weekKey(l.d)===wk?' · <span class="c-good">diese Woche ✓</span>':''}</span><h3>${esc(t.t)}</h3><p>${l?`Zuletzt ${l.v}/10 (${fmtDate(l.d)}) · Bestwert ${best}/10${tr!=null?` · <span style="color:${tr>0?'var(--good)':tr<0?'var(--bad)':'var(--muted)'}">${tr>0?'▲ +':tr<0?'▼ ':'▬ '}${fmt1(tr)}</span>`:''}`:'Noch nicht gemacht'}</p></span>${r.length>1?ttBars(r.slice(-6)):''}<span class="go">${I.chev}</span></button>`;});
+ return h+'</div>';}
+function ttBars(r){return `<span class="ttb">${r.map(x=>`<i style="height:${Math.max(8,x.v*10)}%"></i>`).join('')}</span>`;}
+let TTV=null;
+function ttSheet(id){const t=TBYID[id],r=ttRes(id);if(TTV==null)TTV=ttLast(id)?ttLast(id).v:5;
+ modal(`<div class="eyebrow muted">Techniktest · ${esc(SK[t.sk].n)}</div><h2>${esc(t.t)}</h2><div class="theory" style="padding:14px;animation:none"><p style="margin:0;font-weight:700">${esc(t.d)}</p></div>
+ <div class="center"><span class="lab">Treffer von 10</span><div class="stepper"><button class="btn ghost" data-act="ttStep" data-v="-1" aria-label="Weniger">−</button><b id="ttv">${TTV}</b><button class="btn ghost" data-act="ttStep" data-v="1" aria-label="Mehr">+</button></div></div>
+ ${r.length?`<div><div class="eyebrow muted" style="margin-bottom:6px">Verlauf</div><div class="tthist">${r.slice(-10).map(x=>`<div><i style="height:${Math.max(6,x.v*10)}%"></i><span>${x.v}</span><em>${parseD(x.d).getDate()}.${parseD(x.d).getMonth()+1}.</em></div>`).join('')}</div></div>`:''}
+ <button class="btn block" data-act="ttSave" data-id="${id}">${I.check} Ergebnis speichern · +15 XP</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);}
+
+/* ================= Trainerstunden-Nachbereitung + Wiederholung ================= */
+const REV_STEPS=[3,7,14];
+function reviewsDue(){return S.journal.filter(j=>j.coach&&j.rev&&j.rev.step<REV_STEPS.length&&j.rev.next<=today());}
+function reviewPopup(){const j=reviewsDue()[0];if(!j){nextModal();return;}S.revAsked=today();save();const c=j.coach;
+ modal(`<div class="eyebrow muted">Wiederholung ${j.rev.step+1}/${REV_STEPS.length} · Trainerstunde vom ${parseD(j.date).toLocaleDateString('de-DE')}</div><h2>Weißt du's noch?</h2>
+ <div class="stack">${c.learn?`<div class="revf"><b>Gelernt</b><p>${esc(c.learn)}</p></div>`:''}${c.avoid?`<div class="revf bad"><b>Diesen Fehler vermeiden</b><p>${esc(c.avoid)}</p></div>`:''}${c.practice?`<div class="revf good"><b>Im nächsten Match üben</b><p>${esc(c.practice)}</p></div>`:''}</div>
+ <p class="muted small b">Hast du es seitdem umgesetzt?</p>
+ <button class="btn good block" data-act="revOk" data-id="${j.id}">${I.check} Sitzt – weiter so</button><button class="btn ghost block" data-act="revAgain" data-id="${j.id}">Muss ich noch üben</button>`);beep('pop');}
+
+/* ================= Persönlicher Coach + Wochenplan ================= */
+function coachFocus(){
+ const M=[...S.journal].filter(j=>j.res).sort(byDateAsc).slice(-6);
+ const lc={};M.forEach(j=>{if(j.lost)lc[j.lost]=(lc[j.lost]||0)+1;});const lost=Object.entries(lc).sort((a,b)=>b[1]-a[1])[0];
+ if(lost&&lost[1]>=2)return{k:lost[0],why:`In ${lost[1]} deiner letzten ${M.length} Matches hast du die meisten Punkte bei ${SK[lost[0]].n} verloren.`};
+ let drop=null;SKIDS.forEach(k=>{const h=ratingHist(k);if(h.length<6)return;const a=h.slice(-3),b=h.slice(-6,-3),d=a.reduce((s,x)=>s+x,0)/3-b.reduce((s,x)=>s+x,0)/3;if(d<=-1&&(!drop||d<drop.d))drop={k,d};});
+ if(drop)return{k:drop.k,why:`Deine ${SK[drop.k].p} sind zuletzt um ${fmt1(-drop.d)} Punkte schwächer geworden.`};
+ const low=TT.map(t=>({t,l:ttLast(t.id)})).filter(x=>x.l&&x.l.v<=4).sort((a,b)=>a.l.v-b.l.v)[0];
+ if(low)return{k:low.t.sk,why:`Im Techniktest „${low.t.t}“ hattest du zuletzt nur ${low.l.v} von 10.`};
+ const sr=selfRating(),k=weakest()[0];
+ return{k,why:sr[k]!=null?`Laut deinen Bewertungen ist ${SK[k].n} (${fmt1(sr[k])}/10) gerade deine größte Baustelle.`:`Dein Startfokus: ${SK[k].n}. Sobald du Matches einträgst, passe ich ihn an deine Daten an.`};
+}
+function coachWeek(){
+ const wk=weekKey();S.coach=S.coach||{};
+ if(!S.coach[wk]){const f=coachFocus();S.coach[wk]={k:f.k,why:f.why};save();}
+ const F=S.coach[wk];let streak=1;for(let i=1;i<8;i++){const p=S.coach[addDays(wk,-7*i)];if(p&&p.k===F.k)streak++;else break;}
+ const J=S.journal.filter(j=>weekKey(j.date)===wk),trainings=J.filter(j=>j.type==='Training'||j.type==='Trainerstunde').length,matches=J.filter(j=>j.type==='Match'||j.type==='Turnier').length;
+ const tick=id=>!!(S.wtick&&S.wtick[wk+':'+id]),items=[],n=Math.max(1,S.weekGoal||2),cs=curStage(),k=F.k;
+ const ls=LESSONS.filter(l=>l.sk===k&&unlocked(l.idx)),les=ls.find(l=>!lessonDone(l.id))||ls.find(l=>stars(l.id)<3);
+ if(les)items.push({id:'les',ic:'book',t:`Lektion: ${les.t}`,s:lessonDone(les.id)?'Mission für den 3. Stern offen':'Theorie + Quiz, 3 Minuten',done:lessonDone(les.id)&&weekKey(S.lessons[les.id].date||'2000-01-01')===wk,act:`data-act="lesson" data-id="${les.id}"`});
+ const mis=(activeMissions().find(x=>x.l.sk===k)||{}).l||les||ls[0];
+ const plans=PLANS.filter(p=>p.sk===k||(k==='smash'&&p.sk==='bandeja')).sort((a,b)=>Math.abs(a.st-cs)-Math.abs(b.st-cs)||(a.n===(S.pn||2)?-1:1)),pool=[...plans,...PLANS.filter(p=>!plans.includes(p)&&Math.abs(p.st-cs)<=1).sort((a,b)=>(a.n===(S.pn||2)?-1:1)-(b.n===(S.pn||2)?-1:1)||Math.abs(a.st-cs)-Math.abs(b.st-cs))],planAt=i=>pool[(i+streak-1)%pool.length];
+ let tI=0,mI=0;for(let i=0;i<n;i++){
+  const plan=planAt(tI);if(i%2===0&&plan){items.push({id:'s'+i,ic:'dumbbell',t:`Training: ${plan.t}`,s:`60 Min · ${plan.n} Spieler · mit Timer`,done:trainings>tI,act:`data-act="plan" data-id="${plan.id}"`});tI++;}
+  else{items.push({id:'s'+i,ic:'racket',t:`Match mit Fokus ${SK[k].s}`,s:mis?`Mission: ${mis.m.t}`:`Achte bewusst auf deine ${SK[k].p}`,done:matches>mI,act:`data-act="brief"`});mI++;}}
+ const dr=DRILLS.filter(d=>d.sk===k);if(dr.length){const d=dr[(hash(wk)+streak)%dr.length];items.push({id:'drill',ic:'clock',t:`Drill: ${d.t}`,s:`${d.min} Min · ${d.d}`,done:tick('drill'),act:`data-act="coachTick" data-id="drill"`,tick:1});}
+ const tt=TT.filter(t=>t.sk===k)[streak%2]||TT.find(t=>t.sk===k);if(tt){const l=ttLast(tt.id);items.push({id:'tt',ic:'target',t:`Techniktest: ${tt.t}`,s:l?`Letztes Mal ${l.v}/10 – schaffst du mehr?`:'Einmal messen, wo du stehst',done:!!(l&&weekKey(l.d)===wk),act:`data-act="ttOpen" data-id="${tt.id}"`});}
+ const tc=[...S.journal].filter(j=>j.coach&&j.coach.practice&&dayDiff(j.date,today())<=14).sort((a,b)=>byDateAsc(b,a))[0];
+ if(tc)items.push({id:'tc',ic:'pen',t:'Aus der Trainerstunde üben',s:tc.coach.practice,done:tick('tc'),act:`data-act="coachTick" data-id="tc"`,tick:1});
+ return{F,streak,items,done:items.filter(x=>x.done).length};
+}
+function coachCard(){const C=coachWeek(),rv=reviewsDue().length;
+ return `<div class="coach"><div class="row"><span class="eyebrow" style="opacity:.85">Dein Coach · diese Woche</span>${C.streak>1?`<span class="chip ball" style="margin-left:auto">Woche ${C.streak} am ${esc(SK[C.F.k].s)}</span>`:''}</div>
+ <h2>Fokus: ${esc(SK[C.F.k].n)}</h2><p>${esc(C.F.why)}</p>
+ <div class="goal" style="color:inherit"><div class="bar"><i style="width:${C.items.length?C.done/C.items.length*100:0}%"></i></div><span>${C.done}/${C.items.length}</span></div>
+ <div class="citems">${C.items.map(x=>`<div class="citem ${x.done?'done':''}"><button class="ck" ${x.tick?`data-act="coachTick" data-id="${x.id}"`:x.act} aria-label="${x.done?'Erledigt':'Offen'}">${x.done?I.check:''}</button><button class="cbody" ${x.act}><b>${esc(x.t)}</b><span>${esc(x.s)}</span></button></div>`).join('')}</div>
+ ${rv?`<button class="btn block" data-act="revOpen">${I.book} ${rv} Wiederholung${rv>1?'en':''} aus der Trainerstunde</button>`:''}
+ <p class="small" style="opacity:.8;margin:0">Plan für ${S.weekGoal||2} Sessions pro Woche (im Profil änderbar). Der Fokus wird jeden Montag neu aus deinen Daten bestimmt.</p></div>`;}
+
 /* ================= Modals ================= */
 function modal(html){$('#modal').innerHTML=`<div class="modal" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;}
 function closeModal(){$('#modal').innerHTML='';if(typeof MQ!=='undefined')MQ=[];}
@@ -2597,7 +2704,7 @@ function journalNew(o){
  drawJournal();
 }
 function journalEdit(id){const j=S.journal.find(x=>x.id===id);if(!j)return;closeModal();
- JF={editId:id,type:j.type,date:j.date,dur:j.dur,int:j.int||2,res:j.res||null,score:j.score||'',partner:j.partner||'',opp:j.opp||'',feel:j.feel||3,rt:j.rt&&Object.keys(j.rt).length?{...j.rt}:Object.fromEntries(SKIDS.map(k=>[k,lastRating(k)])),lost:j.lost||null,mr:{},notes:j.notes||'',ol:j.ol??'',pl:j.pl??''};drawJournal();}
+ JF={editId:id,coach:j.coach?{...j.coach}:null,type:j.type,date:j.date,dur:j.dur,int:j.int||2,res:j.res||null,score:j.score||'',partner:j.partner||'',opp:j.opp||'',feel:j.feel||3,rt:j.rt&&Object.keys(j.rt).length?{...j.rt}:Object.fromEntries(SKIDS.map(k=>[k,lastRating(k)])),lost:j.lost||null,mr:{},notes:j.notes||'',ol:j.ol??'',pl:j.pl??''};drawJournal();}
 function drawJournal(){
  const am=activeMissions(),isMatch=JF.type==='Match'||JF.type==='Turnier';
  const feels=['Mies','Naja','Okay','Gut','Top'];
@@ -2616,6 +2723,10 @@ function drawJournal(){
   ${am.length&&!JF.editId?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
   <div><div class="row" style="margin-bottom:6px"><span class="lab grow" style="margin:0">Wie gut warst du heute? (0–10)</span><span class="chip" id="rcount">${Object.keys(JF.rt).length} von ${SKIDS.length} bewertet</span></div><p class="muted small b" style="margin-bottom:10px">Alle Regler starten mit deiner letzten Bewertung – schieb nur, was heute anders war. Was du nicht gespielt hast (z. B. Volleys im Single), tippst du auf „Nicht gespielt“.</p><div class="stack">${SKIDS.map(rateRow).join('')}</div></div>
   <div><span class="lab">Wo hast du die meisten Punkte verloren?</span><div class="seg">${SKIDS.map(k=>`<button data-act="jf" data-k="lost" data-v="${k}" aria-pressed="${JF.lost===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
+  ${JF.type==='Trainerstunde'?`<div class="card stack" style="border-color:var(--accent)"><div class="row"><span class="ic">${I.pen}</span><div class="grow"><b>Nachbereitung der Trainerstunde</b><div class="muted small b">Wird dir nach 3, 7 und 14 Tagen wieder gezeigt.</div></div></div>
+   <div><label class="lab" for="jc_learn">Das habe ich gelernt</label><textarea id="jc_learn" class="field" placeholder="z. B. Bandeja: Schläger früher hoch">${esc((JF.coach||{}).learn||'')}</textarea></div>
+   <div><label class="lab" for="jc_avoid">Diesen Fehler soll ich vermeiden</label><textarea id="jc_avoid" class="field" placeholder="z. B. zu spät seitlich drehen">${esc((JF.coach||{}).avoid||'')}</textarea></div>
+   <div><label class="lab" for="jc_practice">Das übe ich im nächsten Match</label><textarea id="jc_practice" class="field" placeholder="z. B. jede Bandeja tief in die Ecke">${esc((JF.coach||{}).practice||'')}</textarea></div></div>`:''}
   <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
  </div></div>
  <div class="l-foot"><div class="foot-in"><button class="btn block" data-act="saveJournal">${I.check} Speichern</button></div></div></div>`;
@@ -2632,15 +2743,18 @@ function liveKcal(){const i=document.getElementById('jdur'),o=document.getElemen
 function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
  const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
  ['score','partner','opp','notes'].forEach(k=>{const v=g('j'+({partner:'part'}[k]||k));if(v!=null)JF[k]=v.trim();});
+ {const c={};['learn','avoid','practice'].forEach(k=>{const v=g('jc_'+k);if(v!=null)c[k]=v.trim();});if(Object.keys(c).length)JF.coach=Object.assign(JF.coach||{},c);}
  [['ol','jol'],['pl','jpl']].forEach(([k,id])=>{const v=g(id);if(v!=null){const n=parseFloat(String(v).replace(',','.'));JF[k]=v.trim()===''||isNaN(n)?'':Math.max(0,Math.min(7,n));}});}
 function saveJournal(){
  syncJF();
  if(JF.editId){const j=S.journal.find(x=>x.id===JF.editId);if(j){Object.assign(j,{type:JF.type,date:JF.date||j.date,dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner,rs:10});
   if(JF.type==='Match'||JF.type==='Turnier'){j.res=JF.res||inferRes(JF.score);j.score=JF.score;j.opp=JF.opp;j.ol=JF.ol;j.pl=JF.pl;}else{delete j.res;delete j.score;delete j.opp;}
+  if(JF.type==='Trainerstunde'&&JF.coach&&(JF.coach.learn||JF.coach.avoid||JF.coach.practice)){j.coach=JF.coach;if(!j.rev)j.rev={step:0,next:addDays(j.date,REV_STEPS[0])};}
   S.journal.sort((a,b)=>b.date.localeCompare(a.date));}
   JF=null;$('#ov').innerHTML='';const hit=goalsCheck();save();render();toast('Eintrag aktualisiert',I.check);MQ=hit.map(goalPopup);if(MQ.length)nextModal();return;}
  const e={rs:10,id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
  if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;if(JF.ol!=='')e.ol=JF.ol;if(JF.pl!=='')e.pl=JF.pl;}
+ if(JF.type==='Trainerstunde'&&JF.coach&&(JF.coach.learn||JF.coach.avoid||JF.coach.practice)){e.coach=JF.coach;e.rev={step:0,next:addDays(e.date,REV_STEPS[0])};}
  e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
  e.ts=Date.now();if((e.type==='Match'||e.type==='Turnier')&&!e.res&&e.score)e.res=inferRes(e.score);
  const prevSR=selfRating(),dueBefore=gearDue().map(g=>g.id),rBefore=topRacket().id;
@@ -2678,6 +2792,7 @@ function journalView(i){
  ${rt.length?`<div class="stack">${rt.map(([k,v])=>`<div class="row"><span style="width:90px" class="b small">${esc(SK[k].s)}</span><div class="bar thin blue"><i style="width:${v*10}%"></i></div><span class="b small">${v}/10</span></div>`).join('')}</div>`:''}
  ${j.lost?`<p class="b">Punkte verloren vor allem bei: ${esc(SK[j.lost].n)}</p>`:''}
  ${(j.missions||[]).length?`<p class="b">Missionen: ${j.missions.map(m=>LBYID[m.id]?esc(LBYID[m.id].m.t)+' ('+RATE[m.r-1][1]+')':'').join(', ')}</p>`:''}
+ ${j.coach?`<div class="stack">${j.coach.learn?`<div class="revf"><b>Gelernt</b><p>${esc(j.coach.learn)}</p></div>`:''}${j.coach.avoid?`<div class="revf bad"><b>Vermeiden</b><p>${esc(j.coach.avoid)}</p></div>`:''}${j.coach.practice?`<div class="revf good"><b>Im Match üben</b><p>${esc(j.coach.practice)}</p></div>`:''}${j.rev?`<p class="muted small b">${j.rev.step>=REV_STEPS.length?'Alle Wiederholungen erledigt ✓':'Nächste Wiederholung: '+parseD(j.rev.next).toLocaleDateString('de-DE')}</p>`:''}</div>`:''}
  ${j.notes?`<div class="card" style="white-space:pre-wrap">${esc(j.notes)}</div>`:''}
  <div class="row"><button class="btn ghost grow" data-act="closeModal">Schließen</button><button class="btn sm" data-act="journalEdit" data-id="${j.id}">${I.pen} Bearbeiten</button><button class="btn bad sm" data-act="journalDel" data-i="${i}">Löschen</button></div>`);
 }
@@ -2757,6 +2872,13 @@ const ACT={
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
  peek(){peekSheet(LS.id);},
  brief(){briefSheet();},
+ ttOpen(el){TTV=null;ttSheet(el.dataset.id);},
+ ttStep(el){TTV=Math.max(0,Math.min(10,TTV+ +el.dataset.v));$('#ttv').textContent=TTV;beep('tap');},
+ ttSave(el){const id=el.dataset.id,t=TBYID[id];S.tt=S.tt||{};(S.tt[id]=S.tt[id]||[]).push({d:today(),v:TTV});S.cnt.tt=(S.cnt.tt||0)+1;const prev=ttRes(id).slice(0,-1).map(x=>x.v),rec=prev.length&&TTV>Math.max(...prev);const r=addXP(15,t.sk);checkAch();save();closeModal();render();toast(rec?`Neuer Bestwert: ${TTV}/10! +${r.n} XP`:`${esc(t.t)}: ${TTV}/10 gespeichert · +${r.n} XP`,I.target);if(rec)confetti();beep('coin');TTV=null;},
+ coachTick(el){const k=weekKey()+':'+el.dataset.id;S.wtick=S.wtick||{};S.wtick[k]=!S.wtick[k];if(S.wtick[k]){addXP(5,null);beep('coin');}save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
+ revOpen(){MQ=[];reviewPopup();},
+ revOk(el){const j=S.journal.find(x=>x.id===el.dataset.id);j.rev.step++;if(j.rev.step<REV_STEPS.length)j.rev.next=addDays(today(),REV_STEPS[j.rev.step]-REV_STEPS[j.rev.step-1]);addXP(5,null);save();render();toast(j.rev.step>=REV_STEPS.length?'Alle Wiederholungen geschafft – das sitzt!':'Nächste Wiederholung in '+(REV_STEPS[j.rev.step]-REV_STEPS[j.rev.step-1])+' Tagen',I.check);if(reviewsDue().length)reviewPopup();else nextModal();},
+ revAgain(el){const j=S.journal.find(x=>x.id===el.dataset.id);j.rev.next=addDays(today(),3);save();render();toast('Okay – ich zeige es dir in 3 Tagen nochmal',I.clock);if(reviewsDue().length)reviewPopup();else nextModal();},
  briefGo(){S.brief={opp:($('#bopp').value||'').trim(),partner:($('#bpart').value||'').trim(),date:today()};S.cnt.brief=(S.cnt.brief||0)+1;save();checkAch();briefSheet();},
  briefLog(){closeModal();journalNew();},
  quick(){QL=null;quickSheet();},
@@ -2811,7 +2933,7 @@ const ACT={
   else{S.owned.push(it.id);S.wear={hat:it.id};}
   S.gems-=it.p;save();beep('coin');toast(esc(it.t)+' gekauft!',I.bag);shopSheet();renderTop();},
  wear(el){S.wear=S.wear.hat===el.dataset.id?{}:{hat:el.dataset.id};save();render();shopSheet();},
- set(el){const k=el.dataset.k;let v=el.dataset.v;if(k==='goal'||k==='weekGoal')v=+v;if(k==='sound')v=v==='1';if(k==='arm')v=v==='1';S[k]=v;save();render();},
+ set(el){const k=el.dataset.k;let v=el.dataset.v;if(k==='goal'||k==='weekGoal')v=+v;if(k==='sound')v=v==='1';if(k==='arm')v=v==='1';if(k==='focusMode')v=v==='1';S[k]=v;save();render();},
  focus(el){const k=el.dataset.k;if(S.focus.includes(k))S.focus=S.focus.filter(x=>x!==k);else if(S.focus.length<3){S.focus.push(k);const l=unlockSkill(k);if(l)toast('Freigeschaltet: <b>'+esc(l.t)+'</b>',I.sparkle);}else{toast('Maximal 3 Fokus-Skills',I.target);return;}save();render();},
  lvlInfo(){const lv=lvl(S.xp);modal(`<div class="center">${mascot('happy')}<h2>Level ${lv.L} · ${title(lv.L)}</h2><div class="goal" style="width:100%"><div class="bar blue"><i style="width:${lv.cur/lv.need*100}%"></i></div><span>${lv.cur}/${lv.need}</span></div><p class="muted b">Nächster Titel: ${(TITLES.find(t=>t[0]>lv.L)||['','Du bist eine Legende!'])[1]}${TITLES.find(t=>t[0]>lv.L)?' ab Level '+TITLES.find(t=>t[0]>lv.L)[0]:''}</p></div><button class="btn block" data-act="closeModal">OK</button>`);},
  streakInfo(){showStreak();},
@@ -2858,7 +2980,7 @@ const startMsgs=tick();
 render();
 if(S.onb)checkAch();
 startMsgs.forEach((m,i)=>setTimeout(()=>toast(m[0],m[1]),400+i*700));
-function gearCheckOnOpen(){if(!S.onb||$('#modal').innerHTML||LS||JF||PR)return;MQ=[];const g=gearDue().length&&S.gearAsked!==today(),b=backupDue()&&S.backupAsked!==today();if(g&&b)MQ.push(backupPopup);if(g)gearPopup();else if(b)backupPopup();}
+function gearCheckOnOpen(){if(!S.onb||$('#modal').innerHTML||LS||JF||PR)return;MQ=[];const q=[];if(reviewsDue().length&&S.revAsked!==today())q.push(reviewPopup);if(gearDue().length&&S.gearAsked!==today())q.push(gearPopup);if(backupDue()&&S.backupAsked!==today())q.push(backupPopup);if(q.length){MQ=q.slice(1);q[0]();}}
 setTimeout(gearCheckOnOpen,1200);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(gearCheckOnOpen,600);});
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}

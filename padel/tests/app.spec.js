@@ -263,3 +263,57 @@ for (const scheme of ['light', 'dark']) {
     }
   });
 }
+
+test('Coach: Wochenfokus aus den letzten Matches und Wochenplan', async ({ page }) => {
+  await open(page, () => { base(); seedMatches(); S.weekGoal = 3; S.unlockId = 'lob';
+    S.journal.slice(0, 3).forEach(j => { j.res = 'l'; j.lost = 'lob'; }); }); // 3 der letzten 6 Matches über Lob verloren
+  await expect(page.locator('.coach h2')).toHaveText('Fokus: Lob');
+  await expect(page.locator('.coach')).toContainText('In 4 deiner letzten 6 Matches');
+  // 3 Sessions + Lektion + Drill + Test = 6 Aufgaben
+  await expect(page.locator('.citem')).toHaveCount(6);
+  const trainings = await page.locator('.cbody b', { hasText: 'Training:' }).allTextContents();
+  expect(new Set(trainings).size).toBe(trainings.length); // keine doppelten Pläne
+  await page.locator('.citem .ck[data-act=coachTick]').first().click();
+  await expect(page.locator('.coach .goal span')).toHaveText('1/6');
+  // Fokus bleibt die Woche über stabil, auch wenn neue Daten kommen
+  expect(await page.evaluate(() => { S.journal.forEach(j => j.lost = 'smash'); return coachWeek().F.k; })).toBe('lob');
+});
+
+test('Techniktest: Ergebnis speichern, Bestwert, Verlauf', async ({ page }) => {
+  await open(page, () => { base(); S.tab = 'missions'; S.tt = { lobtief: [{ d: addDays(today(), -14), v: 4 }] }; });
+  await page.click('[data-act=ttOpen][data-id=lobtief]');
+  await expect(page.locator('#ttv')).toHaveText('4');
+  for (let i = 0; i < 3; i++) await page.click('[data-act=ttStep][data-v="1"]');
+  await page.click('[data-act=ttSave]');
+  expect(await page.evaluate(() => S.tt.lobtief.map(x => x.v))).toEqual([4, 7]);
+  await expect(page.locator('[data-act=ttOpen][data-id=lobtief]')).toContainText('Zuletzt 7/10');
+});
+
+test('Trainerstunde: Nachbereitung und Wiederholung nach 3 Tagen', async ({ page }) => {
+  await open(page, () => { base(); S.tab = 'journal'; });
+  await page.click('[data-act=journalNew]');
+  await page.click('[data-act=jf][data-k=type][data-v=Trainerstunde]');
+  await page.fill('#jc_learn', 'Schläger früher hoch');
+  await page.fill('#jc_avoid', 'Zu spät drehen');
+  await page.fill('#jc_practice', 'Jede Bandeja in die Ecke');
+  await page.click('[data-act=saveJournal]');
+  const e = await page.evaluate(() => S.journal[0]);
+  expect(e.coach.practice).toBe('Jede Bandeja in die Ecke');
+  expect(e.rev).toEqual({ step: 0, next: await page.evaluate(() => addDays(today(), 3)) });
+  // 3 Tage später: Pop-up beim Öffnen
+  await page.evaluate(() => { S.journal[0].rev.next = today(); S.revAsked = null; save(); });
+  await page.reload(); await page.waitForTimeout(1500);
+  await expect(page.locator('.sheet h2')).toHaveText('Weißt du\'s noch?');
+  await expect(page.locator('.sheet')).toContainText('Jede Bandeja in die Ecke');
+  await page.click('[data-act=revOk]');
+  expect(await page.evaluate(() => S.journal[0].rev)).toEqual({ step: 1, next: await page.evaluate(() => addDays(today(), 4)) });
+});
+
+test('Fokus-Modus blendet Liga und Shop aus', async ({ page }) => {
+  await open(page, () => { base(); S.tab = 'profile'; });
+  await expect(page.locator('[data-act=tab][data-id=league]')).toHaveCount(1);
+  await page.click('[data-act=set][data-k=focusMode][data-v="1"]');
+  await expect(page.locator('[data-act=tab][data-id=league]')).toHaveCount(0);
+  await expect(page.locator('.top [data-act=shop]')).toHaveCount(0);
+  await expect(page.locator('#main')).not.toContainText('Shop öffnen');
+});

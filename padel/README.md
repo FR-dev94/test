@@ -41,6 +41,11 @@ Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchs
 
 ## Trainieren, planen, absichern
 
+- **Persönlicher Coach** (oben im Lernen-Tab): Wochenfokus aus deinen letzten Matches, Bewertungstrends und Techniktests – mit Wochenplan passend zu deinen Sessions pro Woche (Lektion, Trainingspläne, Match-Fokus, Drill, Techniktest, Trainerstunden-Aufgabe); der Fokus bleibt eine Woche stabil und baut über Wochen auf
+- **10 Techniktests** (z. B. Lob-Tiefe, Bandeja tief, Return auf die Füße): Treffer von 10 mit Verlauf und Bestwert
+- **Trainerstunden-Nachbereitung**: „gelernt / vermeiden / im Match üben“ mit Wiederholung nach 3, 7 und 14 Tagen
+- **Fokus-Modus** im Profil: blendet Liga, Quests und Shop aus
+
 - **Match-Briefing** vor dem Spiel: Bilanz gegen die Gegner und mit dem Partner, Siegchance, wo du gegen sie Punkte verlierst, und ein 3-Punkte-Plan
 - **Erkenntnisse** in der Statistik: z. B. „Wenn deine Lobs bei 7+ liegen, gewinnst du 9 von 11“, häufigste Verlust-Bereiche, bester Partner
 - **Spielstärke-Schätzung** (0–7) aus Siegen, Niederlagen und Games – genauer, wenn du das Niveau von Gegnern/Partner einträgst
