@@ -332,6 +332,18 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .skr{cursor:pointer;border-radius:12px}
 .skr:hover{background:var(--surface-2)}
 
+/* Animationen */
+.anim{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.anim svg{width:100%;display:block}
+.anim .plbl{font-family:var(--font-body);font-size:10px;font-weight:900;fill:var(--fg)}
+.anim .plbl.m{fill:var(--muted);font-weight:800}
+.acap{min-height:42px;font-weight:800;font-size:15px;margin:0}
+.astep{color:var(--accent);margin-right:4px}
+.peek{margin-left:auto;float:right;display:inline-flex;align-items:center;gap:4px;border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 10px;font-size:12px;font-weight:900;color:var(--accent)}
+.peek svg{width:14px;height:14px}
+.vbtn{align-self:flex-start;text-decoration:none}
+.rrun>span>svg{width:22px;height:22px}
+
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
 .lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -537,6 +549,7 @@ const I={
  tactic:'<svg viewBox="0 0 24 24"><rect x="3" y="2" width="18" height="20" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 12h18" stroke="currentColor" stroke-width="2.2"/><path d="M7 6.5l2.5 2.5M9.5 6.5 7 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="15.5" cy="17" r="2.2" fill="currentColor"/><path d="M9 16c1.5-2.5 3-3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-dasharray="2 2"/></svg>',
  backhand:'<svg viewBox="0 0 24 24"><g transform="scale(-1,1) translate(-24,0)"><path fill="currentColor" d="M14.2 1.8a7 7 0 0 1 7.6 7.6c-.4 3.6-3.7 6.6-7.4 6.6-1.1 0-2.1-.2-3-.7l-5.6 5.6a1.6 1.6 0 0 1-2.3 0l-.4-.4a1.6 1.6 0 0 1 0-2.3l5.6-5.6a6.6 6.6 0 0 1-.7-3c0-3.7 3-7 6.2-7.8z"/></g></svg>',
  calendar:'<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16.5" rx="3" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="15" r="2" fill="currentColor"/></svg>',
+ play:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M7 4.5v15l12.5-7.5z"/></svg>',
  chart:'<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h4v8H3zM10 8h4v13h-4zM17 3h4v18h-4z"/></svg>'
 };
 
@@ -1310,7 +1323,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-const APPVER='2026-10-10 · v10';
+const APPVER='2026-10-10 · v11';
 function defaults(){return{v:3,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
@@ -1542,6 +1555,7 @@ function viewLearn(){
   <div class="goal"><span>Tagesziel</span><div class="bar"><i style="width:${Math.min(100,S.day.xp/S.goal*100)}%"></i></div><span>${S.day.xp}/${S.goal} XP</span></div></div></div>
  <button class="mini ${dd?'done':''}" data-act="drill"><span class="ic" style="--c:var(--u4)">${dd?I.check:I.dumbbell}</span><span class="grow"><span class="eyebrow muted">Tagesdrill · ${d.min} Min</span><h3>${esc(d.t)}</h3><p>${dd?'Erledigt – stark!':esc(d.d)}</p></span><span class="go">${I.chev}</span></button>`;
  if(rec)h+=`<button class="mini" data-act="lesson" data-id="${rec.l.id}"><span class="ic" style="--c:${SK[rec.k].c}">${I[SK[rec.k].ic]}</span><span class="grow"><span class="eyebrow muted">Empfohlen für dich · ${esc(SK[rec.k].s)}</span><h3>${esc(rec.l.t)}</h3><p>${lessonDone(rec.l.id)?'Mission offen – hol dir den 3. Stern':'Deine Baustelle – jetzt verbessern'}</p></span><span class="go">${I.chev}</span></button>`;
+ h+=`<button class="mini" data-act="lexicon"><span class="ic" style="--c:var(--u3)">${I.play}</span><span class="grow"><span class="eyebrow muted">Schlag-Lexikon</span><h3>${Object.keys(ANIM).length} Schläge animiert</h3><p>Chiquita, Bandeja, Víbora, Bajada … zum Nachschauen</p></span><span class="go">${I.chev}</span></button>`;
  {const cs=curStage(),st=STAGES[cs];h+=`<button class="mini" data-act="roadmap"><span class="ic" style="--c:${st.c}">${I.chart}</span><span class="grow"><span class="eyebrow muted">Deine Roadmap · Stufe ${cs+1}/${STAGES.length}</span><h3>${esc(st.t)} · ${esc(st.lv)}</h3><div class="road">${STAGES.map((x,i)=>`<i style="--rc:${x.c}"><b style="width:${stageProg(i).pct*100}%"></b></i>`).join('')}</div></span><span class="go">${I.chev}</span></button>`;}
  const xs=[0,44,64,44,0,-44,-64,-44];
  UNITS.forEach((u,ui)=>{
@@ -1916,6 +1930,74 @@ function afterRender(){
 }
 let scrollCur=true;
 
+/* ================= Ballflug-Animationen (Seitenansicht des Courts) =================
+ Meter-Koordinaten: x 0 = deine Rückwand, 10 = Netz, 20 = gegnerische Rückwand; y = Höhe über dem Boden.
+ seg: [x1,y1, x2,y2, Scheitelhöhe, Erklärung]  ·  pl: Spieler {x, g:Gegner?, l:Name, to:[[Segment, Ziel-x]]} */
+const ANIM={
+ chiquita:{t:'Chiquita',pl:[{x:2.5,l:'Du',to:[[2,7]]},{x:12.8,g:1,l:'Gegner'}],seg:[[2.8,.8,12.2,0,1.5,'Du spielst den Ball langsam und flach übers Netz …'],[12.2,0,12.7,.45,.7,'… er fällt direkt vor die Füße des Netzspielers.'],[12.7,.45,6,1.6,2.2,'Der Gegner muss von unten hochspielen – du rückst vor und greifst an.']]},
+ lob:{t:'Lob (Globo)',pl:[{x:2.5,l:'Du',to:[[1,5],[2,7.5]]},{x:12.5,g:1,l:'Gegner',to:[[1,17.5]]}],seg:[[2.8,.7,18.3,0,4.8,'Hoch und tief über den Netzspieler …'],[18.3,0,20,1.2,1.4,'… er springt an die Rückwand, der Gegner muss zurück.'],[20,1.2,17.6,.8,1.5,'Ihr rückt währenddessen gemeinsam ans Netz vor.']]},
+ rueckwand:{t:'Ball an der Rückwand',pl:[{x:4,l:'Du',to:[[1,2.8],[3,3.6]]},{x:12.5,g:1,l:'Gegner'}],seg:[[12.5,1,5,0,1.6,'Der Ball kommt tief in dein Feld.'],[5,0,0,1.6,1.9,'Seitlich zurückgehen – er prallt an die Rückwand.'],[0,1.6,2.9,.8,1.7,'Warten, bis er wieder herunterkommt …'],[2.9,.8,15,0,1.6,'… und vor dem Körper kontrolliert zurückspielen.']]},
+ bandeja:{t:'Bandeja',pl:[{x:7.5,l:'Du',to:[[0,6.5]]},{x:17,g:1,l:'Gegner'}],seg:[[17,.8,6.6,2.5,5,'Der Gegner lobbt – du stellst dich seitlich.'],[6.6,2.5,17.8,0,2.7,'Bandeja mit Slice: kontrolliert und tief in die Ecke.'],[17.8,0,20,.7,.8,'Der Slice hält den Ball nach dem Glas niedrig …'],[20,.7,18.7,.3,.75,'… und du bleibst am Netz.']]},
+ vibora:{t:'Víbora',pl:[{x:7.5,l:'Du',to:[[0,6.6]]},{x:17,g:1,l:'Gegner'}],seg:[[17,.8,6.7,2.4,4.6,'Nicht ganz tiefer Lob – du stehst gut.'],[6.7,2.4,18.2,0,2.45,'Víbora: mehr Tempo und Seitenschnitt in die Ecke.'],[18.2,0,20,.4,.5,'Durch den Drall bleibt der Ball nach dem Glas ganz flach.'],[20,.4,19,.1,.42,'Kaum zu verteidigen.']]},
+ smash:{t:'Smash (por 4)',pl:[{x:7.5,l:'Du',to:[[0,8.2]]},{x:16,g:1,l:'Gegner'}],seg:[[16,.8,8.3,2.8,4,'Kurzer, langsamer Lob – deine Smash-Chance.'],[8.3,2.8,15,0,2.85,'Smash mit voller Kraft steil nach unten …'],[15,0,20,3.6,3.7,'… der Ball springt so hoch ab …'],[20,3.6,20.9,4.5,4.8,'… dass er über die Rückwand fliegt: por 4! (por 3 = über die Seitenwand)']]},
+ bajada:{t:'Bajada de pared',pl:[{x:3.5,l:'Du',to:[[1,3]]},{x:12,g:1,l:'Gegner'}],seg:[[12,2.6,4.5,0,2.8,'Ein harter, hoher Ball springt tief in dein Feld …'],[4.5,0,0,2.6,2.8,'… knallt hoch an die Rückwand …'],[0,2.6,3.2,2.1,2.9,'… und kommt weit und hoch zurück.'],[3.2,2.1,12.5,0,2.2,'Bajada: in der Luft nach unten angreifen!']]},
+ contrapared:{t:'Contrapared',pl:[{x:2.2,l:'Du',to:[[0,1.8]]},{x:12.5,g:1,l:'Gegner'}],seg:[[12.5,1.2,3.5,0,2.6,'Ein Lob ist an dir vorbei …'],[3.5,0,1.6,.9,1.3,'… du erreichst ihn nur noch tief.'],[1.6,.9,0,2.2,2.3,'Contrapared: gegen deine eigene Rückwand spielen …'],[0,2.2,14,0,4,'… von dort fliegt er hoch übers Netz.']]},
+ aufschlag:{t:'Aufschlag',pl:[{x:2.4,l:'Du',to:[[2,5],[3,7]]},{x:18,g:1,l:'Gegner'}],seg:[[2.7,.9,2.8,0,.9,'Ball hinter der Aufschlaglinie aufspringen lassen.'],[2.8,0,2.85,.7,.75,'Treffen auf oder unter Hüfthöhe.'],[2.85,.7,14.5,0,1.6,'Diagonal ins gegnerische Aufschlagfeld …'],[14.5,0,20,1,1.2,'… Glas ist erlaubt – und du rückst ans Netz vor.']]},
+ volley:{t:'Volley',pl:[{x:7.8,l:'Du'},{x:17.5,g:1,l:'Gegner'}],seg:[[17.5,.8,8,1.1,1.5,'Der Gegner spielt von hinten.'],[8,1.1,16.8,0,1.4,'Kurzer Block ohne Ausholen – tief auf die Füße.'],[16.8,0,17.3,.3,.4,'Er muss den Ball von ganz unten spielen.']]},
+ dejada:{t:'Dejada (Stopp)',pl:[{x:8,l:'Du'},{x:18.5,g:1,l:'Gegner',to:[[2,14.5],[3,13]]}],seg:[[18.5,.8,8.2,1.2,1.6,'Beide Gegner stehen weit hinten.'],[8.2,1.2,11,0,1.35,'Dejada: weich und kurz übers Netz …'],[11,0,11.5,.15,.2,'… der Ball stirbt fast sofort …'],[11.5,.15,11.8,0,.17,'… der Gegner kommt zu spät.']]},
+ gancho:{t:'Gancho',pl:[{x:8.5,l:'Du'},{x:15,g:1,l:'Gegner'}],seg:[[15,.9,8.6,2.1,3.2,'Halbhoher Lob, du stehst nah am Netz.'],[8.6,2.1,12.3,0,2.15,'Gancho: kompakt, kurz und steil nach unten …'],[12.3,0,13.4,.6,.7,'… auf die Füße – kaum zu verteidigen.']]},
+ rueckwandlob:{t:'Lob nach der Rückwand',pl:[{x:4,l:'Du',to:[[1,2.8],[3,4]]},{x:12.5,g:1,l:'Gegner',to:[[3,17.5]]}],seg:[[12.5,1,5,0,1.6,'Der Ball kommt tief in dein Feld.'],[5,0,0,1.6,1.9,'Er prallt an die Rückwand.'],[0,1.6,2.9,.8,1.7,'Du lässt ihn herunterkommen …'],[2.9,.8,18.5,0,4.8,'… und spielst ihn als hohen Lob über die Gegner.']]},
+ smashdefense:{t:'Smash verteidigen',pl:[{x:2.2,l:'Du'},{x:8,g:1,l:'Gegner',to:[[3,12.5]]}],seg:[[8,2.7,5,0,2.75,'Harter Smash des Gegners.'],[5,0,0,2.2,2.4,'Du bleibst tief und weit hinten – der Ball geht an die Wand.'],[0,2.2,2.8,.9,2.3,'Ruhig lesen, wohin er kommt …'],[2.8,.9,18,0,4.8,'… und mit hohem Lob zurück: der Gegner muss nach hinten.']]},
+ return:{t:'Return',pl:[{x:2.5,l:'Du'},{x:17.5,g:1,l:'Gegner',to:[[1,15],[2,13.4]]}],seg:[[17.4,.7,6,0,1.6,'Aufschlag des Gegners …'],[6,0,3,.8,1.1,'… du nimmst ihn vor oder nach der Wand.'],[3,.8,13.2,0,1.4,'Return flach auf die Füße des Aufschlägers, der ans Netz läuft.']]}
+};
+const LEXD={chiquita:'Langsamer, flacher Ball auf die Füße der Netzspieler',lob:'Hoher, tiefer Ball über die Netzspieler – holt dir das Netz zurück',rueckwand:'Den Ball an die Rückwand lassen und danach spielen',bandeja:'Kontrollierter Überkopf mit Slice – du hältst das Netz',vibora:'Aggressiver Überkopf mit Seitenschnitt in die Ecke',smash:'Punkt-Smash: der Ball fliegt über die Wand raus',bajada:'Hohen Ball nach der Rückwand in der Luft angreifen',contrapared:'Notschlag gegen die eigene Rückwand',aufschlag:'Unterhand, unter Hüfthöhe, diagonal ins Feld',volley:'Ball am Netz aus der Luft blocken',dejada:'Stoppball, der direkt hinter dem Netz stirbt',gancho:'Kompakter Überkopf-Volley nah am Netz',rueckwandlob:'Nach der Rückwand hoch über die Gegner lobben',smashdefense:'Einen Smash nach der Wand zurückbringen',return:'Den Aufschlag flach auf die Füße zurückspielen'};
+const ANIMOF={chiquita:'chiquita',lob:'lob',lobtaktik:'lob',uebergang:'lob',rueckwand:'rueckwand',rueckwand2:'rueckwand',bandeja:'bandeja',ueberkopf:'bandeja',rueckwaerts:'bandeja',vibora:'vibora',smash:'smash',bajada:'bajada',kontraangriff:'bajada',contrapared:'contrapared',aufschlag:'aufschlag',aufschlag2:'aufschlag',volleyvh:'volley',volleyrh:'volley',volleyziele:'volley',blockvolley:'volley',netzduell:'volley',erstervolley:'return',returnplan:'return',dejada:'dejada',gancho:'gancho',rueckwandlob:'rueckwandlob',smashdefense:'smashdefense'};
+const VQ={chiquita:'padel chiquita',lob:'padel lob globo',rueckwand:'padel rückwand pared de fondo',bandeja:'padel bandeja tutorial',vibora:'padel vibora tutorial',smash:'padel smash por 4 por 3',bajada:'padel bajada de pared',contrapared:'padel contrapared',aufschlag:'padel aufschlag saque',volley:'padel volley tutorial',dejada:'padel dejada',gancho:'padel gancho',rueckwandlob:'padel globo after back wall',smashdefense:'padel defend smash',return:'padel return resto'};
+const ytUrl=q=>'https://www.youtube.com/results?search_query='+encodeURIComponent(q);
+function videoBtn(id){const k=ANIMOF[id]||id,q=VQ[k]||('padel '+(LBYID[id]?LBYID[id].t:id));return `<a class="btn ghost sm vbtn" href="${ytUrl(q)}" target="_blank" rel="noopener">${I.play} Videos dazu auf YouTube</a>`;}
+const AX=x=>22+x*16.8,AY=y=>150-y*25;
+function animHTML(key){const A=ANIM[key];if(!A)return '';
+ const glass=(x,dir)=>`<rect x="${dir<0?AX(x)-5:AX(x)}" y="${AY(3)}" width="5" height="${AY(0)-AY(3)}" fill="color-mix(in srgb,var(--accent) 22%,transparent)" stroke="var(--accent)" stroke-opacity=".5"/><rect x="${dir<0?AX(x)-5:AX(x)}" y="${AY(4)}" width="5" height="${AY(3)-AY(4)}" fill="url(#mesh)" stroke="var(--muted)" stroke-opacity=".5"/>`;
+ const fig=(p,i)=>`<g class="pl" id="pl${i}" transform="translate(${AX(p.x)},0)"><circle cx="0" cy="${AY(1.75)}" r="6" fill="${p.g?'#E5484D':'var(--accent)'}"/><path d="M0 ${AY(1.6)}V${AY(.85)}M0 ${AY(.85)}L-6 ${AY(0)}M0 ${AY(.85)}L6 ${AY(0)}M-8 ${AY(1.35)}L8 ${AY(1.35)}" stroke="${p.g?'#E5484D':'var(--accent)'}" stroke-width="3" stroke-linecap="round" fill="none"/><text x="0" y="${AY(2.15)}" text-anchor="middle" class="plbl">${esc(p.l)}</text></g>`;
+ return `<div class="anim" data-anim="${key}"><svg viewBox="0 0 380 172" role="img" aria-label="Animation: ${esc(A.t)}"><defs><pattern id="mesh" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0L4 4M4 0L0 4" stroke="var(--muted)" stroke-width=".6" opacity=".6"/></pattern></defs>
+ <rect x="${AX(0)}" y="${AY(0)}" width="${AX(20)-AX(0)}" height="6" rx="2" fill="color-mix(in srgb,var(--accent) 35%,var(--surface-2))"/>
+ ${glass(0,-1)}${glass(20,1)}
+ <path d="M${AX(3.05)} ${AY(0)}v6M${AX(16.95)} ${AY(0)}v6" stroke="var(--surface)" stroke-width="2"/>
+ <path d="M${AX(10)} ${AY(0)}V${AY(.92)}" stroke="var(--fg)" stroke-width="2.5"/><path d="M${AX(10)-1} ${AY(.88)}V${AY(0)}" stroke="var(--muted)" stroke-width="5" stroke-dasharray="1.5 2" opacity=".6"/>
+ <text x="${AX(5)}" y="${AY(0)+20}" text-anchor="middle" class="plbl m">Deine Seite</text><text x="${AX(15)}" y="${AY(0)+20}" text-anchor="middle" class="plbl m">Gegner</text><text x="${AX(10)}" y="${AY(0)+20}" text-anchor="middle" class="plbl m">Netz</text>
+ ${A.pl.map(fig).join('')}
+ <polyline class="trail" points="" fill="none" stroke="var(--muted)" stroke-opacity=".7" stroke-width="2" stroke-dasharray="3 4"/>
+ <g class="marks"></g>
+ <circle class="ballc" r="6" cx="-20" cy="-20" fill="#C9E52B" stroke="#7A8F10" stroke-width="1.5"/>
+ </svg><p class="acap"><b class="astep"></b><span></span></p><div class="row"><button class="btn ghost sm" data-act="animReplay">${I.play} Nochmal</button><span class="grow"></span><span class="muted small b">${esc(A.t)}</span></div></div>`;}
+function bez(s,u){const [x1,y1,x2,y2,h]=s,cy=(4*h-y1-y2)/2,cx=(x1+x2)/2;const a=(1-u)*(1-u),b=2*(1-u)*u,c=u*u;return[a*x1+b*cx+c*x2,a*y1+b*cy+c*y2];}
+function segDur(s){return 900+Math.hypot(s[2]-s[0],s[3]-s[1])*90+(s[4]>3?700:0);}
+const HOLD=1100;
+function runAnim(el){const A=ANIM[el.dataset.anim];if(!A)return;const id=(el._run=(el._run||0)+1);
+ const svg=el.querySelector('svg'),ball=svg.querySelector('.ballc'),trail=svg.querySelector('.trail'),marks=svg.querySelector('.marks'),cap=el.querySelector('.acap span'),stp=el.querySelector('.astep');
+ const durs=A.seg.map(segDur),pts=[];marks.innerHTML='';
+ const plPos=A.pl.map(p=>p.x),place=(i,x)=>{const g=svg.querySelector('#pl'+i);if(g)g.setAttribute('transform',`translate(${AX(x)},0)`);};
+ A.pl.forEach((p,i)=>place(i,p.x));
+ const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(still){A.seg.forEach(s=>{for(let u=0;u<=1;u+=.05){const [x,y]=bez(s,u);pts.push(AX(x)+','+AY(y));}});trail.setAttribute('points',pts.join(' '));stp.textContent='';cap.textContent=A.seg.map((s,i)=>(i+1)+'. '+s[5]).join(' ');return;}
+ let si=0,t0=performance.now(),from=A.pl.map(p=>p.x),hold=0;
+ const mark=s=>{const [x2,y2]=[s[2],s[3]];if(y2<=0.02)marks.insertAdjacentHTML('beforeend',`<ellipse cx="${AX(x2)}" cy="${AY(0)}" rx="5" ry="2" fill="var(--fg)" opacity=".35"/>`);else if(x2<=0.01||x2>=19.99)marks.insertAdjacentHTML('beforeend',`<circle cx="${AX(x2)+(x2<1?-2:2)}" cy="${AY(y2)}" r="4" fill="none" stroke="var(--ball-ink)" opacity=".6"/>`);};
+ const step=now=>{if(!el.isConnected||el._run!==id)return;
+  if(si>=A.seg.length){if(now-t0>2600){runAnim(el);}else requestAnimationFrame(step);return;}
+  if(hold){if(now-hold<HOLD){requestAnimationFrame(step);return;}hold=0;t0=now;}
+  const s=A.seg[si],u=Math.min(1,(now-t0)/durs[si]),[x,y]=bez(s,u);
+  ball.setAttribute('cx',AX(x));ball.setAttribute('cy',AY(y)-5);pts.push(AX(x).toFixed(1)+','+(AY(y)-5).toFixed(1));trail.setAttribute('points',pts.join(' '));
+  stp.textContent=(si+1)+'/'+A.seg.length+' ';cap.textContent=s[5];
+  A.pl.forEach((p,i)=>{(p.to||[]).forEach(([k,tx])=>{if(k===si){const fx=from[i];place(i,fx+(tx-fx)*u);plPos[i]=fx+(tx-fx)*u;}});});
+  if(u>=1){mark(s);from=plPos.slice();si++;t0=now;if(si<A.seg.length)hold=now;}
+  requestAnimationFrame(step);};
+ requestAnimationFrame(step);}
+function initAnims(root){(root||document).querySelectorAll('.anim').forEach(el=>{if(!el._run)runAnim(el);});}
+function animSheet(key,lessonId){const A=ANIM[key];modal(`<div class="eyebrow muted">So sieht's aus</div><h2>${esc(A.t)}</h2>${animHTML(key)}${videoBtn(lessonId||key)}<button class="btn block" data-act="closeModal">Schließen</button>`);initAnims($('#modal'));}
+function peekSheet(id){const l=LBYID[id],k=ANIMOF[id];
+ modal(`<div class="eyebrow muted">Nachschauen</div><h2>${esc(l.t)}</h2>${k?animHTML(k):''}${l.cards.map(c=>`<div class="theory" style="padding:14px;animation:none"><h3 style="font-size:17px">${esc(c[0])}</h3><ul>${c[1].map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>`).join('')}<div class="protip">${mascot()}<div><b>Profi-Tipp</b><p>${esc(l.tip)}</p></div></div>${videoBtn(id)}<button class="btn block" data-act="closeModal">Zurück zur Frage</button>`);initAnims($('#modal'));}
+function lexiconSheet(){modal(`<div class="eyebrow muted">Schlag-Lexikon</div><h2>Alle Schläge animiert</h2><p class="muted b small">Tippe auf einen Schlag, um den Ballflug zu sehen.</p><div class="stack">${Object.entries(ANIM).map(([k,A])=>`<button class="rrun" data-act="lexAnim" data-k="${k}"><span class="c-acc">${I.play}</span><span class="grow"><b>${esc(A.t)}</b><small>${esc(LEXD[k]||'')}</small></span><span class="go">${I.chev}</span></button>`).join('')}</div><button class="btn ghost block" data-act="closeModal">Schließen</button>`);}
+
 /* ================= Modals ================= */
 function modal(html){$('#modal').innerHTML=`<div class="modal" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;}
 function closeModal(){$('#modal').innerHTML='';if(typeof MQ!=='undefined')MQ=[];}
@@ -1927,6 +2009,7 @@ function lessonSheet(id){
  modal(`<div class="row"><span class="ic" style="--c:${SK[l.sk].c}">${I[SK[l.sk].ic]}</span><div class="grow"><div class="eyebrow muted">Einheit ${l.ui+1} · ${esc(SK[l.sk].n)}</div><h2>${esc(l.t)}</h2></div></div>
  ${lessonDone(id)?starRow(st):''}
  <div class="stack small b"><div class="row"><span class="c-good">${st>=1?I.check:I.book}</span> Theorie & Quiz abschließen</div><div class="row"><span class="c-gold">${st>=2||(S.lessons[id]&&S.lessons[id].perfect)?I.check:I.star}</span> Quiz fehlerfrei</div><div class="row"><span class="c-acc">${m&&m.st==='done'?I.check:I.target}</span> ${esc(ms)}: „${esc(l.m.t)}“</div></div>
+ ${ANIMOF[id]?`<button class="btn ghost block" data-act="lexAnim" data-k="${ANIMOF[id]}" data-l="${id}">${I.play} Ballflug ansehen</button>`:''}
  <button class="btn block" data-act="startLesson" data-id="${id}">${lessonDone(id)?'Wiederholen · +10 XP':'Start · +15 XP'}</button>
  ${lessonDone(id)&&(!m||m.st==='paused')?`<button class="btn ball block" data-act="startMission" data-id="${id}">${I.target} Mission starten</button>`:''}
  ${m&&m.st==='active'?`<button class="btn ball block" data-act="rateMission" data-id="${id}">${I.target} Mission auswerten</button>`:''}`);
@@ -1957,12 +2040,13 @@ function drawLesson(){
  if(LS.phase==='cards'){
   const c=LS.l.cards[LS.ci],last=LS.ci===LS.l.cards.length-1;
   body=`<span class="ex-eyebrow" style="--c:${col}">${I.book} Theorie ${LS.ci+1}/${LS.l.cards.length}</span><h1 class="ex-title">${esc(c[0])}</h1>
+  ${LS.ci===0&&ANIMOF[LS.id]?animHTML(ANIMOF[LS.id]):''}
   <div class="theory"><ul>${c[1].map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>
-  ${last?`<div class="protip">${mascot()}<div><b>Profi-Tipp</b><p>${esc(LS.l.tip)}</p></div></div>`:''}`;
+  ${last?`<div class="protip">${mascot()}<div><b>Profi-Tipp</b><p>${esc(LS.l.tip)}</p></div></div>${videoBtn(LS.id)}`:''}`;
   foot=`<div class="foot-row"><button class="btn block" data-act="nextCard">${last?'Zum Quiz':'Weiter'}</button></div>`;
  }else{
   const q=LS.queue[LS.qi],st=LS.state;
-  body=`<div class="combo">${LS.combo>=3?`<span>${I.flame} ${LS.combo} in Folge!</span>`:''}</div><span class="ex-eyebrow" style="--c:${col}">${I.sparkle} ${q.k==='tf'?'Stimmt das?':q.k==='order'?'Reihenfolge':'Quiz'}</span>`;
+  body=`<div class="combo">${LS.combo>=3?`<span>${I.flame} ${LS.combo} in Folge!</span>`:''}</div><span class="ex-eyebrow" style="--c:${col}">${I.sparkle} ${q.k==='tf'?'Stimmt das?':q.k==='order'?'Reihenfolge':'Quiz'}</span>${LS.id?`<button class="peek" data-act="peek">${I.book} Nachschauen${ANIMOF[LS.id]?' · '+I.play+' Animation':''}</button>`:''}`;
   body+=`<div class="say">${mascot(st==='bad'?'sad':st==='good'?'happy':'')}<div class="saybub">${esc(q.q)}</div></div>`;
   if(q.k==='mc'){
    body+=`<div class="opts">${q.opts.map((o,i)=>{let cls='';if(st!=='ask'){if(o===q.a[0])cls='ok';else if(LS.sel===o)cls='no';}return `<button class="opt ${cls}" data-act="sel" data-v="${esc(o)}" aria-pressed="${LS.sel===o}"><span class="k">${i+1}</span>${esc(o)}</button>`;}).join('')}</div>`;
@@ -1980,6 +2064,7 @@ function drawLesson(){
  ov.innerHTML=`<div class="overlay"><div class="l-top"><button class="iconbtn" data-act="quitLesson" aria-label="Schließen">${I.x}</button><div class="bar"><i style="width:${pct}%"></i></div></div>
  <div class="l-body"><div class="l-inner ${LS.state!=='ask'&&LS.phase==='quiz'?'locked':''}">${body}</div></div>
  <div class="l-foot ${LS.phase==='quiz'&&LS.state!=='ask'?LS.state:''}"><div class="foot-in">${foot}</div></div></div>`;
+ initAnims(ov);
 }
 function checkAnswer(){
  const q=LS.queue[LS.qi];let ok;
@@ -2233,6 +2318,10 @@ const ACT={
  journalNew(){closeModal();journalNew();},
  jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel'||k==='dur'||k==='int')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
+ peek(){peekSheet(LS.id);},
+ lexicon(){lexiconSheet();},
+ lexAnim(el){animSheet(el.dataset.k,el.dataset.l);},
+ animReplay(el){const a=el.closest('.anim');a._run=(a._run||0)+1;runAnim(a);},
  racket(el){racketSheet(el.dataset.id);},
  myRacket(el){S.myRacket=S.myRacket===el.dataset.id?null:el.dataset.id;save();closeModal();render();toast(S.myRacket?'Als dein Schläger gespeichert':'Entfernt',I.racket);},
  rkAll(){rkShowAll=!rkShowAll;const R=rkRanked();$('#rklist').innerHTML=rkListHTML(R,S.rkq);},
