@@ -1867,7 +1867,7 @@ let scrollCur=true;
 
 /* ================= Modals ================= */
 function modal(html){$('#modal').innerHTML=`<div class="modal" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;}
-function closeModal(){$('#modal').innerHTML='';}
+function closeModal(){$('#modal').innerHTML='';if(typeof MQ!=='undefined')MQ=[];}
 
 function lessonSheet(id){
  const l=LBYID[id],ul=unlocked(l.idx),st=stars(id),m=S.missions[id];
