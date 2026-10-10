@@ -1,0 +1,78 @@
+# PadelUp – besser im Padel
+
+Eine stark gamifizierte Padel-App im Duolingo-Stil: Lektionen lernen, im nächsten Match anwenden, im Tagebuch auswerten.
+Alles steckt in einer Datei (`index.html`): kein Konto, keine Werbung, installierbar und offline nutzbar.
+
+**Adresse (sobald GitHub Pages aktiv ist):** https://fr-dev94.github.io/test/padel/
+
+## Der Kreislauf
+
+1. **Lektion** – kurze Theorie-Karten + Quiz (Multiple Choice, Stimmt/Stimmt nicht, Reihenfolge)
+2. **Mission** – nach jeder Lektion eine konkrete Aufgabe für dein nächstes Spiel (max. 3 gleichzeitig)
+3. **Tagebuch** – Match/Training eintragen, Missionen bewerten (versucht / teilweise / gemeistert), Schläge 1–5 einschätzen
+4. **Personalisierung** – aus Fokus-Skills, Selbsteinschätzung und „Wo hast du Punkte verloren?“ empfiehlt die App die nächste Lektion und schaltet passende Lektionen frei
+
+## Roadmap: vom Einsteiger zum Wettkampfspieler
+
+5 Stufen, 14 Einheiten, 53 Lektionen, 212 Quizfragen, 53 Match-Missionen, 32 Tagesdrills, 25 Skill-Checks:
+
+| Stufe | Niveau | Einheiten |
+|---|---|---|
+| 1 · Einsteiger | 0 – 1,5 | Grundlagen (inkl. Regeln & Beinarbeit) · Die Wände · Am Netz |
+| 2 · Hobby | 1,5 – 2,5 | Lob & Defensive · Überkopf (Zurücklaufen, Bandeja) · Teamplay (Rollen, Vorrücken) |
+| 3 · Fortgeschritten | 2,5 – 3,5 | Aufschlag & Return 2.0 · Wand-Profi (Bajada, Gitter) · Überkopf 2.0 (Víbora, Gancho, Smash-Abwehr) |
+| 4 · Ambitioniert | 3,5 – 4,5 | Taktik 2.0 (Muster, Gegner lesen, Tempo, Winkel) · Netz-Meister (Block, Dejada, Duelle, Konter) · Mentale Stärke |
+| 5 · Wettkampf | 4,5+ | Matchstrategie (Punto de oro, Plan B, Turniertag) · Athletik & Material |
+
+Jede Stufe hat 5 **Skill-Checks** – praktische Tests auf dem Court (z. B. „7 von 10 Lobs hinter die Aufschlaglinie“).
+Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchstens ein Skill-Check fehlt.
+
+## Gamification
+
+- Lernpfad mit 3 Sternen pro Lektion (abgeschlossen · fehlerfrei · Mission gemeistert), Truhen und Meisterprüfungen
+- XP, Level mit Titeln (Novato → Leyenda), Tagesziel, Streak mit Streak-Schutz
+- 11 Skills (inkl. Athletik) mit eigenem Level-Balken (bis Level 10)
+- Tägliche Quests + Bonustruhe, Wochenliga (Club → Major) mit Auf- und Abstieg
+- Bälle als Währung, Shop (Streak-Schutz, Doppel-XP, Outfits für Maskottchen Bolita), 26 Erfolge
+- Tagebuch mit drei Bereichen: **Einträge**, **Statistik** (Siege/Niederlagen/Remis, Siegquote, Form, Serien, Sätze, Games, Tie-Breaks, Bilanz pro Partner und Gegner, Monatsverlauf, Gefühl vs. Ergebnis) und **Material** (Wechsel-Erinnerungen für Overgrip, Bälle, Schuhe, Schläger + Schläger-Empfehlung aus 114 konkreten Schlägern von Padel-Point, Preise vom 05.10.2026: Top-Match mit Prozent-Passung, Stärken/Schwächen je Schläger, Rangliste mit Suche, Feinabstimmung, „mein Schläger“-Vergleich)
+- Selbsteinschätzung 0–10 nach jedem Spiel („Wie gut waren deine Lobs?“) mit Schnitt, Trend und Verlauf pro Bereich
+- Kalorien-Schätzung pro Session (MET × Gewicht × Dauer, mit Intensität), kcal pro Woche und gesamt
+- Tagebuch-Statistiken: Siegquote, Stunden, Spielzeit pro Woche, Radar-Spielerprofil, Wochenziel
+
+## Trainieren, planen, absichern
+
+- **Persönlicher Coach** (oben im Lernen-Tab): Wochenfokus aus deinen letzten Matches, Bewertungstrends und Techniktests – mit Wochenplan passend zu deinen Sessions pro Woche (Lektion, Trainingspläne, Match-Fokus, Drill, Techniktest, Trainerstunden-Aufgabe); der Fokus bleibt eine Woche stabil und baut über Wochen auf
+- **10 Techniktests** (z. B. Lob-Tiefe, Bandeja tief, Return auf die Füße): Treffer von 10 mit Verlauf und Bestwert
+- **Trainerstunden-Nachbereitung**: „gelernt / vermeiden / im Match üben“ mit Wiederholung nach 3, 7 und 14 Tagen
+- **Fokus-Modus** im Profil: blendet Liga, Quests und Shop aus
+
+- **Match-Briefing** vor dem Spiel: Bilanz gegen die Gegner und mit dem Partner, Siegchance, wo du gegen sie Punkte verlierst, und ein 3-Punkte-Plan
+- **Erkenntnisse** in der Statistik: z. B. „Wenn deine Lobs bei 7+ liegen, gewinnst du 9 von 11“, häufigste Verlust-Bereiche, bester Partner
+- **Spielstärke-Schätzung** (0–7) aus Siegen, Niederlagen und Games – genauer, wenn du das Niveau von Gegnern/Partner einträgst
+- **Schnell-Eintrag** in 10 Sekunden, Einträge **bearbeiten** und Bewertung später ergänzen
+- **Persönliche Ziele** (Bewertung eines Bereichs, Siegquote, Anzahl Sessions) mit Datum und automatischem Fortschritt
+- **15 Trainingspläne** (60 Min, zu zweit oder zu viert, je Stufe) mit Ablauf und Block-Timer
+- **Backup als Datei** (Teilen → iCloud Drive/Dateien) mit Erinnerung alle 14 Tage und Wiederherstellen per Datei
+
+Der Fortschritt liegt im Browser (`localStorage`). Unter **Profil → Fortschritt sichern** gibt es einen Code zum Übertragen.
+
+## Qualität (2.1)
+
+- **Spielniveau ehrlich getrennt:** externes Niveau (z. B. Playtomic) mit Verlauf · Schätzung nur aus Matches mit eingetragenem Gegner-Niveau (ab 3 Matches, mit ±) · interne Leistungsentwicklung als relativer Index (Start 100)
+- **Coach über drei Zeiträume:** letzte 5 Matches (50 %), letzte 20 (30 %), letzte 60 Tage (20 %) – Verlust-Bereiche, Bewertungen unter dem eigenen Schnitt, schwache Techniktests
+- **Flexibler Wochenplan:** Sessions dieser Woche, verfügbare Tage, „Wie fühlst du dich heute?“ und Belastung (7 Tage vs. Ø der 4 Wochen davor) – bei hoher Belastung, Müdigkeit oder Beschwerden wird eine Einheit leichter
+- **Standardisierte Techniktests:** festes Protokoll, Bedingungen (Zuspiel, Tempo, Ort) werden gespeichert; Trend und Bestwert nur bei gleichen Bedingungen
+- **Datenqualität:** Schnell-Einträge sind markiert und werden in der Statistik ausgewiesen
+- **Backup-Import mit Prüfung:** ungültige Dateien werden abgelehnt, fehlerhafte Einträge/Werte aussortiert und vor dem Laden angezeigt
+
+## Tests
+
+24 automatische Browser-Tests (Playwright) prüfen Inhalte, Lernpfad, Tagebuch, Statistik, Material, Schläger-Empfehlung, Backup, Ziele, Trainingspläne, Briefing und Animationen in Hell und Dunkel.
+
+```bash
+npm install
+npx playwright install chromium   # einmalig
+npm test
+```
+
+Auf GitHub laufen sie bei jeder Änderung an `padel/` automatisch (Workflow „PadelUp-Tests“).
