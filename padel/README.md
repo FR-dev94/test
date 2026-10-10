@@ -12,18 +12,28 @@ Alles steckt in einer Datei (`index.html`): kein Konto, keine Werbung, installie
 3. **Tagebuch** – Match/Training eintragen, Missionen bewerten (versucht / teilweise / gemeistert), Schläge 1–5 einschätzen
 4. **Personalisierung** – aus Fokus-Skills, Selbsteinschätzung und „Wo hast du Punkte verloren?“ empfiehlt die App die nächste Lektion und schaltet passende Lektionen frei
 
-## Inhalt
+## Roadmap: vom Einsteiger zum Wettkampfspieler
 
-6 Einheiten, 24 Lektionen, 96 Quizfragen, 24 Match-Missionen, 18 Tagesdrills (ohne Court machbar):
-Grundlagen · Die Wände · Am Netz · Lob & Defensive · Überkopf (Bandeja, Víbora, Smash) · Taktik & Kopf
+5 Stufen, 14 Einheiten, 53 Lektionen, 212 Quizfragen, 53 Match-Missionen, 32 Tagesdrills, 25 Skill-Checks:
+
+| Stufe | Niveau | Einheiten |
+|---|---|---|
+| 1 · Einsteiger | 0 – 1,5 | Grundlagen (inkl. Regeln & Beinarbeit) · Die Wände · Am Netz |
+| 2 · Hobby | 1,5 – 2,5 | Lob & Defensive · Überkopf (Zurücklaufen, Bandeja) · Teamplay (Rollen, Vorrücken) |
+| 3 · Fortgeschritten | 2,5 – 3,5 | Aufschlag & Return 2.0 · Wand-Profi (Bajada, Gitter) · Überkopf 2.0 (Víbora, Gancho, Smash-Abwehr) |
+| 4 · Ambitioniert | 3,5 – 4,5 | Taktik 2.0 (Muster, Gegner lesen, Tempo, Winkel) · Netz-Meister (Block, Dejada, Duelle, Konter) · Mentale Stärke |
+| 5 · Wettkampf | 4,5+ | Matchstrategie (Punto de oro, Plan B, Turniertag) · Athletik & Material |
+
+Jede Stufe hat 5 **Skill-Checks** – praktische Tests auf dem Court (z. B. „7 von 10 Lobs hinter die Aufschlaglinie“).
+Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchstens ein Skill-Check fehlt.
 
 ## Gamification
 
 - Lernpfad mit 3 Sternen pro Lektion (abgeschlossen · fehlerfrei · Mission gemeistert), Truhen und Meisterprüfungen
 - XP, Level mit Titeln (Novato → Leyenda), Tagesziel, Streak mit Streak-Schutz
-- 10 Skills mit eigenem Level-Balken (bis Level 10)
+- 11 Skills (inkl. Athletik) mit eigenem Level-Balken (bis Level 10)
 - Tägliche Quests + Bonustruhe, Wochenliga (Club → Major) mit Auf- und Abstieg
-- Bälle als Währung, Shop (Streak-Schutz, Doppel-XP, Outfits für Maskottchen Bolita), 18 Erfolge
+- Bälle als Währung, Shop (Streak-Schutz, Doppel-XP, Outfits für Maskottchen Bolita), 26 Erfolge
 - Tagebuch-Statistiken: Siegquote, Stunden, Spielzeit pro Woche, Radar-Spielerprofil, Wochenziel
 
 Der Fortschritt liegt im Browser (`localStorage`). Unter **Profil → Fortschritt sichern** gibt es einen Code zum Übertragen.

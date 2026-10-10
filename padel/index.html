@@ -155,6 +155,25 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px 40px;scroll-beha
 .stars + .nodelabel{margin-top:4px}
 .nodelabel{font-size:12px;font-weight:800;color:var(--muted);margin-top:14px;max-width:120px;text-align:center;line-height:1.2}
 
+/* Roadmap */
+.stage{border-radius:24px;padding:18px;color:#fff;background:linear-gradient(135deg,var(--sc),color-mix(in srgb,var(--sc) 62%,#000));margin:40px 0 4px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 0 color-mix(in srgb,var(--sc) 50%,#000)}
+.stage h2{font-size:26px}
+.stage p{font-weight:700;opacity:.92;font-size:14px}
+.stage .bar{background:rgba(255,255,255,.25);flex:none}
+.stage .bar i{background:#fff}
+.stage .row .btn{--b:#fff;--ink:var(--sc);box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.stage.locked{--sc:#8A93AD}
+.road{display:flex;gap:6px;margin:6px 0 2px}
+.road i{flex:1;height:10px;border-radius:9px;background:var(--surface-2);overflow:hidden;display:block;position:relative}
+.road i b{position:absolute;inset:0 auto 0 0;background:var(--rc);border-radius:9px}
+.rstage{display:flex;gap:12px;align-items:center;width:100%;text-align:left;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:12px 14px}
+.rstage .num{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:var(--sc);color:#fff;font-family:var(--font-display);font-weight:700;font-size:20px;flex:none}
+.rstage.off{opacity:.6}
+.msrow{display:flex;gap:12px;align-items:center}
+.msrow .ck{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);display:grid;place-items:center;flex:none;color:#fff}
+.msrow .ck.on{background:var(--good);border-color:var(--good)}
+.msrow .ck svg{width:18px;height:18px}
+
 /* Missionen */
 .mission{border:2px solid var(--line);border-radius:20px;background:var(--surface);overflow:hidden}
 .mission .mh{display:flex;gap:12px;align-items:center;padding:14px 16px;background:color-mix(in srgb,var(--ball) 22%,var(--surface))}
@@ -452,13 +471,14 @@ const SK={
  bandeja:{n:'Bandeja & Víbora',s:'Bandeja',ic:'overhead',c:'var(--u5)'},
  smash:{n:'Smash',s:'Smash',ic:'smash',c:'var(--u5)'},
  taktik:{n:'Taktik',s:'Taktik',ic:'tactic',c:'var(--u1)'},
- kopf:{n:'Kopf & Mental',s:'Kopf',ic:'brain',c:'var(--u3)'}
+ kopf:{n:'Kopf & Mental',s:'Kopf',ic:'brain',c:'var(--u3)'},
+ athletik:{n:'Athletik & Fitness',s:'Athletik',ic:'dumbbell',c:'var(--u4)'}
 };
 const SKIDS=Object.keys(SK);
 
 /* ================= Lektionen =================
  Frage-Typen: mc = Multiple Choice (a[0] ist richtig), tf = Stimmt/Stimmt nicht, order = Reihenfolge (a in richtiger Reihenfolge) */
-const UNITS=[
+const OLDU=[
 {t:'Grundlagen',d:'Griff, Grundschläge & Aufschlag',c:'var(--u1)',L:[
  {id:'griff',t:'Griff & Bereitschaft',sk:'vorhand',
   cards:[['Der Kontinentalgriff',['Halte den Schläger wie einen Hammer – das ist der Kontinentalgriff.','Damit spielst du Vorhand, Rückhand, Volley und Überkopf, ohne umzugreifen.','Die Schlaufe gehört immer ums Handgelenk – Sicherheit geht vor.']],
@@ -688,11 +708,464 @@ const UNITS=[
   m:{t:'Reset-Routine',d:'Mach im nächsten Spiel nach jedem eigenen Fehler deine Reset-Routine: durchatmen, Schläger richten, Plan für den nächsten Punkt.'}}
 ]}
 ];
+/* Lektions-Pool: Original-Lektionen + Vertiefungen */
+const LP={};OLDU.forEach(u=>u.L.forEach(l=>{LP[l.id]=l;}));
+const NEWL={
+regeln: { t:'Regeln & Zählweise', sk:'taktik',
+    cards:[['So wird gezählt',['Punkte zählen 15, 30, 40 und dann Spiel – wie im Tennis.','Bei 40:40 heißt es „Einstand“: Du brauchst zwei Punkte in Folge, um das Spiel zu holen.','Beim Punto de oro (Golden Point) entscheidet bei 40:40 ein einziger Punkt das Spiel.','Beim Punto de oro wählt das rückschlagende Team, auf welche Seite aufgeschlagen wird.']],
+           ['Satz & Seitenwechsel',['Ein Satz geht bis 6 Games, du brauchst 2 Games Vorsprung.','Bei 6:6 entscheidet der Tie-Break den Satz.','Die Seiten werden nach jedem ungeraden Game gewechselt: nach dem 1., 3., 5. usw.']],
+           ['Ball & Wände',['Dein Schlag muss zuerst im gegnerischen Feld auf dem Boden aufspringen.','Trifft dein Ball ohne Bodenkontakt direkt die gegnerische Wand oder das Gitter, ist es dein Fehler.','Beim Contrapared darfst du den Ball absichtlich gegen deine eigene Wand spielen, damit er rüberfliegt.']]],
+    tip:'Klärt vor dem Match, ob mit Einstand oder Punto de oro gespielt wird – das erspart Diskussionen beim ersten 40:40.',
+    q:[{k:'mc',q:'Es steht 40:40, ihr spielt mit Punto de oro. Was passiert?',a:['Der nächste Punkt entscheidet das Spiel','Es gibt Einstand mit Vorteil','Es geht in den Tie-Break','Das Game wird wiederholt'],e:'Beim Punto de oro reicht ein einziger Punkt bei 40:40.'},
+       {k:'tf',q:'Trifft dein Ball ohne Bodenkontakt direkt die gegnerische Rückwand, geht der Punkt an den Gegner.',a:true,e:'Der Ball muss zuerst im gegnerischen Feld aufspringen.'},
+       {k:'mc',q:'Wer wählt beim Punto de oro die Seite für den entscheidenden Aufschlag?',a:['Das rückschlagende Team','Das aufschlagende Team','Der Schiedsrichter per Münzwurf','Immer die rechte Seite'],e:'Das Rückschläger-Team entscheidet, wer returniert.'},
+       {k:'order',q:'Bring die Punktezählung in die richtige Reihenfolge.',a:['15','30','40','Spiel']}],
+    m:{t:'Schiri im Kopf',d:'Sage im nächsten Match vor jedem Aufschlag den Spielstand laut an – und wechselt nach jedem ungeraden Game korrekt die Seiten.'}},
+
+  beinarbeit: { t:'Beinarbeit-Basics', sk:'athletik',
+    cards:[['Bereit sein',['Mach einen Split-Step, genau wenn der Gegner den Ball trifft.','Bleib mit leicht gebeugten Knien tief – tiefer Schwerpunkt heißt schneller Start.','Steh auf den Fußballen, nie auf den Fersen.']],
+           ['Richtig bewegen',['Für kurze Wege nutzt du Sidesteps, für längere den Kreuzschritt.','Kurz vor dem Schlag machst du viele kleine Anpassungsschritte statt eines großen Sprungs.','Zur Wand bewegst du dich seitlich rückwärts, damit du den Ball im Blick behältst.']],
+           ['Nach dem Schlag',['Kehre nach jedem Schlag sofort zu deiner Grundposition zurück.','Bleib nicht stehen, um deinem Schlag zuzuschauen.']]],
+    tip:'Gute Spieler stehen nicht schneller, sie stehen früher bereit: Split-Step plus kleine Schritte bringen dich entspannt zum Ball.',
+    q:[{k:'mc',q:'Wann machst du den Split-Step?',a:['Wenn der Gegner den Ball trifft','Wenn der Ball über das Netz fliegt','Nachdem der Ball bei dir aufspringt','Nur beim Return'],e:'Im Treffmoment des Gegners bist du so startbereit in jede Richtung.'},
+       {k:'tf',q:'Kurz vor dem Schlag ist ein großer Sprung zum Ball besser als viele kleine Schritte.',a:false,e:'Kleine Anpassungsschritte bringen dich präzise in Position.'},
+       {k:'mc',q:'Wie bewegst du dich zur Rückwand?',a:['Seitlich rückwärts, Ball im Blick','Frontal rückwärts laufen','Umdrehen und sprinten','Gar nicht, Ball kommt ja zurück'],e:'Seitlich bleibst du stabil und siehst den Ball.'},
+       {k:'order',q:'Bring den Bewegungsablauf in die richtige Reihenfolge.',a:['Split-Step beim gegnerischen Treffpunkt','Sidesteps oder Kreuzschritt zum Ball','Kleine Anpassungsschritte','Schlag','Zurück zur Grundposition']}],
+    m:{t:'Split-Zähler',d:'Achte im nächsten Match auf deinen Split-Step: Schaffe ihn in mindestens 10 Ballwechseln bei jedem gegnerischen Schlag.'}},
+
+  rueckwaerts: { t:'Rückwärts gegen den Lob', sk:'bandeja',
+    cards:[['Richtig zurücklaufen',['Dreh dich seitlich und lauf mit Sidesteps oder Kreuzschritten zurück.','Lauf nie frontal rückwärts – du kannst stolpern und stürzen.','Zeig mit der freien Hand zum Ball, das hilft beim Timing.']],
+           ['Die Entscheidung',['Erreichst du den Ball über dem Kopf, spielst du einen Überkopf wie die Bandeja.','Ist der Lob zu gut, drehst du um und spielst den Ball nach der Rückwand.','Dein Partner ruft früh, z. B. „Deiner!“ oder „Lass ihn!“']],
+           ['Als Team',['Geht ein Spieler zurück, geht auch der Partner zurück.','So steht ihr nicht versetzt und bietet keine Lücke in der Mitte.']]],
+    tip:'Lieber den Ball nach der Rückwand sauber verteidigen als einen Überkopf erzwingen, den du nur im Rückwärtsfallen erreichst.',
+    q:[{k:'tf',q:'Gegen einen Lob läufst du am besten frontal rückwärts, so bist du am schnellsten.',a:false,e:'Frontal rückwärts droht ein Sturz – lauf seitlich zurück.'},
+       {k:'mc',q:'Der Lob ist zu hoch und zu tief für einen Überkopf. Was tust du?',a:['Umdrehen und den Ball nach der Rückwand spielen','Trotzdem springen und smashen','Den Ball laufen lassen und hoffen, dass er ausgeht','Stehen bleiben und Volley spielen'],e:'Nach der Rückwand hast du mehr Zeit und Kontrolle.'},
+       {k:'mc',q:'Was macht dein Partner, wenn du gegen den Lob zurückläufst?',a:['Er geht ebenfalls zurück und ruft','Er bleibt am Netz stehen','Er rennt zur Seitenwand','Er schaut nur zu'],e:'Gemeinsam zurück – und kommunizieren.'},
+       {k:'order',q:'Bring den Ablauf gegen den Lob in die richtige Reihenfolge.',a:['Lob erkennen','Seitlich drehen','Mit Sidesteps zurücklaufen','Entscheiden: Überkopf oder Rückwand']}],
+    m:{t:'Seitwärts zurück',d:'Lauf im nächsten Match bei jedem Lob über dich seitlich zurück – und zähle, wie oft du bewusst die richtige Entscheidung Überkopf oder Rückwand triffst.'}},
+
+  positionen: { t:'Rechts oder links?', sk:'taktik',
+    cards:[['Rechte Seite (Drive)',['Der Drive-Spieler ist konstant und macht wenige Fehler.','Er ist oft der Return-Spezialist und baut den Punkt geduldig auf.','Er bereitet die Chancen vor, die der Partner abschließt.']],
+           ['Linke Seite (Revés)',['Der Revés-Spieler hat meist den stärkeren Überkopf.','Bei zwei Rechtshändern nimmt er viele Mitte-Bälle als Vorhand-Überkopf.','Er übernimmt oft den Abschluss des Punktes.']],
+           ['Links- & Rechtshänder',['Spielt der Linkshänder rechts, liegen beide Vorhände in der Mitte.','Spielt der Linkshänder links, liegen beide Vorhände außen an den Seitenwänden.','Sprecht vorher ab, wer die Mitte-Bälle übernimmt.']]],
+    tip:'Wählt eure Seiten nach Stärken, nicht nach Gewohnheit: Wer den besten Überkopf hat, spielt meist links.',
+    q:[{k:'mc',q:'Welche Rolle hat typischerweise der Spieler auf der rechten Seite?',a:['Konstant spielen und den Punkt aufbauen','Jeden Ball sofort smashen','Nur Lobs spielen','Die Mitte komplett freilassen'],e:'Der Drive-Spieler baut auf und macht wenige Fehler.'},
+       {k:'tf',q:'Bei zwei Rechtshändern nimmt der linke Spieler viele Mitte-Bälle mit seinem Vorhand-Überkopf.',a:true,e:'Seine Vorhand zeigt zur Mitte.'},
+       {k:'mc',q:'Ihr seid ein Linkshänder und ein Rechtshänder und wollt beide Vorhände in der Mitte. Wie stellt ihr euch auf?',a:['Linkshänder rechts, Rechtshänder links','Linkshänder links, Rechtshänder rechts','Beide auf derselben Seite','Ist egal'],e:'So zeigen beide Vorhände zur Mitte.'},
+       {k:'mc',q:'Wer spielt meist auf der linken Seite?',a:['Der Spieler mit dem stärkeren Überkopf','Der schwächere Spieler','Immer der Linkshänder','Wer zuletzt aufgeschlagen hat'],e:'Links fallen viele Abschlüsse über Kopf an.'}],
+    m:{t:'Rollen klären',d:'Sprich vor dem nächsten Match mit deinem Partner ab, wer welche Seite spielt und wer die Mitte-Bälle nimmt – und zählt danach, wie oft ihr euch in der Mitte behindert habt.'}},
+
+  uebergang: { t:'Ans Netz vorrücken', sk:'taktik',
+    cards:[['Wann vorrücken?',['Nach einem guten Lob, der die Gegner nach hinten treibt.','Nach einer Chiquita – einem langsamen, flachen Ball auf die Füße der Netzspieler.','Nach deinem Aufschlag rückst du direkt ans Netz vor.']],
+           ['Wie vorrücken?',['Durchquere das Niemandsland zwischen Aufschlag- und Grundlinie zügig, bleib nicht stehen.','Rückt gemeinsam vor – nie nur einer allein.','Mach auch beim Vorrücken einen Split-Step, wenn der Gegner den Ball trifft.']]],
+    tip:'Ein Lob ist nur halb so viel wert, wenn ihr danach hinten stehen bleibt – der gute Lob ist euer Startsignal zum Netz.',
+    q:[{k:'mc',q:'Dein Lob treibt beide Gegner an die Rückwand. Was tust du?',a:['Gemeinsam mit dem Partner ans Netz vorrücken','Hinten stehen bleiben','Allein ans Netz laufen','An die Seitenwand gehen'],e:'Ein guter Lob ist die Chance, das Netz zu übernehmen.'},
+       {k:'tf',q:'Zwischen Aufschlaglinie und Grundlinie solltest du stehen bleiben und abwarten.',a:false,e:'Das ist das Niemandsland – dort bekommst du Bälle auf die Füße.'},
+       {k:'tf',q:'Auch während du vorrückst, machst du einen Split-Step, wenn der Gegner den Ball trifft.',a:true,e:'So kannst du auf jeden Ball reagieren.'},
+       {k:'mc',q:'Was ist eine Chiquita?',a:['Ein langsamer, flacher Ball auf die Füße der Netzspieler','Ein hoher Lob','Ein harter Smash','Ein Aufschlag in die Ecke'],e:'Die Chiquita zwingt die Netzspieler zu einem schwachen Ball.'}],
+    m:{t:'Startsignal Lob',d:'Rücke im nächsten Match nach jedem guten Lob gemeinsam mit deinem Partner ans Netz vor – zähle, wie oft euch das gelingt.'}},
+
+  aufschlag2: { t:'Aufschlag-Varianten', sk:'aufschlag',
+    cards:[['Die Varianten',['Slice-Aufschlag: Der Ball springt flach ab und bleibt tief.','In die Glasecke: Der Ball springt von der Seitenwand weg und macht den Return schwer.','Auf den Körper: Der Rückschläger hat wenig Platz zum Ausholen.','Aufs T in die Mitte: Der Return kommt eher mittig und ist leichter zu volleyen.']],
+           ['Taktik',['Variiere das Tempo, damit sich der Rückschläger nicht einstellen kann.','Der Aufschlag ist dein Startschuss: Danach rückst du sofort ans Netz vor.']],
+           ['Regeln bleiben',['Du lässt den Ball hinter der Aufschlaglinie aufspringen.','Du triffst den Ball auf oder unter Hüfthöhe.','Der Ball muss im diagonalen Aufschlagfeld landen.']]],
+    tip:'Ein platzierter, langsamer Aufschlag ist im Padel mehr wert als ein harter – Hauptsache, du kommst sicher ans Netz.',
+    q:[{k:'mc',q:'Was bewirkt ein Aufschlag in die Glasecke?',a:['Der Ball springt von der Seitenwand weg und erschwert den Return','Der Ball wird automatisch zum Ass','Der Aufschlag ist ungültig','Der Ball wird langsamer und höher'],e:'Die Seitenwand verändert den Absprung.'},
+       {k:'tf',q:'Beim Aufschlag darfst du den Ball über Hüfthöhe treffen, wenn du hinter der Linie stehst.',a:false,e:'Der Treffpunkt muss auf oder unter Hüfthöhe liegen.'},
+       {k:'mc',q:'Du hast aufgeschlagen. Was tust du als Nächstes?',a:['Ans Netz vorrücken','Hinten stehen bleiben','An die Rückwand gehen','Zur Seitenwand laufen'],e:'Der Aufschlag ist der Startschuss für den Netzangriff.'},
+       {k:'mc',q:'Warum variierst du das Tempo beim Aufschlag?',a:['Damit sich der Rückschläger nicht einstellen kann','Weil schnelle Aufschläge verboten sind','Damit du Kraft sparst','Damit der Ball ins Gitter geht'],e:'Abwechslung bringt den Rückschläger aus dem Rhythmus.'}],
+    m:{t:'Drei Varianten',d:'Setze im nächsten Match in jedem Aufschlagspiel mindestens zwei verschiedene Aufschlag-Varianten ein (z. B. Glasecke und Körper).'}},
+
+  returnplan: { t:'Return-Varianten', sk:'aufschlag',
+    cards:[['Deine Optionen',['Flach auf die Füße des vorrückenden Aufschlägers.','Lob-Return über den Netzspieler, um selbst ans Netz zu kommen.','In die Mitte, um bei den Gegnern Unsicherheit zu erzeugen.','Nach der Glaswand returnieren, wenn der Aufschlag gut war.']],
+           ['Position & Ziel',['Steh etwa 1 m vor der Rückwand.','So kannst du den Ball direkt nehmen oder nach der Wand spielen.','Ziel: Der Aufschläger soll nicht bequem ans Netz kommen.']]],
+    tip:'Ein sicherer Return auf die Füße ist mehr wert als ein riskanter Winner – zwing den Aufschläger zu einem schwierigen ersten Volley.',
+    q:[{k:'mc',q:'Wo stehst du ungefähr beim Return?',a:['Etwa 1 m vor der Rückwand','Direkt an der Aufschlaglinie','Mit dem Rücken an der Glaswand','Am Netz'],e:'Von dort kannst du den Ball direkt oder nach der Wand nehmen.'},
+       {k:'mc',q:'Der Aufschläger rückt schnell vor. Welcher Return passt?',a:['Flach auf seine Füße','Ein hoher Ball genau auf seinen Schläger','Ein Return ins Gitter','Ein Ball direkt an die gegnerische Rückwand'],e:'Bälle auf die Füße erschweren den ersten Volley.'},
+       {k:'tf',q:'Das Hauptziel des Returns ist, die Gegner am Netzangriff zu hindern.',a:true,e:'Wer das Netz hat, hat den Vorteil.'},
+       {k:'mc',q:'Wozu dient der Lob-Return?',a:['Über den Netzspieler spielen und selbst ans Netz kommen','Den Punkt sofort beenden','Den Aufschläger zum Smash einladen','Den Ball ins Netz spielen'],e:'Ein guter Lob-Return drängt die Gegner nach hinten.'}],
+    m:{t:'Füße-Return',d:'Spiele im nächsten Match mindestens 5 Returns bewusst flach auf die Füße des vorrückenden Aufschlägers.'}},
+
+  erstervolley: { t:'Der erste Volley', sk:'volley',
+    cards:[['Die Situation',['Nach dem Aufschlag rückst du ans Netz vor.','Mach einen Split-Step, genau wenn der Returner den Ball trifft.','Der erste Volley kommt oft tief und aus dem Halbfeld.']],
+           ['Die Lösung',['Spiel den ersten Volley sicher und tief in die Ecke oder in die Mitte.','Greif nicht an – ein tiefer, kontrollierter Ball reicht.','Rück nach dem Volley weiter ans Netz vor.']]],
+    tip:'Der erste Volley gewinnt selten den Punkt, aber er entscheidet, ob du sicher am Netz ankommst.',
+    q:[{k:'order',q:'Bring den Ablauf nach dem Aufschlag in die richtige Reihenfolge.',a:['Aufschlag','Vorrücken','Split-Step beim Return','Sicherer, tiefer Volley','Weiter ans Netz vorrücken']},
+       {k:'tf',q:'Der erste Volley sollte möglichst hart und riskant gespielt werden.',a:false,e:'Sicher und tief – nicht angreifen.'},
+       {k:'mc',q:'Der Return kommt tief auf deine Füße im Halbfeld. Wohin spielst du?',a:['Sicher tief in die Ecke oder Mitte','Kurz ans Netz zum Winner','Hart auf den Netzspieler','Ins Gitter'],e:'Aus tiefer Position ist Sicherheit wichtiger als Angriff.'},
+       {k:'mc',q:'Wann machst du den Split-Step beim Vorrücken?',a:['Wenn der Returner den Ball trifft','Wenn du am Netz angekommen bist','Wenn der Ball aufspringt','Gar nicht'],e:'So kannst du auf den Return reagieren.'}],
+    m:{t:'Sicher ankommen',d:'Spiele im nächsten Match jeden ersten Volley nach deinem Aufschlag tief und sicher – zähle, wie viele davon im Feld landen.'}},
+
+  gitter: { t:'Bälle aus dem Gitter', sk:'wand',
+    cards:[['Was passiert',['Ein Ball, der nach dem Aufspringen ins Gitter (Malla) geht, springt unberechenbar ab.','Er verliert Tempo und kommt meist langsam und tief heraus.']],
+           ['Verteidigen',['Halte Abstand zum Gitter und warte ab, wie der Ball abspringt.','Bleib tief in den Knien und schlage erst, wenn der Ball wieder kommt.','Spiel den Ball kurz und sicher zurück, z. B. als Lob oder flach in die Mitte.']],
+           ['Angreifen',['Spiel als Angreifer gezielt ins Gitter, wenn es dem Gegner Probleme macht.','Eine Víbora (seitlich geschnittener Überkopf) oder Bandeja in die Ecke aus Seitenwand und Gitter ist fies.']]],
+    tip:'Gegen Gitterbälle gewinnt Geduld: Wer zu früh reingeht, trifft den Ball im falschen Moment.',
+    q:[{k:'tf',q:'Ein Ball aus dem Gitter springt meist schnell und hoch ab.',a:false,e:'Er wird langsam und tief – und unberechenbar.'},
+       {k:'mc',q:'Der Ball springt auf und geht ins Gitter. Was tust du?',a:['Abstand halten, tief bleiben und abwarten','Direkt ans Gitter laufen und sofort schlagen','Den Ball laufen lassen','Rückwärts zum Netz laufen'],e:'Abstand gibt dir Zeit zu sehen, wie der Ball kommt.'},
+       {k:'mc',q:'Was bedeutet „Malla“?',a:['Das Gitter','Die Glaswand','Der Aufschlag','Das Netz in der Mitte'],e:'Malla ist das Metallgitter am Court.'},
+       {k:'mc',q:'Wie kannst du das Gitter als Angreifer nutzen?',a:['Víbora oder Bandeja an die Ecke von Seitenwand und Gitter spielen','Direkt ohne Bodenkontakt ins gegnerische Gitter schießen','Immer in die Mitte spielen','Nur Lobs spielen'],e:'Nach dem Aufspringen ins Gitter wird es für den Gegner schwer. Direkt ins Gitter wäre ein Fehler.'}],
+    m:{t:'Geduld am Gitter',d:'Bleib im nächsten Match bei jedem Gitterball tief und wart ab – zähle, wie viele davon du sicher zurückspielst.'}},
+
+  rueckwandlob: { t:'Lob nach der Rückwand', sk:'lob',
+    cards:[['Die Standardlösung',['Kommt ein Ball von der Rückwand, ist der Lob (Globo) deine sicherste Option.','Lass den Ball nach der Wand herunterkommen, statt ihn hoch zu nehmen.','Öffne die Schlagfläche und spiel den Ball weich von unten nach oben.']],
+           ['Ziel & danach',['Spiel hoch und tief über die Gegner hinweg bis kurz vor ihre Rückwand.','Ziel ist oft die Rückhandseite oder der Spieler mit dem schwächeren Überkopf.','Ist der Lob gut, rückt ihr gemeinsam ans Netz vor.']]],
+    tip:'Ein hoher, tiefer Lob nach der Rückwand dreht den Punkt: Aus Verteidigung wird Angriff, wenn ihr danach vorrückt.',
+    q:[{k:'order',q:'Bring den Lob nach der Rückwand in die richtige Reihenfolge.',a:['Ball von der Rückwand abprallen lassen','Ball herunterkommen lassen','Schlagfläche öffnen','Hoch und tief über die Gegner lobben','Gemeinsam vorrücken']},
+       {k:'tf',q:'Für den Lob nach der Rückwand schließt du die Schlagfläche.',a:false,e:'Eine offene Schlagfläche bringt den Ball hoch.'},
+       {k:'mc',q:'Wohin zielst du mit deinem Lob am besten?',a:['Auf die Seite des schwächeren Überkopfs','Genau auf den Schläger des stärksten Smashers','Kurz hinter das Netz','Direkt in die gegnerische Rückwand'],e:'Ein schwacher Überkopf gibt euch Zeit zum Vorrücken.'},
+       {k:'mc',q:'Was ist ein Globo?',a:['Der spanische Begriff für Lob','Ein Schmetterball','Ein Volley am Netz','Ein Aufschlag'],e:'Globo heißt auf Spanisch Lob.'}],
+    m:{t:'Globo-Plan',d:'Spiele im nächsten Match mindestens 5 Bälle nach der Rückwand als hohen, tiefen Lob – und rücke nach jedem guten Lob vor.'}},
+gancho: { t:'Der Gancho', sk:'bandeja',
+    cards:[
+      ['Was ist der Gancho?',['Gancho (span. „Haken“) ist ein Überkopf-Volley nahe am Netz gegen halbhohe Lobs.','Du spielst ihn, wenn keine Zeit bleibt, für eine Bandeja zurückzuweichen.','Der Ball wird vor dem Körper aus der Luft genommen, nicht nach dem Aufsprung.']],
+      ['Technik',['Kurze Ausholbewegung: Schläger hinter dem Kopf, Ellbogen hoch.','Treffpunkt vor und über der Schulter, Schlägerfläche schließt sich mit einer hakenartigen Bewegung über den Ball.','Der Ball geht kurz und nach unten, auf die Füße der Gegner oder ins Seitenglas.']],
+      ['Abgrenzung',['Bandeja: weiter hinten, mit Slice, tief Richtung Rückwand, um das Netz zu halten.','Smash: volle Kraft, Ziel ist der direkte Punkt oder x3/x4.','Gancho: nah am Netz, kompakt, nach unten – Kontrolle vor Tempo.']]
+    ],
+    tip:'Ein Gancho lang an die Rückwand ist meist ein Geschenk – je näher du am Netz stehst, desto kürzer und steiler muss der Ball nach unten.',
+    q:[
+      {k:'mc',q:'Wann ist der Gancho die richtige Wahl?',a:['Bei einem halbhohen Lob, wenn du nah am Netz stehst und keine Zeit für eine Bandeja hast','Bei einem hohen Lob, der dich bis zur Rückwand treibt','Als Return auf einen Aufschlag','Wenn der Ball unter Netzhöhe ist'],e:'Der Gancho ist der kompakte Überkopf-Volley nahe am Netz.'},
+      {k:'tf',q:'Der Gancho wird wie die Bandeja tief mit Slice an die Rückwand gespielt.',a:false,e:'Der Gancho geht kurz und nach unten – tief mit Slice ist die Bandeja.'},
+      {k:'order',q:'Bring den Gancho in die richtige Reihenfolge.',a:['Halbhohen Lob nahe am Netz erkennen','Schläger hinter den Kopf, Ellbogen hoch','Ball vor und über der Schulter treffen','Fläche hakenartig über den Ball schließen','Ball kurz nach unten auf die Füße spielen']},
+      {k:'mc',q:'Wohin zielt ein guter Gancho?',a:['Kurz nach unten auf die Füße der Gegner oder ins Seitenglas','Hoch und lang an die Rückwand','Direkt auf den Netzrand','Immer in die Mitte, möglichst hoch'],e:'Kurz und nach unten – so bleibt der Ball schwer zu erreichen.'}
+    ],
+    m:{t:'Haken setzen',d:'Spiele im nächsten Match mindestens 3 halbhohe Lobs nahe am Netz als Gancho kurz nach unten statt zurückzuweichen. Zähle, wie viele davon den Punkt gewinnen oder dir das Netz sichern.'}
+  },
+
+  smashdefense: { t:'Smash verteidigen', sk:'wand',
+    cards:[
+      ['Grundposition',['Sobald der Gegner zum Smash ansetzt: weit zurück, nah an die Rückwand.','Tief geduckt, Knie gebeugt, Schläger vor dem Körper – bereit in beide Richtungen.','Ruhe bewahren: Viele Smashes kommen von der Rückwand zurück und sind spielbar.']],
+      ['Ball von der Wand lesen',['Flache Smashes springen tief und schnell von der Rückwand ab – kurz und kompakt antworten.','Beim x3 (por tres) springt der Ball über die Seitenwand raus: früh Richtung Seitenwand bzw. Tür laufen.','Rauslaufen durch die Tür nur, wenn der Platz offene Ausgänge hat und es erlaubt ist.']],
+      ['Die Antwort',['Nach der Wand: hoher Lob über die Netzspieler, um selbst wieder ans Netz zu kommen.','Alternative: flacher Ball auf die Füße, wenn die Gegner nah am Netz kleben.','Nicht hektisch hart zurückschlagen – Kontrolle schlägt Tempo.']]
+    ],
+    tip:'Zeig dem Smasher früh, dass du bereitstehst – wer seinen x3 schon einmal zurückbekommen hat, riskiert beim nächsten Mal mehr und macht mehr Fehler.',
+    q:[
+      {k:'mc',q:'Der Gegner setzt zum harten Smash an. Was machst du?',a:['Weit zurück an die Rückwand und tief geduckt bereitmachen','Nach vorne ans Netz sprinten','Stehen bleiben und abwarten','Den Ball vor dem Aufsprung volley nehmen'],e:'Weit zurück, geduckt – so hast du Zeit, den Ball von der Wand zu lesen.'},
+      {k:'tf',q:'Durch die Tür rauslaufen ist nur erlaubt, wenn der Platz offene Ausgänge hat und es zugelassen ist.',a:true,e:'Nicht jeder Platz hat offene Ausgänge – kläre das vor dem Match.'},
+      {k:'order',q:'Bring die Smash-Verteidigung in die richtige Reihenfolge.',a:['Smash-Ansatz des Gegners erkennen','Weit zurück an die Rückwand','Tief ducken, Schläger vor dem Körper','Ball nach der Wand lesen','Mit Lob oder flachem Ball zurückspielen']},
+      {k:'mc',q:'Welche Antwort ist nach der Wand meist am besten, um selbst wieder ans Netz zu kommen?',a:['Ein hoher Lob über die Netzspieler','Ein harter Ball direkt auf den Smasher','Eine Dejada direkt hinters Netz','Ein Ball ins eigene Seitenglas'],e:'Der Lob drückt die Gegner zurück und gibt dir Zeit vorzurücken.'}
+    ],
+    m:{t:'Die Mauer',d:'Bleib im nächsten Match bei jedem gegnerischen Smash tief und ruhig an der Rückwand. Zähle, wie viele Smashes du zurückbringst – Ziel: mindestens 3.'}
+  },
+
+  muster: { t:'Spielmuster', sk:'taktik',
+    cards:[
+      ['Punkte konstruieren',['Gute Teams erzwingen den Punkt nicht, sie bauen ihn über mehrere Schläge auf.','Ein Muster ist eine geplante Schlagfolge, die eine Lücke oder einen schwachen Ball erzeugt.','Spielt Muster bewusst und sprecht sie vorher ab.']],
+      ['Bewährte Muster',['Aufschlag in die Glasecke, erster Volley in die Mitte zwischen beide Gegner.','Lob, dann ans Netz: zwingt den Gegner in ein Bandeja-Duell aus der Defensive.','Chiquita auf die Füße, sofort vorrücken und den hohen Ball angreifen.']],
+      ['Rückhand-Überkopf',['Lobbe auf die Rückhand-Überkopf-Seite – für die meisten der schwächste Überkopf.','Gegen Rechtshänder heißt das: Der Lob geht über ihre linke Schulter.','Kommt der Ball schwach zurück, ist das euer Moment zum Angriff.']]
+    ],
+    tip:'Der Gewinnschlag ist oft nur der letzte Schritt – der Punkt wurde zwei, drei Bälle vorher mit dem richtigen Muster gewonnen.',
+    q:[
+      {k:'mc',q:'Was bedeutet „Punkte konstruieren“?',a:['Den Punkt über mehrere geplante Schläge aufbauen, bis ein schwacher Ball kommt','Jeden Ball so hart wie möglich schlagen','Nur auf Fehler des Gegners warten','Immer sofort smashen'],e:'Muster erzeugen Lücken – erzwingen erzeugt Fehler.'},
+      {k:'order',q:'Bring das Muster „Aufschlag + erster Volley“ in die richtige Reihenfolge.',a:['Aufschlag in die Glasecke','Ans Netz vorrücken','Split-Step beim Return','Erster Volley in die Mitte']},
+      {k:'tf',q:'Ein Lob auf die Rückhand-Überkopf-Seite zielt meist auf den schwächsten Überkopf des Gegners.',a:true,e:'Rückhand-Überkopf ist für die meisten Spieler die schwächste Seite.'},
+      {k:'mc',q:'Du spielst eine Chiquita auf die Füße der Netzspieler. Was folgt im Muster?',a:['Sofort vorrücken und den hohen Ball angreifen','Hinten bleiben und abwarten','Sofort lobben','Zur Rückwand laufen'],e:'Die Chiquita zwingt den Gegner, hochzuspielen – du gehst vor und greifst an.'}
+    ],
+    m:{t:'Der Bauplan',d:'Legt vor dem nächsten Match mit deinem Partner 2 Muster fest. Spielt jedes mindestens 3-mal und zählt, wie oft es zum Punktgewinn führt.'}
+  },
+
+  schwaeche: { t:'Gegner lesen', sk:'taktik',
+    cards:[
+      ['Beim Einspielen beobachten',['Wie sicher ist der Überkopf – Bandeja oder nur Notlösung?','Wackelt der Rückhand-Volley oder das Spiel aus der Rückwand?','Wie beweglich und fit wirken die Gegner?']],
+      ['Al débil – zum Schwächeren',['„Al débil“ heißt: Spiel bewusst mehr Bälle auf den schwächeren Spieler.','Achte auf Linkshänder: Ihre Vorhand und ihr Überkopf liegen auf der anderen Seite.','Vorsicht: Der stärkere Spieler wird versuchen, in die Mitte zu übernehmen – haltet die Bälle weg von ihm.']],
+      ['Plan anpassen',['Merke dir die Lieblingsschläge des Gegners und nimm sie ihm weg.','Funktioniert der Plan nicht, ändert ihn beim Seitenwechsel.','Sprich kurz mit deinem Partner: Was klappt, was nicht?']]
+    ],
+    tip:'Nutze die ersten Bälle beim Einspielen wie ein Scout: Spiel jedem Gegner einen Lob, einen Rückhand-Volley und einen Wandball – und merk dir, wer wackelt.',
+    q:[
+      {k:'mc',q:'Was bedeutet „al débil“?',a:['Bewusst mehr Bälle auf den schwächeren Spieler spielen','Immer auf den stärkeren Spieler spielen','Nur in die Mitte spielen','Langsam spielen'],e:'Druck auf den schwächeren Spieler bringt die meisten Fehler.'},
+      {k:'tf',q:'Bei einem Linkshänder liegen Vorhand und Überkopf auf der anderen Seite als bei einem Rechtshänder.',a:true,e:'Deshalb musst du Ziele wie den Rückhand-Überkopf anpassen.'},
+      {k:'mc',q:'Dein Plan funktioniert nach mehreren Spielen nicht. Was tust du?',a:['Beim Seitenwechsel mit dem Partner besprechen und den Plan anpassen','Stur weitermachen','Nur noch härter schlagen','Aufgeben'],e:'Ein guter Plan wird an das angepasst, was du beobachtest.'},
+      {k:'mc',q:'Worauf achtest du beim Einspielen?',a:['Überkopf, Rückhand-Volley, Wandspiel und Fitness der Gegner','Nur auf die Schlägerfarbe','Auf das Publikum','Auf nichts – Einspielen ist nur Aufwärmen'],e:'Das Einspielen ist deine Scouting-Phase.'}
+    ],
+    m:{t:'Der Scout',d:'Notiere dir nach dem Einspielen im nächsten Match für jeden Gegner eine Schwäche. Spiele im ersten Satz mindestens 60 % der Bälle auf den Schwächeren.'}
+  },
+
+  tempo: { t:'Tempowechsel', sk:'taktik',
+    cards:[
+      ['Schnell ist nicht gleich gut',['Harte Bälle an die Glaswand kommen zurück und geben dem Gegner Zeit.','Langsame Bälle wie Bandeja, Chiquita oder Globo (hoher Lob) zwingen den Gegner, selbst Tempo zu erzeugen.','Beschleunige nur, wenn du den Ball über Netzhöhe triffst.']],
+      ['Rhythmus brechen',['Wechsle bewusst zwischen langsam und schnell, damit der Gegner keinen Rhythmus findet.','Nach mehreren langsamen Bällen wirkt ein plötzlicher schneller Ball doppelt.','Ein Ball unter Netzhöhe wird langsam gespielt – nach unten, nicht hart.']]
+    ],
+    tip:'Wer das Tempo bestimmt, bestimmt den Punkt – und meistens gewinnt der, der den Ball langsamer macht, nicht der, der ihn schneller macht.',
+    q:[
+      {k:'tf',q:'Ein harter Ball an die Glaswand ist fast immer ein Gewinnschlag.',a:false,e:'Das Glas gibt den Ball zurück und dem Gegner Zeit.'},
+      {k:'mc',q:'Wann solltest du beschleunigen?',a:['Wenn du den Ball über Netzhöhe triffst','Bei jedem Ball','Wenn der Ball unter Netzhöhe ist','Nur beim Return'],e:'Über Netzhöhe kannst du nach unten beschleunigen – darunter nicht.'},
+      {k:'mc',q:'Welche Schläge sind typische langsame Bälle?',a:['Bandeja, Chiquita und Globo','Smash, x3 und x4','Flacher Return und Bajada','Nur der Aufschlag'],e:'Langsame Bälle zwingen den Gegner, selbst Tempo zu erzeugen.'},
+      {k:'mc',q:'Du hast drei langsame Bälle gespielt, der Gegner spielt einen hohen Ball über Netzhöhe. Was tust du?',a:['Plötzlich beschleunigen – der Tempowechsel überrascht ihn','Noch langsamer spielen','Den Ball laufen lassen','Hoch lobben'],e:'Nach langsamen Bällen wirkt ein schneller Ball doppelt.'}
+    ],
+    m:{t:'Gas und Bremse',d:'Spiele im nächsten Match jeden Ball unter Netzhöhe bewusst langsam und beschleunige nur über Netzhöhe. Zähle, wie oft du das schaffst – Ziel: 10-mal.'}
+  },
+
+  winkel: { t:'Winkel & Seitenwand', sk:'taktik',
+    cards:[
+      ['Der Winkel-Volley',['Bei hohen Bällen nahe am Netz spielst du den Volley schräg ans Seitenglas.','Zielt auf die Ecke zwischen Boden und Seitenwand – so bleibt der Ball flach.','Ein zu langer Winkel springt weit zurück ins Feld und wird spielbar.']],
+      ['Risiko vs. Ertrag',['Winkel nur bei Bällen über Netzhöhe – sonst ist das Fehlerrisiko zu hoch.','Ein Ball in die Mitte öffnet oft erst den Winkel für den nächsten Schlag.','Spielst du außen, deckt dein Partner die Mitte.']]
+    ],
+    tip:'Erst Mitte, dann Winkel: Ein Ball in die Mitte zieht die Gegner zusammen – danach ist die Seitenwand frei.',
+    q:[
+      {k:'mc',q:'Wohin zielt ein guter Winkel-Volley?',a:['In die Ecke zwischen Boden und Seitenwand','Hoch an die Rückwand','Direkt auf den Netzrand','Mitten ins Feld'],e:'So bleibt der Ball flach und schwer zu erreichen.'},
+      {k:'tf',q:'Spielst du einen Winkel außen, deckt dein Partner die Mitte.',a:true,e:'Sonst öffnet ihr selbst die Mitte für den Gegner.'},
+      {k:'order',q:'Bring den Ablauf in die richtige Reihenfolge.',a:['Ball in die Mitte spielen','Gegner rücken zusammen','Hoher Ball über Netzhöhe kommt','Winkel-Volley ans Seitenglas']},
+      {k:'mc',q:'Ein Ball kommt unter Netzhöhe. Spielst du den Winkel?',a:['Nein, das Fehlerrisiko ist zu hoch','Ja, immer','Ja, mit voller Kraft','Nur mit der Rückhand'],e:'Winkel nur bei Bällen über Netzhöhe.'}
+    ],
+    m:{t:'Ecke treffen',d:'Spiele im nächsten Match mindestens 3 Winkel-Volleys bei hohen Bällen nahe am Netz in die Seitenwand-Ecke. Zähle, wie viele flach bleiben.'}
+  },
+
+  blockvolley: { t:'Block-Volley', sk:'volley',
+    cards:[
+      ['Wann blocken?',['Gegen harte Bälle auf den Körper fehlt die Zeit für einen normalen Volley.','Rückhand-Volley vor dem Körper ist dein Standard bei Körperbällen.','Der Ellbogen bleibt vor dem Körper, nicht seitlich.']],
+      ['Technik',['Schläger vor dem Körper, keine Ausholbewegung.','Nutze die Energie des Balls – du schlägst nicht, du hältst nur die Fläche hin.','Fester Griff im Moment des Treffens, Fläche leicht offen.']],
+      ['Ziel',['Blocke tief zurück, damit der Gegner nicht sofort nachsetzen kann.','Nicht hoch zurückspielen – das ist eine Einladung zum Smash.','Nach dem Block sofort wieder bereit.']]
+    ],
+    tip:'Je härter der Ball kommt, desto weniger musst du tun – stabile Fläche vor dem Körper reicht, der Ball bringt das Tempo selbst mit.',
+    q:[
+      {k:'tf',q:'Beim Block-Volley holst du weit aus, um den harten Ball zu kontern.',a:false,e:'Keine Ausholbewegung – du nutzt die Energie des Balls.'},
+      {k:'mc',q:'Welcher Volley ist der Standard bei Bällen auf den Körper?',a:['Rückhand-Volley vor dem Körper','Vorhand-Volley mit großer Ausholbewegung','Smash','Lob'],e:'Mit der Rückhand vor dem Körper deckst du den Körper am besten ab.'},
+      {k:'order',q:'Bring den Block-Volley in die richtige Reihenfolge.',a:['Harten Ball auf den Körper erkennen','Schläger vor den Körper','Fläche ohne Ausholen hinhalten','Ball tief zurückblocken']},
+      {k:'mc',q:'Wohin blockst du den Ball?',a:['Tief zurück','Hoch in die Luft','Direkt ins Netz','Seitlich ins Aus'],e:'Tiefe nimmt dem Gegner die Möglichkeit, sofort nachzusetzen.'}
+    ],
+    m:{t:'Die Wand',d:'Blocke im nächsten Match jeden harten Ball auf den Körper ohne Ausholen tief zurück. Zähle, wie viele Blocks du sicher zurückbringst – Ziel: 5.'}
+  },
+
+  dejada: { t:'Die Dejada (Stopp)', sk:'volley',
+    cards:[
+      ['Was ist die Dejada?',['Die Dejada ist ein kurzer Stopp-Volley direkt hinter das Netz.','Du spielst sie, wenn die Gegner weit hinten an der Rückwand stehen.','Der Ball soll nach dem Aufsprung sterben, bevor der Gegner ihn erreicht.']],
+      ['Technik',['Weiche Hand: lockerer Griff, Schläger nimmt dem Ball das Tempo.','Leichter Unterschnitt, damit der Ball kaum weiterspringt.','Kurze Bewegung, kein Durchschwung.']],
+      ['Risiko',['Stehen die Gegner nah, ist die Dejada ein Geschenk.','Der Überraschungseffekt ist entscheidend – nicht zu oft spielen.','Nach der Dejada bereit bleiben, falls der Gegner sie erreicht.']]
+    ],
+    tip:'Die beste Dejada folgt auf einen tiefen Ball: Erst drückst du die Gegner zur Rückwand, dann lässt du den Ball kurz hinter dem Netz sterben.',
+    q:[
+      {k:'mc',q:'Wann spielst du die Dejada?',a:['Wenn die Gegner weit hinten an der Rückwand stehen','Wenn die Gegner direkt am Netz stehen','Bei jedem Ball','Nur beim Aufschlag'],e:'Nur dann haben die Gegner einen weiten Weg zum Ball.'},
+      {k:'tf',q:'Wenn die Gegner nah am Netz stehen, ist die Dejada ein Geschenk für sie.',a:true,e:'Sie erreichen den kurzen Ball leicht und können angreifen.'},
+      {k:'mc',q:'Was macht die Dejada technisch aus?',a:['Weiche Hand, leichter Unterschnitt, kein Durchschwung','Fester Griff und voller Durchschwung','Topspin und hohe Flugkurve','Ausholen wie beim Smash'],e:'So verliert der Ball Tempo und springt kaum weiter.'},
+      {k:'order',q:'Bring den Ablauf in die richtige Reihenfolge.',a:['Tiefen Ball spielen','Gegner werden zur Rückwand gedrückt','Kurzen Ball erkennen','Dejada mit weicher Hand','Bereit bleiben']}
+    ],
+    m:{t:'Der Stopp',d:'Spiele im nächsten Match mindestens 2 Dejadas, aber nur, wenn beide Gegner an der Rückwand stehen. Zähle, wie viele direkt den Punkt bringen.'}
+  },
+
+  netzduell: { t:'Netzduelle', sk:'volley',
+    cards:[
+      ['Kompakt bleiben',['Schläger hoch vor dem Körper, kurze Bewegungen, kein Ausholen.','Split-Step bei jedem Schlag des Gegners.','Ruhig bleiben: Wer hektisch wird, spielt den Ball hoch.']],
+      ['Ziele im Duell',['Ziele auf die Hüfte oder die Schlägerarm-Seite des Körpers – dort ist Abwehr am schwersten.','Spiel den Ball nach unten, nie hoch.','Ein hoher Ball im Netzduell ist eine Einladung zum Angriff.']]
+    ],
+    tip:'Im Netzduell gewinnt nicht der Schnellste, sondern der, der den Ball zuerst nach unten bringt – bleib kompakt und warte auf den ersten hohen Ball.',
+    q:[
+      {k:'mc',q:'Wohin zielst du im Netzduell?',a:['Auf die Hüfte oder die Schlägerarm-Seite des Körpers','Hoch über den Gegner','Immer ins Seitenglas','Auf den Netzpfosten'],e:'Dort kann der Gegner am schwersten abwehren.'},
+      {k:'tf',q:'Im Netzduell spielst du den Ball nach unten, nie hoch.',a:true,e:'Ein hoher Ball lädt den Gegner zum Angriff ein.'},
+      {k:'mc',q:'Wie ist deine Schlägerhaltung im Netzduell?',a:['Hoch vor dem Körper, kompakt','Tief neben dem Knie','Weit hinter dem Körper','Über dem Kopf'],e:'So bist du schnell bei jedem Ball.'},
+      {k:'mc',q:'Du wirst im Netzduell hektisch. Was passiert oft?',a:['Du spielst den Ball hoch und wirst angegriffen','Du gewinnst automatisch','Der Gegner macht einen Fehler','Nichts'],e:'Ruhe bewahren hält den Ball unten.'}
+    ],
+    m:{t:'Kühler Kopf',d:'Spiele im nächsten Match jedes Netzduell kompakt und nach unten auf die Hüfte. Zähle, wie viele Duelle du gewinnst – Ziel: mindestens 3.'}
+  },
+
+  kontraangriff: { t:'Kontern', sk:'smash',
+    cards:[
+      ['Chance erkennen',['Ein schwacher Lob oder ein kurzer Ball ist deine Chance zum Gegenangriff.','Angreifen nur, wenn du den Ball über Netzhöhe triffst.','Aus dem Halbfeld: Bajada, Smash oder Vorhand-Angriff nach unten.']],
+      ['Nach dem Angriff',['Sofort ans Netz vorrücken – der Konter allein reicht nicht.','Partner rückt mit vor, gemeinsam wie mit einem Seil verbunden.','Split-Step, sobald der Gegner den Ball trifft.']],
+      ['Langsamen Smash kontern',['Ein zu langsamer Smash springt nach der Rückwand weit ins Feld.','Diesen Ball kannst du direkt angreifen statt nur zu lobben.','Bleib geduldig: Konter nur bei echten Chancen.']]
+    ],
+    tip:'Der beste Konter ist der, den der Gegner nicht kommen sieht – aus der Defensive in einem Schlag ans Netz: das bricht jede Angriffsserie.',
+    q:[
+      {k:'mc',q:'Wann greifst du aus dem Halbfeld an?',a:['Wenn du den Ball über Netzhöhe triffst','Bei jedem Ball','Wenn der Ball unter Netzhöhe ist','Nur nach dem Aufschlag'],e:'Über Netzhöhe kannst du nach unten angreifen.'},
+      {k:'order',q:'Bring den Konter in die richtige Reihenfolge.',a:['Schwachen Lob oder kurzen Ball erkennen','Ball über Netzhöhe treffen','Angriff nach unten spielen','Sofort ans Netz vorrücken']},
+      {k:'tf',q:'Nach einem Konter bleibst du hinten an der Rückwand stehen.',a:false,e:'Sofort ans Netz – sonst verschenkst du die Chance.'},
+      {k:'mc',q:'Der Gegner spielt einen zu langsamen Smash, der weit ins Feld springt. Was tust du?',a:['Den Ball direkt angreifen','Nur lobben','Den Ball laufen lassen','Aus dem Feld rennen'],e:'Ein langsamer Smash ist eine Chance zum Gegenangriff.'}
+    ],
+    m:{t:'Umschalten',d:'Greife im nächsten Match jeden schwachen Lob über Netzhöhe aus dem Halbfeld an und rücke danach sofort ans Netz. Zähle, wie oft du das Netz so zurückeroberst – Ziel: 3-mal.'}
+  },
+drucksituation: { t:'Big Points', sk:'kopf',
+    cards:[
+      ['Was sind Big Points?',['Breakball, 30:40, 40:40 oder jeder Punkt im Tie-Break entscheidet oft das ganze Spiel.','Genau dann steigen Puls und Fehlerquote – bei dir und beim Gegner.','Wer in diesen Momenten die wenigsten leichten Fehler macht, gewinnt meistens.']],
+      ['Hohe Prozentsätze',['Spiel sichere Ziele: Mitte, tiefe Bälle, hohe Lobs statt riskanter Winkel.','Erster Aufschlag rein – lieber etwas langsamer und mit Platzierung.','Kein neuer Schlag im Big Point: Spiel, was du hundertmal trainiert hast.']],
+      ['Kopf ruhig halten',['Mach vor dem Punkt einen klaren Plan mit deinem Partner: ein Ziel, eine Idee.','Nutze deine Routine und atme einmal lang aus, bevor der Ball ins Spiel kommt.','Denk an den Prozess („tief in die Mitte“), nicht ans Ergebnis („bloß nicht verlieren“).']]
+    ],
+    tip:'Unter Druck spielen die meisten Gegner vorsichtiger – wenn du einfach einen Ball mehr sicher zurückbringst, schenken sie dir den Big Point oft selbst.',
+    q:[
+      {k:'mc',q:'Breakball gegen dich, der Ball kommt halbhoch in die Mitte. Was spielst du?',a:['Einen sicheren, tiefen Ball in die Mitte','Einen riskanten Winkel ins Seitenaus-Eck','Einen neuen Trickschlag, den du nie trainierst','Den härtesten Schlag, egal wohin'],e:'Big Points gewinnst du mit hohen Prozentsätzen und sicheren Zielen.'},
+      {k:'tf',q:'Im Big Point solltest du dich auf das Ergebnis konzentrieren: „Bloß nicht verlieren!“',a:false,e:'Fokus auf den Prozess, z. B. „tief in die Mitte“, hält dich locker.'},
+      {k:'order',q:'Bring deinen Ablauf vor einem Big Point in die richtige Reihenfolge.',a:['Kurz mit dem Partner den Plan absprechen','Routine starten','Einmal lang ausatmen','Punkt mit sicherem Ziel spielen']},
+      {k:'mc',q:'Was machst du beim ersten Aufschlag in einem wichtigen Punkt?',a:['Sicher reinbringen, lieber etwas langsamer und platziert','Volles Risiko auf die Linie','Absichtlich einen Doppelfehler riskieren','Den Aufschlag so hart wie möglich schlagen'],e:'Ein sicherer erster Aufschlag nimmt Druck raus.'}
+    ],
+    m:{t:'Big-Point-Modus',d:'Sprich im nächsten Match vor jedem Breakball und jedem 40:40 mit deinem Partner ein konkretes Ziel ab und zähle, wie viele dieser Punkte ihr gewinnt.'}
+  },
+
+  goldenpoint: { t:'Punto de oro', sk:'taktik',
+    cards:[
+      ['Die Regel',['Beim Punto de oro (Golden Point) entscheidet bei 40:40 ein einziger Punkt das Spiel – kein Vorteil.','Das Rückschläger-Team wählt, wer von beiden diesen Punkt returniert.','Der Aufschläger schlägt dann auf die gewählte Seite auf.']],
+      ['Als Rückschläger',['Wählt den Spieler mit dem sichereren Return, nicht unbedingt den mit dem härteren.','Achtet darauf, welche Seite dem Aufschläger mehr Probleme macht.','Erstes Ziel: den Return sicher und tief zurückbringen.']],
+      ['Als Aufschläger',['Bring den ersten Aufschlag sicher rein – ein Doppelfehler kostet direkt das Spiel.','Sprecht vorher ab: Wohin geht der Aufschlag, was macht der Netzspieler?','Spielt den Punkt mit eurem stärksten, einfachsten Muster.']]
+    ],
+    tip:'Legt schon vor dem Match fest, wer bei Golden Point returniert – dann müsst ihr bei 40:40 nicht diskutieren und spielt mit klarem Kopf.',
+    q:[
+      {k:'mc',q:'Wer entscheidet beim Punto de oro, welcher Spieler returniert?',a:['Das Rückschläger-Team','Der Aufschläger','Der Schiedsrichter per Los','Es returniert immer der Spieler auf der Rückhandseite'],e:'Das Rückschläger-Team wählt den Returnspieler.'},
+      {k:'tf',q:'Beim Golden Point gibt es bei 40:40 noch einen Vorteil-Punkt.',a:false,e:'Ein einziger Punkt entscheidet das Spiel.'},
+      {k:'mc',q:'Ihr returniert bei Golden Point. Dein Partner returniert sicherer, du härter. Wer nimmt den Return?',a:['Dein Partner mit dem sichereren Return','Du, weil du härter schlägst','Immer der Linkshänder','Ihr wechselt euch einfach ab'],e:'Sicherheit schlägt Härte im Entscheidungspunkt.'},
+      {k:'mc',q:'Worauf achtet der Aufschläger beim Golden Point am meisten?',a:['Den ersten Aufschlag sicher reinzubringen','Möglichst viel Risiko zu gehen','Den Plan spontan zu ändern','Ohne Absprache zu spielen'],e:'Ein Doppelfehler kostet direkt das Spiel.'}
+    ],
+    m:{t:'Goldener Plan',d:'Legt vor dem nächsten Match fest, wer bei Golden Point returniert, und sprecht bei jedem 40:40 ein konkretes Ziel für den Punkt ab.'}
+  },
+
+  scouting: { t:'Einspielen clever', sk:'kopf',
+    cards:[
+      ['Dich selbst warm machen',['Nutze die ca. 5 Minuten Einspielzeit für alle Schläge, nicht nur Grundschläge.','Spiel Volleys, ein paar Lobs und mindestens 3–4 Überkopfbälle.','Starte locker und steigere das Tempo langsam.']],
+      ['Den Gegner scouten',['Lass jeden Gegner ein paar Überkopfbälle spielen: Wer smasht sicher, wer wackelt?','Teste die Rückhand: Wer spielt sie unsicher oder nur geschnitten?','Achte auf Linkshänder – das verändert, wo die Mitte und die Vorhand liegen.']],
+      ['Kurzer Plan',['Tauscht euch vor dem ersten Punkt kurz aus: Was habt ihr gesehen?','Legt ein Hauptziel fest, z. B. „Lobs auf den schwächeren Überkopf-Spieler“.','Prüft nach ein paar Spielen, ob der Plan aufgeht.']]
+    ],
+    tip:'Spiel beim Einspielen bewusst ein paar Lobs zu beiden Gegnern – deren Überkopf verrät dir oft schon den halben Matchplan.',
+    q:[
+      {k:'mc',q:'Wie lange dauert das Einspielen vor dem Match ungefähr?',a:['Ca. 5 Minuten','Ca. 30 Sekunden','Ca. 20 Minuten','Eine ganze Stunde'],e:'Rund 5 Minuten – nutze sie gut.'},
+      {k:'tf',q:'Beim Einspielen solltest du auch Überkopfbälle und Lobs spielen, nicht nur Grundschläge.',a:true,e:'Alle Schläge sollen vor dem ersten Punkt warm sein.'},
+      {k:'mc',q:'Ein Gegner smasht beim Einspielen zweimal ins Netz. Was ist ein sinnvoller Plan?',a:['Gezielt Lobs auf diesen Spieler spielen','Ihm nur noch flache Bälle geben','Ihn komplett ignorieren','Selbst nur noch smashen'],e:'Ein unsicherer Überkopf ist ein klares Ziel für Lobs.'},
+      {k:'order',q:'Bring das clevere Einspielen in eine sinnvolle Reihenfolge.',a:['Locker Grundschläge spielen','Volleys und Lobs einbauen','Überkopfbälle testen und Gegner beobachten','Mit dem Partner einen Plan festlegen']}
+    ],
+    m:{t:'Spion am Netz',d:'Notiere dir beim nächsten Einspielen zu jedem Gegner eine Schwäche (Überkopf, Rückhand oder Linkshänder) und sag sie deinem Partner vor dem ersten Punkt.'}
+  },
+
+  satzplan: { t:'Plan B im Match', sk:'taktik',
+    cards:[
+      ['Erst analysieren',['Frag dich: Wo verlieren wir gerade die meisten Punkte?','Typische Antworten: zu viele eigene Fehler, Lobs zu kurz, Bälle zu oft auf den starken Spieler.','Nutze die Pause beim Seitenwechsel (bis zu 90 Sekunden) für diese Analyse.']],
+      ['Muster ändern',['Mehr lobben, um die Gegner vom Netz zu holen.','Mehr in die Mitte spielen, um Verwirrung zu stiften.','Tempo rausnehmen, wenn die Gegner von schnellen Bällen leben.']],
+      ['Eine Sache zur Zeit',['Ändert immer nur eine Sache, damit ihr seht, was wirkt.','Die Returnseiten bleiben im Satz fest – tauschen geht erst zum neuen Satz.','Gebt der Änderung ein paar Spiele Zeit, bevor ihr wieder umstellt.']]
+    ],
+    tip:'Ändert nie eine gewinnende Taktik, aber immer eine verlierende – und zwar bewusst, nicht aus Frust.',
+    q:[
+      {k:'tf',q:'Ihr dürft mitten im Satz die Returnseiten tauschen, wenn es nicht läuft.',a:false,e:'Die Seiten sind im Satz fest, tauschen geht erst zum neuen Satz.'},
+      {k:'mc',q:'Wie lange dauert die Pause beim Seitenwechsel höchstens?',a:['90 Sekunden','10 Sekunden','5 Minuten','Es gibt keine Pause'],e:'Bis zu 90 Sekunden – ideal für eure Analyse.'},
+      {k:'mc',q:'Die Gegner gewinnen fast alle Punkte mit schnellen Volleys am Netz. Was ist ein guter Plan B?',a:['Mehr lobben und Tempo rausnehmen','Noch härter auf sie draufschlagen','Gar nichts ändern','Alles auf einmal umstellen'],e:'Lobs und weniger Tempo nehmen ihnen ihre Waffe.'},
+      {k:'order',q:'Bring den Ablauf für Plan B in die richtige Reihenfolge.',a:['Merken, wo ihr die Punkte verliert','Beim Seitenwechsel analysieren','Eine einzige Sache ändern','Ein paar Spiele testen und bewerten']}
+    ],
+    m:{t:'Plan-B-Check',d:'Analysiert im nächsten Match bei jedem Seitenwechsel in einem Satz: Wo verlieren wir die Punkte? Wenn ihr zurückliegt, ändert genau eine Sache.'}
+  },
+
+  turnier: { t:'Turniertag', sk:'kopf',
+    cards:[
+      ['Am Vortag & morgens',['Schlaf ausreichend – die Nacht vor dem Turnier zählt.','Iss etwa 2–3 Stunden vor dem ersten Match eine leichte, kohlenhydratreiche Mahlzeit.','Pack Ersatz-Griffband, Wasser, Snacks und ein zweites Shirt ein.']],
+      ['Zwischen den Matches',['Trink regelmäßig, auch wenn du keinen Durst hast.','Iss kleine Snacks wie Banane oder Riegel statt einer schweren Mahlzeit.','Wärm dich vor jedem Match erneut kurz auf, auch wenn es das dritte ist.']],
+      ['Mental frisch bleiben',['Hak jedes Match ab – egal ob Sieg oder Niederlage – und starte neu.','Unterstütze deinen Partner, gerade wenn er einen schlechten Tag hat.','Konzentriere dich nur auf das nächste Match, nicht auf das ganze Turnier.']]
+    ],
+    tip:'Ein frisches Griffband vor dem wichtigsten Match gibt dir sicheren Halt – wechsle es, bevor es rutschig wird, nicht danach.',
+    q:[
+      {k:'mc',q:'Wann solltest du vor dem ersten Match etwa essen?',a:['Ca. 2–3 Stunden vorher','Direkt vor dem ersten Ballwechsel','Gar nicht, das macht schneller','Erst nach dem Turnier'],e:'2–3 Stunden geben dem Körper Zeit zum Verdauen.'},
+      {k:'tf',q:'Vor dem dritten Match des Tages brauchst du dich nicht mehr aufzuwärmen.',a:false,e:'Vor jedem Match kurz aufwärmen, der Körper kühlt in Pausen ab.'},
+      {k:'mc',q:'Ihr habt das erste Match knapp verloren. Wie gehst du ins nächste?',a:['Abhaken und mental neu starten','Die ganze Zeit über die Fehler grübeln','Dem Partner Vorwürfe machen','Ohne Aufwärmen sofort losspielen'],e:'Jedes Match ist ein Neustart.'},
+      {k:'order',q:'Bring den Turniertag in eine sinnvolle Reihenfolge.',a:['Gut schlafen','Ca. 2–3 h vorher essen','Vor dem Match aufwärmen','Zwischen den Matches trinken und snacken']}
+    ],
+    m:{t:'Turnier-Checkliste',d:'Schreib dir vor deinem nächsten Turnier oder langen Spieltag eine Packliste mit mindestens 5 Punkten und wärm dich vor jedem einzelnen Match auf.'}
+  },
+
+  aufwaermen: { t:'Richtig aufwärmen', sk:'athletik',
+    cards:[
+      ['Puls hoch',['Plane 8–10 Minuten dynamisches Aufwärmen vor dem Spiel ein.','Starte mit lockerem Laufen, Seitsprüngen und Kreuzschritten.','Ziel: Du kommst leicht ins Schwitzen, bist aber nicht müde.']],
+      ['Mobilisieren & aktivieren',['Kreise Schultern und Arme, öffne die Hüfte, bewege die Sprunggelenke.','Aktiviere die Beine mit Ausfallschritten und kleinen Sprüngen.','Lass langes statisches Dehnen vor dem Spiel weg – das gehört eher nach dem Training.']],
+      ['Dann Ball',['Beginne am Netz mit lockeren Volleys, um Gefühl zu bekommen.','Steigere Tempo und Bewegung erst nach ein paar Minuten.','Spiel zum Schluss auch einige Überkopfbälle, wenn Schultern warm sind.']]
+    ],
+    tip:'Schon 10 Minuten dynamisches Aufwärmen machen dich in den ersten Spielen schneller – viele Matches werden am Anfang gewonnen oder verloren.',
+    q:[
+      {k:'order',q:'Bring das Aufwärmen in die richtige Reihenfolge.',a:['Puls hoch: lockeres Laufen','Mobilisation von Schultern, Hüfte, Sprunggelenk','Aktivierung mit Ausfallschritten und Sprüngen','Einspielen mit Volleys am Netz']},
+      {k:'tf',q:'Vor dem Spiel ist langes statisches Dehnen die beste Vorbereitung.',a:false,e:'Vorher dynamisch aufwärmen, statisch dehnen eher danach.'},
+      {k:'mc',q:'Wie lange sollte dein dynamisches Aufwärmen ungefähr dauern?',a:['8–10 Minuten','30 Sekunden','45 Minuten','Gar nicht, das Einspielen reicht'],e:'8–10 Minuten bringen den Körper auf Betriebstemperatur.'},
+      {k:'mc',q:'Wann spielst du beim Einspielen die ersten Überkopfbälle?',a:['Gegen Ende, wenn die Schultern warm sind','Als allerersten Schlag','Nie vor dem Match','Ohne vorher die Schultern zu bewegen'],e:'Überkopf belastet die Schulter – erst aufwärmen.'}
+    ],
+    m:{t:'10-Minuten-Start',d:'Mach vor deinem nächsten Match 8–10 Minuten dynamisches Aufwärmen mit allen drei Phasen und notiere, wie fit du dich im ersten Spiel fühlst.'}
+  },
+
+  verletzung: { t:'Verletzungen vorbeugen', sk:'athletik',
+    cards:[
+      ['Ellbogen & Schulter',['Halte den Griff locker – zu fest zugreifen belastet den Unterarm und Ellbogen.','Saubere Technik und ein passendes Schlägergewicht entlasten den Arm.','Kräftige die Schulter mit leichten Übungen für die Rotatorenmanschette, z. B. mit Theraband.']],
+      ['Wade & Sprunggelenk',['Wade und Achillessehne mögen kein kaltes Losspurten – wärm dich immer auf.','Wadenheben und Kräftigungsübungen machen die Sehnen belastbarer.','Trag Schuhe mit einer Sohle, die zum Belag passt, damit du nicht wegrutschst.']],
+      ['Bei Schmerzen',['Spiel nicht durch Schmerzen hindurch – pausier lieber.','Halten Beschwerden an, lass sie ärztlich oder physiotherapeutisch abklären.','Steigere Spielzeit und Intensität nach einer Pause langsam.']]
+    ],
+    tip:'Die meisten Überlastungen entstehen durch „zu viel, zu schnell“ – steigere deine Spielzeit pro Woche lieber schrittweise.',
+    q:[
+      {k:'mc',q:'Was entlastet deinen Ellbogen beim Padel?',a:['Den Griff locker halten und sauber schlagen','Den Schläger so fest wie möglich halten','Einen deutlich zu schweren Schläger nehmen','Nur aus dem Handgelenk schlagen'],e:'Lockerer Griff und gute Technik schonen den Arm.'},
+      {k:'tf',q:'Bei anhaltenden Schmerzen solltest du pausieren und es ärztlich abklären lassen.',a:true,e:'Durchspielen kann Beschwerden verschlimmern.'},
+      {k:'mc',q:'Du rutschst auf dem Court ständig weg. Was solltest du prüfen?',a:['Ob die Sohle deiner Schuhe zum Belag passt','Ob dein Griffband neu ist','Ob die Bälle genug Druck haben','Ob dein Schläger rund ist'],e:'Die passende Sohle schützt vor allem dein Sprunggelenk.'},
+      {k:'mc',q:'Womit kannst du deine Schulter für Überkopfbälle stärken?',a:['Leichte Übungen für die Rotatorenmanschette, z. B. mit Theraband','Gar nicht, Schultern kann man nicht trainieren','Nur mit sehr schweren Gewichten','Mit langem Dehnen direkt vor dem Spiel'],e:'Leichte Kräftigung macht die Schulter stabiler.'}
+    ],
+    m:{t:'Lockerer Griff',d:'Achte im nächsten Match bei jedem Seitenwechsel darauf, ob du den Griff zu fest hältst, und lockere ihn bewusst. Mach danach 2 Sätze Wadenheben.'}
+  },
+
+  kondition: { t:'Padel-Fitness', sk:'athletik',
+    cards:[
+      ['Wie Padel belastet',['Padel ist intervallartig: kurze, intensive Ballwechsel, dann kurze Pausen.','Deshalb bringt dir Intervalltraining mehr als langes, gleichmäßiges Joggen.','Beispiel: 20 Sekunden schnell bewegen, 40 Sekunden locker – mehrere Runden.']],
+      ['Was du trainierst',['Beinkraft: Kniebeugen und Ausfallschritte für tiefe Bälle und schnelle Starts.','Rumpfstabilität: Plank-Varianten für mehr Kontrolle bei Überkopf und Volleys.','Schnelligkeit: Koordinationsleiter und schnelle Richtungswechsel.']],
+      ['So startest du',['Für den Anfang reichen 2× pro Woche etwa 20 Minuten.','Plane Regeneration ein: Schlaf und Ruhetage gehören zum Training.','Steigere erst die Sauberkeit der Übungen, dann die Intensität.']]
+    ],
+    tip:'Fitness gewinnt die langen Matches: Wer im dritten Satz noch tief in die Knie geht, macht deutlich weniger leichte Fehler.',
+    q:[
+      {k:'mc',q:'Welche Trainingsform passt am besten zur Belastung im Padel?',a:['Intervalltraining','Nur sehr langes, langsames Joggen','Ausschließlich Dehnen','Gar kein Fitnesstraining'],e:'Padel ist intervallartig – also trainierst du auch so.'},
+      {k:'tf',q:'Für den Anfang reichen etwa 2× pro Woche 20 Minuten Fitnesstraining.',a:true,e:'Regelmäßig und machbar schlägt selten und extrem.'},
+      {k:'mc',q:'Wofür trainierst du mit der Koordinationsleiter?',a:['Für Schnelligkeit und Richtungswechsel','Für die Schultermuskulatur','Für eine bessere Griffhaltung','Für längeres Joggen'],e:'Die Leiter schult schnelle, präzise Schritte.'},
+      {k:'mc',q:'Welche Übung stärkt vor allem deinen Rumpf?',a:['Plank-Varianten','Wadenheben','Seilspringen','Ballwerfen'],e:'Plank-Varianten bauen Rumpfstabilität auf.'}
+    ],
+    m:{t:'Fit in 20',d:'Mach diese Woche 2 Einheiten à 20 Minuten mit Intervallen, Kniebeugen, Ausfallschritten und Planks und trag beide als Training ins Tagebuch ein.'}
+  },
+
+  material: { t:'Schläger & Schuhe', sk:'athletik',
+    cards:[
+      ['Schlägerformen',['Rund: viel Kontrolle, großer Sweetspot, Gewicht eher am Griff – ideal für Einsteiger.','Tropfen: Mischung aus Kontrolle und Power – der Allrounder.','Diamant: kopflastig, viel Power, kleiner Sweetspot – eher für Fortgeschrittene.']],
+      ['Härte & Gewicht',['Weichere Schlagfläche: mehr Ballbeschleunigung bei langsamen Bällen und meist armfreundlicher.','Härtere Schlagfläche: mehr Kontrolle bei schnellen, harten Schlägen.','Übliches Gewicht: etwa 340–375 g – leichter schont den Arm, schwerer bringt mehr Wucht.']],
+      ['Schuhe & Pflege',['Trag Padel-Schuhe: Fischgrät-Sohle als Standard, Omni-Sohle für mehr Halt auf sandigem Kunstrasen.','Wechsle das Griffband regelmäßig, sobald es rutschig oder abgenutzt ist.','Bälle verlieren mit der Zeit Druck – nimm für Matches frische Bälle.']]
+    ],
+    tip:'Kauf deinen Schläger nicht nach dem Profi-Vorbild, sondern nach deinem Level: Ein runder Schläger verzeiht mehr und bringt dich schneller weiter.',
+    q:[
+      {k:'mc',q:'Welche Schlägerform eignet sich am besten für Einsteiger?',a:['Rund','Diamant','Jede kopflastige Form','Egal, Hauptsache möglichst schwer'],e:'Runde Schläger haben einen großen Sweetspot und viel Kontrolle.'},
+      {k:'tf',q:'Diamant-Schläger sind kopflastig und eher für Fortgeschrittene gedacht.',a:true,e:'Viel Power, aber ein kleinerer Sweetspot.'},
+      {k:'mc',q:'Du hast oft Probleme mit dem Arm. Welche Schlagfläche ist meist armfreundlicher?',a:['Eine weichere','Eine sehr harte','Das spielt keine Rolle','Die schwerste, die du findest'],e:'Weichere Flächen sind meist armfreundlicher.'},
+      {k:'mc',q:'In welchem Gewichtsbereich liegen die meisten Padel-Schläger?',a:['Etwa 340–375 g','Etwa 150–200 g','Etwa 500–600 g','Über 1 kg'],e:'Rund 340–375 g ist üblich.'}
+    ],
+    m:{t:'Material-Check',d:'Prüf vor deinem nächsten Match drei Dinge: Griffband (rutschig?), Schuhsohle (passt zum Belag?) und Bälle (genug Druck?). Wechsle mindestens eins, wenn nötig.'}
+  }
+};
+Object.entries(NEWL).forEach(([id,l])=>{l.id=id;LP[id]=l;});
+
+/* ================= Roadmap: 5 Stufen vom Einsteiger zum Wettkampfspieler ================= */
+const STAGES=[
+ {id:'s1',t:'Einsteiger',lv:'Niveau 0 – 1,5',d:'Die Basics sitzen: Griff, Regeln, Wände, erste Volleys.',c:'#1A9A5E',units:[
+  {id:'basics',t:'Grundlagen',d:'Griff, Regeln, Grundschläge & Aufschlag',c:'var(--u1)',L:['griff','regeln','vorhand','rueckhand','aufschlag','beinarbeit']},
+  {id:'waende',t:'Die Wände',d:'Glas lesen und nutzen',c:'var(--u6)',L:['rueckwand','rueckwand2','seitenwand']},
+  {id:'netz1',t:'Am Netz',d:'Volleys & Netzposition',c:'var(--u3)',L:['volleyvh','volleyrh','netzpos','volleyziele']}],
+  ms:[['s1a','15 Bälle in Folge mit dem Partner von hinten spielen'],['s1b','8 von 10 Aufschlägen landen im Feld'],['s1c','10 Volleys in Folge mit dem Partner am Netz'],['s1d','5 von 10 Bällen nach der Rückwand kontrolliert zurückspielen'],['s1e','Ein komplettes Match selbst richtig zählen']]},
+ {id:'s2',t:'Hobby',lv:'Niveau 1,5 – 2,5',d:'Lob, Bandeja und Teamplay – du spielst wie ein Team.',c:'#1F5FD6',units:[
+  {id:'defense',t:'Lob & Defensive',d:'Zeit kaufen, Netz zurückholen',c:'var(--u4)',L:['lob','lobtaktik','chiquita','contrapared']},
+  {id:'overhead',t:'Überkopf',d:'Zurücklaufen, Bandeja & die richtige Wahl',c:'var(--u5)',L:['rueckwaerts','bandeja','ueberkopf']},
+  {id:'teamplay',t:'Teamplay',d:'Zu zweit clever spielen',c:'var(--u2)',L:['mitte','kommunikation','positionen','uebergang']}],
+  ms:[['s2a','7 von 10 Lobs landen hinter der gegnerischen Aufschlaglinie'],['s2b','6 von 10 Bandejas bleiben tief im Feld'],['s2c','Ein ganzes Match mit klaren „Mía/Tuya“-Absprachen'],['s2d','5 von 10 Rückhandbällen nach der Rückwand kommen sicher zurück'],['s2e','Nach jedem guten Lob rücken wir gemeinsam ans Netz vor']]},
+ {id:'s3',t:'Fortgeschritten',lv:'Niveau 2,5 – 3,5',d:'Du steuerst Punkte mit Aufschlag, Wandangriff und Víbora.',c:'#7A4CC2',units:[
+  {id:'start',t:'Aufschlag & Return 2.0',d:'Den Punkt von Anfang an steuern',c:'var(--u1)',L:['aufschlag2','returnplan','erstervolley']},
+  {id:'wand2',t:'Wand-Profi',d:'Angreifen und verteidigen nach dem Glas',c:'var(--u6)',L:['bajada','gitter','rueckwandlob']},
+  {id:'overhead2',t:'Überkopf 2.0',d:'Víbora, Gancho, Smash & Smash-Abwehr',c:'var(--u5)',L:['vibora','gancho','smash','smashdefense']}],
+  ms:[['s3a','7 von 10 Aufschlägen gezielt in die Glasecke oder auf die Rückhand'],['s3b','5 von 10 Víboras landen in der Seitenwand-Ecke'],['s3c','3 von 5 Bajadas nach hohen Rückwandbällen sitzen'],['s3d','6 von 10 Returns flach auf die Füße oder als Lob'],['s3e','Einen Smash nach der Wand erfolgreich verteidigt']]},
+ {id:'s4',t:'Ambitioniert',lv:'Niveau 3,5 – 4,5',d:'Du liest Gegner, konstruierst Punkte und gewinnst die Netzduelle.',c:'#C8650A',units:[
+  {id:'taktik2',t:'Taktik 2.0',d:'Punkte konstruieren statt erzwingen',c:'var(--u2)',L:['muster','schwaeche','tempo','winkel']},
+  {id:'netz2',t:'Netz-Meister',d:'Block, Stopp, Duelle & Konter',c:'var(--u3)',L:['blockvolley','dejada','netzduell','kontraangriff']},
+  {id:'kopf',t:'Mentale Stärke',d:'Stark bleiben, wenn es zählt',c:'var(--u4)',L:['geduld','routine','drucksituation']}],
+  ms:[['s4a','Im Einspielen eine Gegnerschwäche erkennen und gezielt anspielen'],['s4b','Ein Satz mit weniger als 5 unerzwungenen Fehlern'],['s4c','Ein Netzduell-Spiel bis 7 Punkte im Training gewinnen'],['s4d','Einen Punkt per Dejada im Match gewinnen'],['s4e','Vor jedem Big Point die eigene Routine durchziehen']]},
+ {id:'s5',t:'Wettkampf',lv:'Niveau 4,5+',d:'Turnierreif: Strategie, Athletik und ein Plan B.',c:'#C8372A',units:[
+  {id:'match',t:'Matchstrategie',d:'Turniere gewinnen',c:'var(--u2)',L:['goldenpoint','scouting','satzplan','turnier']},
+  {id:'athletik',t:'Athletik & Material',d:'Fit, gesund, gut ausgerüstet',c:'var(--u1)',L:['aufwaermen','verletzung','kondition','material']}],
+  ms:[['s5a','Ein Turnier oder Ranglistenmatch spielen'],['s5b','Ein Match nach Satzrückstand mit Plan B drehen'],['s5c','4 Wochen lang vor jedem Match 10 Min aufwärmen'],['s5d','4 Wochen lang 2× pro Woche Athletik trainieren'],['s5e','Einen Punto de oro mit vorher abgesprochenem Plan gewinnen']]}
+];
+const UNITS=[];STAGES.forEach((st,si)=>st.units.forEach(u=>{u.si=si;u.L=u.L.map(id=>LP[id]).filter(Boolean);if(u.L.length)UNITS.push(u);}));
+const MSALL=STAGES.flatMap((st,si)=>st.ms.map(([id,t])=>({id,t,si})));
 const LESSONS=[];UNITS.forEach((u,ui)=>u.L.forEach((l,li)=>{l.ui=ui;l.li=li;l.idx=LESSONS.length;LESSONS.push(l);}));
 const LBYID=Object.fromEntries(LESSONS.map(l=>[l.id,l]));
 
 /* ================= Tagesdrills ================= */
 const DRILLS=[
+ {t:'Gancho-Schatten', d:'Spiel 3 Sätze à 10 Gancho-Schattenschläge (hoher Volley-Smash mit Kontinentalgriff) und lande nach jedem Schlag stabil im Split-Step.', sk:'smash', min:6},
+  {t:'Reaktions-Volleys', d:'Stell dich 2 m vor eine Wand und spiel schnelle Volleys im Wechsel Vorhand und Rückhand, ohne den Ball fallen zu lassen.', sk:'volley', min:7},
+  {t:'Leiter-Footwork', d:'Lauf mit einer Koordinationsleiter (oder Kreidelinien) 6 Durchgänge mit verschiedenen Schrittmustern, jeweils so schnell wie sauber möglich.', sk:'athletik', min:8},
+  {t:'Plank-Varianten', d:'Halte je 30 Sekunden Unterarm-Plank, Seitstütz links, Seitstütz rechts und Plank mit Beinheben, dann 30 Sekunden Pause, 2 Runden.', sk:'athletik', min:6},
+  {t:'Einbeinige Balance', d:'Steh abwechselnd 45 Sekunden auf einem Bein und führ dabei langsam Schattenschläge aus, 3 Runden pro Bein.', sk:'athletik', min:6},
+  {t:'Video-Analyse', d:'Schau dir 10 Minuten Video von deinem eigenen Match an und notiere die drei häufigsten Fehlerquellen.', sk:'kopf', min:10},
+  {t:'Intervall-Sprints', d:'Mach 8 Runden mit 20 Sekunden schnellen Seitschritten und Richtungswechseln, dann 40 Sekunden locker gehen.', sk:'athletik', min:8},
+  {t:'Kniebeugen-Leiter', d:'Mach 10, 8, 6, 4 und 2 langsame Kniebeugen mit je 20 Sekunden Pause und halte bei der letzten Wiederholung unten 5 Sekunden.', sk:'athletik', min:5},
+  {t:'Víbora-Schatten', d:'Führ 20 Víbora-Schattenschläge mit seitlicher Schulter und Schnitt von hinten-oben nach vorne-seitlich aus, jeweils mit Rückwärts-Kreuzschritt davor.', sk:'bandeja', min:6},
+  {t:'Wand-Rückhand-Serie', d:'Spiel mit Ball und Wand 3 Serien à 15 kontrollierte Rückhand-Grundschläge auf Hüfthöhe und zähl deine längste Serie ohne Fehler.', sk:'rueckhand', min:7},
+  {t:'Aufschlag-Ziele', d:'Leg zwei Markierungen an eine Wand und triff mit 20 Unterhand-Aufschlägen abwechselnd das linke und rechte Ziel.', sk:'aufschlag', min:6},
+  {t:'Big-Point-Training', d:'Spiel gedanklich fünf Big Points (Breakball, 40:40) durch und leg für jeden ein sicheres Ziel und deine Routine fest.', sk:'kopf', min:5},
+  {t:'Seitwärts-Schritte', d:'Beweg dich 5 Durchgänge lang mit Seitschritten über 4 m hin und her und führ an jedem Ende einen Schatten-Volley aus.', sk:'athletik', min:7},
+  {t:'Golden-Point-Plan', d:'Schreib mit deinem Partner per Nachricht auf, wer bei 40:40 returniert und welches Muster ihr als Aufschläger spielt.', sk:'taktik', min:5},
  {t:'Ball-Tippen',d:'100× den Ball auf dem Schläger tippen – abwechselnd Vorder- und Rückseite.',sk:'volley',min:5},
  {t:'Schatten-Vorhand',d:'3×15 Vorhand-Schattenschläge: drehen, kurz ausholen, Treffpunkt vorn.',sk:'vorhand',min:6},
  {t:'Schatten-Rückhand',d:'3×15 Rückhand-Schattenschläge – die freie Hand führt den Schläger.',sk:'rueckhand',min:6},
@@ -729,13 +1202,17 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-function defaults(){return{v:1,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockFrom:0,
+function defaults(){return{v:2,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
  day:{d:null,lessons:0,drills:0,xp:0,perfect:0,logs:0,missions:0,claimed:[],chest:false,goalHit:false},
  extra:[],league:null,leagueMsg:null,ach:{},cnt:{perfect:0,missions:0},wear:{},owned:[],sound:true,theme:'auto',tab:'learn'};}
 let S;
 try{const raw=localStorage.getItem(KEY);S=Object.assign(defaults(),raw?JSON.parse(raw):{});}catch(e){S=defaults();}
+/* Migration v1 → v2 (Roadmap) */
+if(S.v<2){const OLD=['griff','vorhand','rueckhand','aufschlag','rueckwand','rueckwand2','seitenwand','bajada','volleyvh','volleyrh','netzpos','volleyziele','lob','lobtaktik','chiquita','contrapared','bandeja','vibora','smash','ueberkopf','mitte','kommunikation','geduld','routine'],OU=['basics','waende','netz1','defense','overhead','teamplay'];
+ if(typeof S.unlockFrom==='number')S.unlockId=OLD[S.unlockFrom]||'griff';delete S.unlockFrom;
+ const t={},c={};Object.entries(S.tests||{}).forEach(([k,v])=>{t[OU[+k]||k]=v;});Object.entries(S.chests||{}).forEach(([k,v])=>{c['c'+(OU[+k.slice(1)]||k.slice(1))]=v;});S.tests=t;S.chests=c;S.ms=S.ms||{};S.v=2;}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
 /* ================= Sound & Effekte ================= */
@@ -769,7 +1246,7 @@ function skLv(x){x=x||0;let L=0,need=30;while(x>=need&&L<10){x-=need;L++;need=30
 const doubleOn=()=>Date.now()<S.dbl;
 const lessonDone=id=>!!S.lessons[id];
 function stars(id){const r=S.lessons[id];if(!r)return 0;return 1+(r.perfect?1:0)+(S.missions[id]&&S.missions[id].st==='done'?1:0);}
-function unlocked(idx){if(idx<=S.unlockFrom||(S.extra||[]).includes(LESSONS[idx].id))return true;return lessonDone(LESSONS[idx-1].id);}
+function unlocked(idx){if(idx<=(LBYID[S.unlockId]||LESSONS[0]).idx||(S.extra||[]).includes(LESSONS[idx].id))return true;return lessonDone(LESSONS[idx-1].id);}
 /* Personalisierung: Schwäche/Fokus schaltet die erste Lektion dieses Skills frei */
 function unlockSkill(k){if(LESSONS.some(l=>l.sk===k&&unlocked(l.idx)))return null;const l=LESSONS.find(l=>l.sk===k);if(!l)return null;S.extra=S.extra||[];S.extra.push(l.id);save();return l;}
 const nDone=()=>LESSONS.filter(l=>lessonDone(l.id)).length;
@@ -860,6 +1337,10 @@ const ACH=[
  {id:'d7',t:'Drill-Maschine',d:'7 Tagesdrills erledigt',f:()=>Object.keys(S.drills).length>=7},
  {id:'sk3',t:'Allrounder',d:'Alle Skills auf Level 3',f:()=>SKIDS.every(k=>skLv(S.skillXp[k]).L>=3)},
  {id:'t1',t:'Unit-Meister',d:'Erste Meisterprüfung bestanden',f:()=>Object.keys(S.tests).length>=1},
+ {id:'l25',t:'Bücherwurm',d:'25 Lektionen abgeschlossen',f:()=>nDone()>=25},
+ {id:'ms5',t:'Praxistest',d:'5 Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=5},
+ {id:'ms25',t:'Bewiesen auf dem Court',d:'Alle Skill-Checks geschafft',f:()=>Object.keys(S.ms).length>=MSALL.length},
+ ...STAGES.map((st,si)=>({id:'st'+(si+1),t:'Stufe '+(si+1)+': '+st.t,d:'Stufe „'+st.t+'“ gemeistert',f:()=>stageDone(si)})),
  {id:'lg',t:'Aufsteiger',d:'Erster Liga-Aufstieg',f:()=>S.league&&S.league.tier>=1}
 ];
 function checkAch(){ACH.forEach(a=>{if(!S.ach[a.id]&&a.f()){S.ach[a.id]=today();S.gems+=15;setTimeout(()=>{toast('Erfolg: <b>'+esc(a.t)+'</b> · +15 Bälle',I.trophy);beep('coin');},600);}});save();}
@@ -876,6 +1357,29 @@ function weakest(){
 function recommend(){
  for(const k of weakest()){const l=LESSONS.find(l=>l.sk===k&&unlocked(l.idx)&&stars(l.id)<3&&!(S.missions[l.id]&&S.missions[l.id].st==='active'));if(l)return{l,k};}
  return null;
+}
+
+/* ----- Roadmap ----- */
+function stageProg(si){const us=UNITS.filter(u=>u.si===si),ls=us.flatMap(u=>u.L),ms=STAGES[si].ms;
+ const lD=ls.filter(l=>lessonDone(l.id)).length,tD=us.filter(u=>S.tests[u.id]).length,mD=ms.filter(m=>S.ms[m[0]]).length;
+ const total=ls.length+us.length+ms.length,done=lD+tD+mD;return{lD,lT:ls.length,tD,tT:us.length,mD,mT:ms.length,done,total,pct:total?done/total:0};}
+const stageDone=si=>{const p=stageProg(si);return p.tD===p.tT&&p.lD===p.lT&&p.mD>=p.mT-1;};
+function curStage(){const c=LESSONS.find(l=>l.idx>=(LBYID[S.unlockId]||LESSONS[0]).idx&&unlocked(l.idx)&&!lessonDone(l.id));return c?UNITS[c.ui].si:STAGES.length-1;}
+const stageOpen=si=>UNITS.some(u=>u.si===si&&u.L.some(l=>unlocked(l.idx)));
+function roadmapSheet(){
+ const cs=curStage();
+ modal(`<div class="eyebrow muted">Deine Roadmap</div><h2>Vom Einsteiger zum Wettkampfspieler</h2><p class="muted b small">Jede Stufe: Lektionen, Meisterprüfungen und Skill-Checks auf dem Court. Eine Stufe ist gemeistert, wenn alle Prüfungen bestanden sind und höchstens ein Skill-Check fehlt.</p>
+ <div class="stack">${STAGES.map((st,si)=>{const p=stageProg(si);return `<button class="rstage ${stageOpen(si)?'':'off'}" style="--sc:${st.c}" data-act="stage" data-si="${si}"><span class="num">${stageDone(si)?I.check.replace('<svg','<svg width="24" height="24"'):si+1}</span><span class="grow"><b>${esc(st.t)}</b>${si===cs?' <span class="chip ball">Du bist hier</span>':''}<div class="muted small b">${esc(st.lv)} · ${p.lD}/${p.lT} Lektionen · ${p.mD}/${p.mT} Checks</div><div class="bar thin" style="margin-top:6px"><i style="width:${p.pct*100}%;background:${st.c}"></i></div></span></button>`;}).join('')}</div>
+ <button class="btn ghost block" data-act="closeModal">Schließen</button>`);
+}
+function stageSheet(si){
+ const st=STAGES[si],p=stageProg(si),us=UNITS.filter(u=>u.si===si);
+ modal(`<div class="eyebrow" style="color:${st.c}">Stufe ${si+1} · ${esc(st.lv)}</div><h2>${esc(st.t)}</h2><p class="muted b">${esc(st.d)}</p>
+ <div class="goal"><div class="bar"><i style="width:${p.pct*100}%;background:${st.c}"></i></div><span>${Math.round(p.pct*100)}%</span></div>
+ <div class="stack small b">${us.map(u=>`<div class="row"><span class="c-${S.tests[u.id]?'good':'acc'}">${S.tests[u.id]?I.check:I.book}</span><span class="grow">${esc(u.t)}</span><span class="muted">${u.L.filter(l=>lessonDone(l.id)).length}/${u.L.length}${S.tests[u.id]?' · Prüfung ✓':''}</span></div>`).join('')}</div>
+ <h3 style="margin-top:6px">Skill-Checks auf dem Court</h3><p class="muted small b" style="margin-top:-8px">Teste dich im Training oder Match. Hak nur ab, was du wirklich geschafft hast. Pro Check gibt es +25 XP und +15 Bälle.</p>
+ <div class="stack">${st.ms.map(([id,t])=>`<div class="msrow"><span class="ck ${S.ms[id]?'on':''}">${S.ms[id]?I.check:''}</span><span class="grow b">${esc(t)}${S.ms[id]?`<div class="muted small">${fmtDate(S.ms[id])}</div>`:''}</span>${S.ms[id]?'':`<button class="btn sm ${stageOpen(si)?'ball':'ghost'}" data-act="msAsk" data-id="${id}" ${stageOpen(si)?'':'disabled'}>Geschafft</button>`}</div>`).join('')}</div>
+ <div class="row"><button class="btn ghost grow" data-act="roadmap">Alle Stufen</button><button class="btn grow" data-act="closeModal">OK</button></div>`);
 }
 
 /* ================= Rendering ================= */
@@ -915,23 +1419,26 @@ function heroTip(){
 function viewLearn(){
  const d=drillOfDay(),dd=S.drills[today()];
  const rec=recommend();
- let cur=LESSONS.findIndex(l=>l.idx>=S.unlockFrom&&unlocked(l.idx)&&!lessonDone(l.id));if(cur<0)cur=LESSONS.findIndex(l=>unlocked(l.idx)&&!lessonDone(l.id));
+ let cur=LESSONS.findIndex(l=>l.idx>=(LBYID[S.unlockId]||LESSONS[0]).idx&&unlocked(l.idx)&&!lessonDone(l.id));if(cur<0)cur=LESSONS.findIndex(l=>unlocked(l.idx)&&!lessonDone(l.id));
  let h=`<div class="hero">${mascot(S.day.goalHit?'happy':'')}<div class="hero-body"><p>${heroTip()}</p>
   <div class="goal"><span>Tagesziel</span><div class="bar"><i style="width:${Math.min(100,S.day.xp/S.goal*100)}%"></i></div><span>${S.day.xp}/${S.goal} XP</span></div></div></div>
  <button class="mini ${dd?'done':''}" data-act="drill"><span class="ic" style="--c:var(--u4)">${dd?I.check:I.dumbbell}</span><span class="grow"><span class="eyebrow muted">Tagesdrill · ${d.min} Min</span><h3>${esc(d.t)}</h3><p>${dd?'Erledigt – stark!':esc(d.d)}</p></span><span class="go">${I.chev}</span></button>`;
  if(rec)h+=`<button class="mini" data-act="lesson" data-id="${rec.l.id}"><span class="ic" style="--c:${SK[rec.k].c}">${I[SK[rec.k].ic]}</span><span class="grow"><span class="eyebrow muted">Empfohlen für dich · ${esc(SK[rec.k].s)}</span><h3>${esc(rec.l.t)}</h3><p>${lessonDone(rec.l.id)?'Mission offen – hol dir den 3. Stern':'Deine Baustelle – jetzt verbessern'}</p></span><span class="go">${I.chev}</span></button>`;
+ {const cs=curStage(),st=STAGES[cs];h+=`<button class="mini" data-act="roadmap"><span class="ic" style="--c:${st.c}">${I.chart}</span><span class="grow"><span class="eyebrow muted">Deine Roadmap · Stufe ${cs+1}/${STAGES.length}</span><h3>${esc(st.t)} · ${esc(st.lv)}</h3><div class="road">${STAGES.map((x,i)=>`<i style="--rc:${x.c}"><b style="width:${stageProg(i).pct*100}%"></b></i>`).join('')}</div></span><span class="go">${I.chev}</span></button>`;}
  const xs=[0,44,64,44,0,-44,-64,-44];
  UNITS.forEach((u,ui)=>{
   const doneN=u.L.filter(l=>lessonDone(l.id)).length,uLocked=!u.L.some(l=>unlocked(l.idx));
+  if(ui===0||UNITS[ui-1].si!==u.si){const st=STAGES[u.si],p=stageProg(u.si),open=stageOpen(u.si);
+   h+=`<div class="stage ${open?'':'locked'}" style="--sc:${st.c}"><div class="eyebrow" style="opacity:.85">Stufe ${u.si+1} von ${STAGES.length} · ${esc(st.lv)}</div><h2>${esc(st.t)}${stageDone(u.si)?' ✓':''}</h2><p>${esc(st.d)}</p><div class="bar"><i style="width:${p.pct*100}%"></i></div><div class="row"><span class="grow b small">${p.lD}/${p.lT} Lektionen · ${p.tD}/${p.tT} Prüfungen · ${p.mD}/${p.mT} Skill-Checks</span><button class="btn sm" data-act="stage" data-si="${u.si}">Skill-Checks</button></div></div>`;}
   h+=`<section class="unit ${uLocked?'locked':''}" style="--c:${u.c}"><div class="unit-head"><div><div class="eyebrow">Einheit ${ui+1}</div><h2>${esc(u.t)}</h2><div class="sub">${esc(u.d)}</div></div><div class="unit-prog">${doneN}/${u.L.length}</div></div><div class="path">`;
   const items=[];u.L.forEach((l,li)=>{items.push({k:'l',l});if(li===1)items.push({k:'chest'});});items.push({k:'test'});
   items.forEach((it,i)=>{
    const x=xs[i%xs.length];
    if(it.k==='l'){const l=it.l,ul=unlocked(l.idx),st=stars(l.id),isCur=l.idx===cur,ma=S.missions[l.id]&&S.missions[l.id].st==='active';
     h+=`<div class="nodewrap" style="--x:${x}px">${isCur?'<span class="startbubble">Los!</span>':''}<button class="node ${ul?'':'locked'} ${isCur?'current':''} ${st===3?'mastered':''}" data-act="lesson" data-id="${l.id}" aria-label="${esc(l.t)}">${ul?I[SK[l.sk].ic]:I.lock}${ma?`<span class="mbadge">${I.target}</span>`:''}</button>${ul&&lessonDone(l.id)?starRow(st):''}<div class="nodelabel">${esc(l.t)}</div></div>`;}
-   else if(it.k==='chest'){const key='c'+ui,ok=lessonDone(u.L[1].id),got=S.chests[key];
+   else if(it.k==='chest'){const key='c'+u.id,ok=lessonDone(u.L[1].id),got=S.chests[key];
     h+=`<div class="nodewrap" style="--x:${x}px"><button class="node chest ${ok?'':'locked'} ${got?'done':''} ${ok&&!got?'current':''}" data-act="chest" data-key="${key}" aria-label="Schatztruhe">${I.chest}</button></div>`;}
-   else{const ok=u.L.every(l=>lessonDone(l.id)),passed=S.tests[ui];
+   else{const ok=u.L.every(l=>lessonDone(l.id)),passed=S.tests[u.id];
     h+=`<div class="nodewrap" style="--x:${x}px"><button class="node test ${ok?'':'locked'} ${passed?'mastered':''} ${ok&&!passed?'current':''}" data-act="test" data-ui="${ui}" aria-label="Meisterprüfung">${I.trophy}</button><div class="nodelabel">Meisterprüfung</div></div>`;}
   });
   h+='</div></section>';
@@ -1131,9 +1638,9 @@ function finishLesson(){
  const perfect=LS.miss===0,acc=Math.round(LS.first/(LS.first+LS.miss)*100);
  let xp,res,extra='';
  if(LS.test!=null){
-  const passed=acc>=70,ui=LS.test,first=!S.tests[ui];
+  const passed=acc>=70,ui=LS.test,first=!S.tests[UNITS[ui].id];
   xp=passed?(first?40:15):5;
-  if(passed){S.tests[ui]=today();if(first)S.gems+=30;}
+  if(passed){S.tests[UNITS[ui].id]=today();if(first)S.gems+=30;}
   const r=addXP(xp,null);
   res=`<div class="results">${mascot(passed?'happy':'sad')}<h1>${passed?'Prüfung bestanden!':'Fast!'}</h1><p class="b muted">${passed?(first?'Trophäe für „'+esc(UNITS[ui].t)+'“ + 30 Bälle':'Wissen aufgefrischt'):'Du brauchst mindestens 70 % – versuch es nochmal.'}</p>
   <div class="tiles3"><div class="ts" style="--tc:var(--gold)"><b>XP</b><span>${I.bolt}${r.n}</span></div><div class="ts" style="--tc:var(--good)"><b>Treffer</b><span>${acc}%</span></div><div class="ts" style="--tc:var(--accent)"><b>Fehler</b><span>${LS.miss}</span></div></div>
@@ -1286,7 +1793,7 @@ function shopSheet(){
 
 /* ================= Onboarding ================= */
 let OB={step:0,name:'',lvl:null,side:null,focus:[],goal:20,weekGoal:2};
-const LEVELS=[['Einsteiger','Weniger als ein halbes Jahr dabei',0],['Hobby','Spiele regelmäßig, kenne die Basics',4],['Fortgeschritten','Wandspiel & Bandeja klappen meistens',8],['Turnier','Spiele Turniere / Ranglisten',12]];
+const LEVELS=[['Einsteiger','Weniger als ein halbes Jahr dabei','griff'],['Hobby','Spiele regelmäßig, kenne die Basics','lob'],['Fortgeschritten','Wandspiel & Bandeja klappen meistens','aufschlag2'],['Turnier','Spiele Turniere / Ranglisten','muster']];
 function renderOnboarding(){
  $('#top').innerHTML='';$('#nav').innerHTML='';
  const s=OB.step;let h='',canNext=true;
@@ -1325,9 +1832,9 @@ const ACT={
  rateMission(el){rateMissionSheet(el.dataset.id);},
  doRate(el){closeModal();const out=rateMission(el.dataset.id,+el.dataset.r);checkAch();render();missionDoneFx(out);if(out&&out.res.streakUp&&!out.done)setTimeout(showStreak,400);},
  test(el){const ui=+el.dataset.ui,u=UNITS[ui];if(!u.L.every(l=>lessonDone(l.id))){modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.trophy}</span><h2>Meisterprüfung</h2><p class="muted b">Schließe alle Lektionen von „${esc(u.t)}“ ab, um die Prüfung freizuschalten.</p></div><button class="btn block" data-act="closeModal">OK</button>`);return;}
-  modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.trophy}</span><h2>Meisterprüfung: ${esc(u.t)}</h2><p class="muted b">8 gemischte Fragen aus der Einheit. Ab 70 % bestanden.${S.tests[ui]?' Bereits bestanden ✓':' Belohnung: 40 XP + 30 Bälle.'}</p></div><button class="btn gold block" data-act="startTest" data-ui="${ui}">Prüfung starten</button><button class="linkbtn" data-act="closeModal">Später</button>`);},
+  modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.trophy}</span><h2>Meisterprüfung: ${esc(u.t)}</h2><p class="muted b">8 gemischte Fragen aus der Einheit. Ab 70 % bestanden.${S.tests[u.id]?' Bereits bestanden ✓':' Belohnung: 40 XP + 30 Bälle.'}</p></div><button class="btn gold block" data-act="startTest" data-ui="${ui}">Prüfung starten</button><button class="linkbtn" data-act="closeModal">Später</button>`);},
  startTest(el){startTest(+el.dataset.ui);},
- chest(el){const k=el.dataset.key,ui=+k.slice(1);if(S.chests[k]){toast('Schon geöffnet',I.chest);return;}if(!lessonDone(UNITS[ui].L[1].id)){toast('Schließe zuerst die Lektionen davor ab',I.lock);return;}
+ chest(el){const k=el.dataset.key,ui=UNITS.findIndex(u=>'c'+u.id===k);if(S.chests[k]){toast('Schon geöffnet',I.chest);return;}if(!lessonDone(UNITS[ui].L[1].id)){toast('Schließe zuerst die Lektionen davor ab',I.lock);return;}
   const g=20+(hash(k+S.name)%3)*5;S.chests[k]=today();S.gems+=g;save();beep('coin');confetti();modal(`<div class="center"><span class="ic" style="width:84px;height:84px;--c:var(--gold)">${I.chest}</span><h2>+${g} Bälle!</h2><p class="muted b">Gib sie im Shop aus.</p></div><button class="btn gold block" data-act="closeModal">Super</button>`);render();},
  drill(){const d=drillOfDay(),done=S.drills[today()];
   modal(`<div class="row"><span class="ic" style="--c:var(--u4)">${I.dumbbell}</span><div class="grow"><div class="eyebrow muted">Tagesdrill · ${d.min} Min · ${esc(SK[d.sk].n)}</div><h2>${esc(d.t)}</h2></div></div><p class="b" style="font-size:18px">${esc(d.d)}</p><p class="muted small b">Kein Court nötig – mach's zu Hause, im Park oder vor dem Match.</p>
@@ -1357,6 +1864,12 @@ const ACT={
  showStreak(){showStreak();},
  goalInfo(){modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--gold)">${I.target}</span><h2>Tagesziel: ${S.goal} XP</h2><div class="goal" style="width:100%"><div class="bar"><i style="width:${Math.min(100,S.day.xp/S.goal*100)}%"></i></div><span>${S.day.xp}/${S.goal}</span></div><p class="muted b">Lektion +15 · Fehlerfrei +5 · Drill +10 · Session +10–20 · Mission bis +30${doubleOn()?'<br>Doppel-XP aktiv!':''}</p></div><button class="btn block" data-act="closeModal">OK</button>`);},
  closeModal(){closeModal();},
+ roadmap(){roadmapSheet();},
+ stage(el){stageSheet(+el.dataset.si);},
+ msAsk(el){const m=MSALL.find(x=>x.id===el.dataset.id);modal(`<div class="center">${mascot()}<h2>Ehrlich geschafft?</h2><p class="b">„${esc(m.t)}“</p><p class="muted b small">Skill-Checks zählen nur, wenn du sie wirklich auf dem Court geschafft hast.</p></div><button class="btn good block" data-act="msDone" data-id="${m.id}">${I.check} Ja, geschafft!</button><button class="linkbtn" data-act="stage" data-si="${m.si}">Noch nicht</button>`);},
+ msDone(el){const m=MSALL.find(x=>x.id===el.dataset.id);if(!m||S.ms[m.id])return;const was=stageDone(m.si);S.ms[m.id]=today();S.gems+=15;const r=addXP(25,null);checkAch();render();beep('done');confetti();
+  if(!was&&stageDone(m.si))modal(`<div class="center">${mascot('happy')}<h2>Stufe „${esc(STAGES[m.si].t)}“ gemeistert!</h2><p class="muted b">${m.si<STAGES.length-1?'Weiter geht\'s mit „'+esc(STAGES[m.si+1].t)+'“.':'Du hast die ganze Roadmap geschafft. Leyenda!'}</p></div><button class="btn block" data-act="closeModal">Vamos!</button>`);
+  else stageSheet(m.si);toast('Skill-Check geschafft! +'+r.n+' XP · +15 Bälle',I.check);},
  closeModalBg(el,e){if(e.target===el)closeModal();},
  export(){const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));const done=()=>toast('Code kopiert – gut aufbewahren!',I.check);
   if(navigator.clipboard)navigator.clipboard.writeText(code).then(done,()=>showCode(code));else showCode(code);},
@@ -1368,7 +1881,7 @@ const ACT={
  obBack(){OB.step=Math.max(0,OB.step-1);renderOnboarding();},
  obNext(){if(OB.step===1){const n=$('#obname');OB.name=(n?n.value:OB.name).trim().slice(0,24);}
   if(OB.step<5){OB.step++;renderOnboarding();return;}
-  Object.assign(S,{onb:true,name:OB.name,lvl:OB.lvl,side:OB.side,focus:OB.focus,goal:OB.goal,weekGoal:OB.weekGoal,unlockFrom:LEVELS[OB.lvl][2]});
+  Object.assign(S,{onb:true,name:OB.name,lvl:OB.lvl,side:OB.side,focus:OB.focus,goal:OB.goal,weekGoal:OB.weekGoal,unlockId:LEVELS[OB.lvl][2]});
   S.focus.forEach(unlockSkill);leagueEnsure();save();scrollCur=true;render();
   setTimeout(()=>{modal(`<div class="center">${mascot('happy')}<h2>Vamos${S.name?', '+esc(S.name):''}!</h2><p class="muted b">So funktioniert's:</p></div><div class="stack b"><div class="row"><span class="ic">${I.book}</span><span class="grow">Lektion lernen: Theorie + Quiz</span></div><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><span class="grow">Mission im nächsten Match anwenden</span></div><div class="row"><span class="ic" style="--c:var(--u4)">${I.pen}</span><span class="grow">Match ins Tagebuch eintragen & Mission auswerten</span></div><div class="row"><span class="ic" style="--c:var(--flame)">${I.flame}</span><span class="grow">Jeden Tag etwas tun – Streak, Liga, Skills leveln</span></div></div><button class="btn block" data-act="closeModal">Los geht's</button>`);},250);}
 };
