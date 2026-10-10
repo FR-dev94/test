@@ -5,10 +5,21 @@ Alles steckt in einer einzigen Datei (`index.html`): kein Konto, keine Werbung, 
 
 ## Starten
 
-- `index.html` im Browser öffnen, **oder**
-- GitHub Pages für dieses Repository aktivieren (Settings → Pages → Branch wählen) und die App im Handy-Browser öffnen.
+Die App ist eine installierbare Web-App (PWA) und läuft über GitHub Pages:
+**https://fr-dev94.github.io/test/**
 
-Der Fortschritt wird im Browser gespeichert (`localStorage`). Unter **Profil → Fortschritt sichern** bekommst du einen Code, mit dem du deinen Stand auf ein anderes Gerät übertragen kannst.
+Einmalig einrichten: Repository → **Settings → Pages** → unter *Branch* `claude/youthful-fermat-itwe7r` und `/ (root)` wählen → **Save**. Nach 1–2 Minuten ist die App unter der Adresse oben erreichbar.
+
+### Als App installieren
+
+- **iPhone/iPad:** Adresse in Safari öffnen → *Teilen* → **„Zum Home-Bildschirm“**
+- **Android:** In Chrome öffnen → Menü ⋮ → **„App installieren“**
+- **Mac:** In Safari öffnen → *Ablage* → **„Zum Dock hinzufügen“** (oder in Chrome: Installieren-Symbol in der Adressleiste)
+- **Windows:** In Chrome oder Edge öffnen → Installieren-Symbol in der Adressleiste
+
+Danach startet ¡Vamos! per Klick im eigenen Fenster und funktioniert auch offline.
+
+Der Fortschritt wird auf dem Gerät gespeichert (`localStorage`). Unter **Profil → Fortschritt sichern** bekommst du einen Code, mit dem du deinen Stand auf ein anderes Gerät übertragen kannst.
 
 ## Inhalt
 
