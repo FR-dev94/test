@@ -250,7 +250,11 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .rr{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
 .rr label{font-weight:800;font-size:14px}
 .rr input{grid-column:1/3;width:100%;accent-color:var(--accent);height:28px}
-.rr.unset input{opacity:.35}
+.rr.unset input{opacity:.3}
+.rr.unset label{color:var(--muted)}
+.np{grid-column:1/3;justify-self:start;display:inline-flex;align-items:center;gap:4px;border:2px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px;font-size:13px;font-weight:800;color:var(--muted)}
+.np svg{width:14px;height:14px}
+.np[aria-pressed="true"]{background:var(--surface-2);color:var(--fg);border-color:var(--locked-ink)}
 .rv{border:2px solid var(--line);background:var(--surface);border-radius:10px;min-width:40px;height:32px;font-family:var(--font-display);font-weight:600;font-size:17px}
 .rr:not(.unset) .rv{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .gear.due{border-color:var(--flame)}
@@ -302,6 +306,7 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .tune summary{cursor:pointer;font-size:16px}
 .rr .ends{grid-column:1/3;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:700;margin-top:-4px}
 .rr b.rv{display:grid;place-items:center;background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.rr.unset b.rv{background:var(--surface);border-color:var(--line);color:var(--muted)}
 
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
@@ -1973,11 +1978,19 @@ function afterXP(r){
  if(r.streakUp){showStreak();return;}
  if(r.goal){toast('Tagesziel erreicht! +10 Bälle',I.target);beep('coin');}
 }
+let MQ=[];
+function nextModal(){const f=MQ.shift();if(f)f();else closeModal();}
+const GEARPOP={grip:'Zeit für einen neuen Overgrip!',balls:'Zeit für neue Bälle!',shoes:'Zeit für neue Schuhe?',racket:'Ist dein Schläger durch?'};
+function gearDoReset(id){const g=GEAR.find(x=>x.id===id),st=gearState(id);st.since=Date.now();S.cnt.gear=(S.cnt.gear||0)+1;S.gems+=5;save();checkAch();beep('coin');return g;}
+function gearPopup(){const due=gearDue();if(!due.length){nextModal();return;}S.gearAsked=today();save();const g=due[0],u=gearUse(g);
+ modal(`<div class="center"><span class="ic" style="width:84px;height:84px;--c:var(--flame)">${g.id==='balls'?I.ball:g.id==='shoes'?I.dumbbell:I.racket}</span><h2>${GEARPOP[g.id]}</h2><p class="b">${g.u==='s'?u.v+' Sessions':fmt1(u.v)+' Stunden'} seit dem letzten Wechsel – dein Intervall: ${u.every} ${unitTxt(g,u.every)}.</p><p class="muted b small">${esc(g.d)}</p></div>
+ <button class="btn gold block" data-act="gearPopDone" data-id="${g.id}">${I.check} Erledigt – ist gewechselt</button>
+ <button class="btn ghost block" data-act="gearPopLater">Später erinnern</button>`);beep('pop');}
 function showStreak(){
  const t=today();const days=[];for(let i=6;i>=0;i--){const d=addDays(t,-i);days.push({d,on:!!S.days[d]});}
  modal(`<div class="center"><div class="streakbig">${I.flame}<span class="n">${S.streak}</span></div><h2>${S.streak===1?'Serie gestartet!':S.streak+' Tage in Folge!'}</h2><p class="muted b">${S.streak===1?'Komm morgen wieder, um sie auszubauen.':'Weiter so – jeden Tag ein bisschen besser.'}</p>
  <div class="row" style="justify-content:center;gap:8px">${days.map(x=>`<div style="display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;font-weight:800;color:var(--muted)"><span style="width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:${x.on?'var(--flame)':'var(--surface-2)'};color:#fff">${x.on?I.check.replace('<svg','<svg width="16" height="16"'):''}</span>${WD[parseD(x.d).getDay()]}</div>`).join('')}</div></div>
- <button class="btn block" data-act="closeModal">Weiter</button>`);
+ <button class="btn block" data-act="nextModal">Weiter</button>`);
  beep('done');
 }
 
@@ -2034,14 +2047,15 @@ function drawJournal(){
   <div class="row"><div class="grow"><label class="lab" for="jpart">Partner/in</label><input id="jpart" class="field" value="${esc(JF.partner)}" placeholder="optional"></div>${isMatch?`<div class="grow"><label class="lab" for="jopp">Gegner</label><input id="jopp" class="field" value="${esc(JF.opp)}" placeholder="optional"></div>`:''}</div>
   <div><span class="lab">Wie hast du dich gefühlt?</span><div class="seg">${feels.map((f,i)=>`<button data-act="jf" data-k="feel" data-v="${i+1}" aria-pressed="${JF.feel===i+1}">${f}</button>`).join('')}</div></div>
   ${am.length?`<div class="card stack" style="border-color:var(--ball)"><div class="row"><span class="ic" style="--c:var(--good)">${I.target}</span><div class="grow"><b>Deine Missionen</b><div class="muted small">Wie lief's heute?</div></div></div>${am.map(x=>`<div><div class="b" style="margin-bottom:6px">${esc(x.l.m.t)}</div><div class="seg">${[[0,'Nicht probiert'],[1,'Versucht'],[2,'Teilweise'],[3,'Gemeistert']].map(([v,n])=>`<button data-act="jmr" data-id="${x.id}" data-v="${v}" aria-pressed="${(JF.mr[x.id]||0)===v}">${n}</button>`).join('')}</div></div>`).join('')}</div>`:''}
-  <div><span class="lab">Wie gut warst du heute? (0–10)</span><p class="muted small" style="margin-bottom:8px">Zieh nur bei dem, was du heute gespielt hast. Tipp auf die Zahl zum Zurücksetzen.</p><div class="stack">${SKIDS.map(k=>{const v=JF.rt[k];return `<div class="rr ${v==null?'unset':''}"><label for="r_${k}">Wie gut waren deine ${esc(SK[k].p)}?</label><button class="rv" data-act="rclear" data-k="${k}" id="rv_${k}" aria-label="Zurücksetzen">${v??'–'}</button><input id="r_${k}" type="range" min="0" max="10" step="1" value="${v??5}" data-rk="${k}"></div>`;}).join('')}</div></div>
+  <div><div class="row" style="margin-bottom:6px"><span class="lab grow" style="margin:0">Wie gut warst du heute? (0–10)</span><span class="chip" id="rcount">${Object.keys(JF.rt).length} von ${SKIDS.length} bewertet</span></div><p class="muted small b" style="margin-bottom:10px">Alles startet als „nicht gespielt“ und zählt dann nicht. Zieh den Regler nur bei dem, was du heute wirklich gespielt hast.</p><div class="stack">${SKIDS.map(k=>{const v=JF.rt[k];return `<div class="rr ${v==null?'unset':''}" id="rr_${k}"><label for="r_${k}">Wie gut waren deine ${esc(SK[k].p)}?</label><b class="rv" id="rv_${k}">${v??'–'}</b><input id="r_${k}" type="range" min="0" max="10" step="1" value="${v??5}" data-rk="${k}"><button class="np" data-act="rclear" data-k="${k}" id="np_${k}" aria-pressed="${v==null}">${v==null?I.check+' Nicht gespielt':'Nicht gespielt'}</button></div>`;}).join('')}</div></div>
   <div><span class="lab">Wo hast du die meisten Punkte verloren?</span><div class="seg">${SKIDS.map(k=>`<button data-act="jf" data-k="lost" data-v="${k}" aria-pressed="${JF.lost===k}">${esc(SK[k].s)}</button>`).join('')}</div></div>
   <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
  </div></div>
  <div class="l-foot"><div class="foot-in"><button class="btn block" data-act="saveJournal">${I.check} Speichern</button></div></div></div>`;
  liveKcal();liveRate();
 }
-function liveRate(){document.querySelectorAll('[data-rk]').forEach(r=>{const set=()=>{const k=r.dataset.rk;JF.rt[k]=+r.value;const b=document.getElementById('rv_'+k);if(b)b.textContent=r.value;r.parentElement.classList.remove('unset');};r.addEventListener('input',set);r.addEventListener('pointerup',set);r.addEventListener('keyup',set);});}
+function rateUI(k){const v=JF.rt[k],b=document.getElementById('rv_'+k),n=document.getElementById('np_'+k),row=document.getElementById('rr_'+k),c=document.getElementById('rcount');if(b)b.textContent=v??'–';if(n){n.setAttribute('aria-pressed',v==null);n.innerHTML=(v==null?I.check+' ':'')+'Nicht gespielt';}if(row)row.classList.toggle('unset',v==null);if(c)c.textContent=Object.keys(JF.rt).length+' von '+SKIDS.length+' bewertet';}
+function liveRate(){document.querySelectorAll('[data-rk]').forEach(r=>{const set=()=>{const k=r.dataset.rk;JF.rt[k]=+r.value;rateUI(k);};r.addEventListener('input',set);r.addEventListener('pointerup',set);r.addEventListener('keyup',set);});}
 function liveKcal(){const i=document.getElementById('jdur'),o=document.getElementById('jkcal');if(i&&o)i.addEventListener('input',()=>{o.textContent='≈ '+fmtN(kcalCalc(JF.type,parseInt(i.value)||0,JF.int))+' kcal';});}
 function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
  const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
@@ -2067,12 +2081,13 @@ function saveJournal(){
  const rk=Object.entries(e.rt||{}).filter(([k])=>prevSR[k]!=null).map(([k,v])=>({k,v,d:v-prevSR[k]})).sort((a,b)=>b.d-a.d);
  const dueNew=gearDue().filter(g=>!dueBefore.includes(g.id)),rAfter=topRacket();
  const ins=[];if(rk.length&&rk[0].d>0.4)ins.push(`<div class="row"><span class="c-good">▲</span><span class="grow">${esc(SK[rk[0].k].n)}: <b>${rk[0].v}/10</b> – ${fmt1(rk[0].d)} über deinem Schnitt</span></div>`);if(rk.length>1&&rk[rk.length-1].d<-0.4){const x=rk[rk.length-1];ins.push(`<div class="row"><span style="color:var(--bad)">▼</span><span class="grow">${esc(SK[x.k].n)}: <b>${x.v}/10</b> – ${fmt1(-x.d)} unter deinem Schnitt</span></div>`);}
- dueNew.forEach(g=>ins.push(`<div class="row"><span class="c-flame">${I.bag}</span><span class="grow"><b>${g.t} wechseln!</b> Intervall erreicht.</span></div>`));
+ if(0)dueNew.forEach(g=>ins.push(`<div class="row"><span class="c-flame">${I.bag}</span><span class="grow"><b>${g.t} wechseln!</b> Intervall erreicht.</span></div>`));
  if(rAfter.id!==rBefore)ins.push(`<div class="row"><span class="c-acc">${I.racket}</span><span class="grow">Neue Schläger-Empfehlung: <b>${esc(rAfter.brand+' '+rAfter.name)}</b></span></div>`);
  modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">≈ ${fmtN(e.kcal)} kcal verbrannt · +${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
  ${ins.length?`<div class="card stack small b">${ins.join('')}</div>`:''}
  ${e.lost?`<div class="card stack"><div class="eyebrow muted">Dein nächster Schritt</div><b>Du hast viele Punkte bei „${esc(SK[e.lost].n)}“ verloren.</b>${newL?`<p class="muted b small">Dafür habe ich dir „${esc(newL.t)}“ freigeschaltet.</p>`:''}${(()=>{const l=LESSONS.find(l=>l.sk===e.lost&&unlocked(l.idx));return l?`<button class="btn ball block" data-act="lesson" data-id="${l.id}">${esc(l.t)} üben</button>`:'';})()}</div>`:''}
- <button class="btn block" data-act="${streak?'showStreak':'closeModal'}">Weiter</button>`);
+ <button class="btn block" data-act="nextModal">Weiter</button>`);
+ MQ=[];if(streak)MQ.push(showStreak);if(gearDue().length)MQ.push(gearPopup);
  beep('done');if(done.length||e.res==='w')confetti();
 }
 function journalView(i){
@@ -2166,11 +2181,14 @@ const ACT={
  myRacket(el){S.myRacket=S.myRacket===el.dataset.id?null:el.dataset.id;save();closeModal();render();toast(S.myRacket?'Als dein Schläger gespeichert':'Entfernt',I.racket);},
  rkAll(){rkShowAll=!rkShowAll;const R=rkRanked();$('#rklist').innerHTML=rkListHTML(R,S.rkq);},
  rfSet(el){rfState()[el.dataset.k]=el.dataset.v;S.rkOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
- rclear(el){delete JF.rt[el.dataset.k];syncJF();drawJournal();},
+ rclear(el){const k=el.dataset.k;delete JF.rt[k];const r=document.getElementById('r_'+k);if(r)r.value=5;rateUI(k);},
  jtab(el){S.jtab=el.dataset.v;save();render();$('#main').scrollTop=0;},
  sf(el){S.sf=el.dataset.v;save();render();},
  gearEvery(el){gearState(el.dataset.id).every=+el.dataset.v;save();render();},
- gearReset(el){const g=GEAR.find(x=>x.id===el.dataset.id);const st=gearState(g.id);st.since=Date.now();S.cnt.gear=(S.cnt.gear||0)+1;S.gems+=5;save();checkAch();render();toast(g.t+' gewechselt – Zähler zurückgesetzt · +5 Bälle',I.check);beep('coin');},
+ nextModal(){nextModal();},
+ gearPopDone(el){const g=gearDoReset(el.dataset.id);render();toast(g.t+' gewechselt – Zähler zurückgesetzt · +5 Bälle',I.check);if(gearDue().length)gearPopup();else nextModal();},
+ gearPopLater(){toast('Okay – ich erinnere dich beim nächsten Mal',I.clock);nextModal();},
+ gearReset(el){const g=gearDoReset(el.dataset.id);render();toast(g.t+' gewechselt – Zähler zurückgesetzt · +5 Bälle',I.check);beep('coin');},
  jrt(el){syncJF();const k=el.dataset.k,v=+el.dataset.v;if(JF.rt[k]===v)delete JF.rt[k];else JF.rt[k]=v;drawJournal();},
  closeJournal(){JF=null;$('#ov').innerHTML='';},
  saveJournal(){saveJournal();},
@@ -2228,6 +2246,9 @@ const startMsgs=tick();
 render();
 if(S.onb)checkAch();
 startMsgs.forEach((m,i)=>setTimeout(()=>toast(m[0],m[1]),400+i*700));
+function gearCheckOnOpen(){if(S.onb&&gearDue().length&&S.gearAsked!==today()&&!$('#modal').innerHTML&&!LS&&!JF){MQ=[];gearPopup();}}
+setTimeout(gearCheckOnOpen,1200);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(gearCheckOnOpen,600);});
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){try{navigator.serviceWorker.register('sw.js').catch(()=>{});}catch(e){}}
 </script>
 </body>
