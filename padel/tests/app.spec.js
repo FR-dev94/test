@@ -147,7 +147,7 @@ test('Statistik: Bilanz, Sätze, Erkenntnisse, Spielstärke', async ({ page }) =
   expect(r).toMatchObject({ w: 12, l: 8, n: 20, lobInsight: true });
   expect(r.ins).toBeGreaterThanOrEqual(3);
   expect(r.L).toBeGreaterThan(0.8);
-  await expect(page.locator('.lvlbig')).toBeVisible();
+  await expect(page.locator('.lvlbig').first()).toBeVisible();
   await expect(page.locator('.dev').first()).toBeVisible();
   await expect(page.locator('.devchips')).toBeVisible();
 });
@@ -268,7 +268,7 @@ test('Coach: Wochenfokus aus den letzten Matches und Wochenplan', async ({ page 
   await open(page, () => { base(); seedMatches(); S.weekGoal = 3; S.unlockId = 'lob';
     S.journal.slice(0, 3).forEach(j => { j.res = 'l'; j.lost = 'lob'; }); }); // 3 der letzten 6 Matches über Lob verloren
   await expect(page.locator('.coach h2')).toHaveText('Fokus: Lob');
-  await expect(page.locator('.coach')).toContainText('In 4 deiner letzten 6 Matches');
+  await expect(page.locator('.coach')).toContainText('In 4 der letzten 5 und');
   // 3 Sessions + Lektion + Drill + Test = 6 Aufgaben
   await expect(page.locator('.citem')).toHaveCount(6);
   const trainings = await page.locator('.cbody b', { hasText: 'Training:' }).allTextContents();
@@ -316,4 +316,87 @@ test('Fokus-Modus blendet Liga und Shop aus', async ({ page }) => {
   await expect(page.locator('[data-act=tab][data-id=league]')).toHaveCount(0);
   await expect(page.locator('.top [data-act=shop]')).toHaveCount(0);
   await expect(page.locator('#main')).not.toContainText('Shop öffnen');
+});
+
+test('Coach gewichtet drei Zeiträume – ein schlechter Tag kippt den Fokus nicht', async ({ page }) => {
+  await open(page, () => { base(); seedMatches();
+    // langfristig: 8 Niederlagen über Smash; zuletzt nur 1 über Lob
+    S.journal.forEach((j, i) => { if (i >= 2 && i < 18 && j.res === 'l') j.lost = 'smash'; });
+    S.journal[0].res = 'l'; S.journal[0].lost = 'lob'; });
+  expect(await page.evaluate(() => coachFocus().k)).toBe('smash');
+});
+
+test('Spielniveau: Schätzung nur mit Gegner-Niveau, externes Niveau mit Verlauf', async ({ page }) => {
+  await open(page, () => { base(); seedMatches(); S.tab = 'journal'; S.jtab = 'stats'; });
+  expect(await page.evaluate(() => levelEstimate().n)).toBe(0);
+  await expect(page.locator('.lvlrow')).toContainText('braucht 3 Matches mit Gegner-Niveau (0/3)');
+  await page.fill('#extlvl', '2,4');
+  await page.click('[data-act=extSave]');
+  await expect(page.locator('.lvlrow')).toContainText('2,4');
+  const est = await page.evaluate(() => { S.journal.slice(0, 4).forEach(j => { j.ol = 2.5; }); return levelEstimate(); });
+  expect(est.n).toBe(4);
+  expect(est.pm).toBeCloseTo(0.6, 1);
+  expect(Math.abs(est.L - 2.4)).toBeLessThan(1);
+});
+
+test('Techniktest: Bedingungen werden gespeichert, Trend nur bei gleichen Bedingungen', async ({ page }) => {
+  await open(page, () => { base(); S.tab = 'missions';
+    S.tt = { lobtief: [{ d: addDays(today(), -20), v: 3, c: { zu: 'maschine', tempo: 'schnell', ort: 'halle' } }, { d: addDays(today(), -10), v: 5, c: { zu: 'partner', tempo: 'mittel', ort: 'halle' } }] }; });
+  await page.click('[data-act=ttOpen][data-id=lobtief]');
+  await page.click('[data-act=ttStep][data-v="1"]');
+  await page.click('[data-act=ttSave]');
+  const r = await page.evaluate(() => ({ last: S.tt.lobtief[2], comp: ttComp('lobtief').length, tr: ttTrend('lobtief') }));
+  expect(r.last.c).toEqual({ zu: 'partner', tempo: 'mittel', ort: 'halle' });
+  expect(r.comp).toBe(2);   // Ballmaschinen-Test zählt nicht mit
+  expect(r.tr).toBe(1);     // 5 → 6
+  await expect(page.locator('[data-act=ttOpen][data-id=lobtief]')).toContainText('2 von 3 vergleichbar');
+});
+
+test('Wochenplan: Sessions, Tage und Belastung anpassen', async ({ page }) => {
+  await open(page, () => { base(); S.weekGoal = 3; });
+  const sessions = () => page.evaluate(() => coachWeek().items.filter(x => x.id[0] === 's').length);
+  expect(await sessions()).toBe(3);
+  await page.click('.cadj summary');
+  await page.click('[data-act=coachN][data-v="-1"]');
+  expect(await sessions()).toBe(2);
+  await page.click('[data-act=coachDay][data-v="1"]');
+  await page.click('[data-act=coachDay][data-v="4"]');
+  await expect(page.locator('.citem').first()).toBeVisible();
+  expect(await page.evaluate(() => coachWeek().items.filter(x => x.id[0] === 's').map(x => x.t.slice(0, 2)))).toEqual(['Di', 'Fr']);
+  await page.click('[data-act=fit][data-v=muede]');
+  await expect(page.locator('.cwarn')).toContainText('müde');
+  await expect(page.locator('.coach')).toContainText('Lockere Einheit');
+  // Hohe Belastung: viel Spielzeit in den letzten 7 Tagen
+  const hi = await page.evaluate(() => { S.fit = null; for (let i = 0; i < 5; i++) S.journal.push({ id: 'h' + i, ts: i, type: 'Turnier', date: addDays(today(), -i), dur: 120, int: 3, rs: 10 });
+    for (let i = 0; i < 4; i++) S.journal.push({ id: 'o' + i, ts: i, type: 'Match', date: addDays(today(), -10 - i * 6), dur: 60, rs: 10 }); return loadInfo(); });
+  expect(hi.high).toBe(true);
+});
+
+test('Backup-Import prüft die Daten', async ({ page }) => {
+  await open(page, () => { base(); seedMatches(); S.tab = 'profile'; });
+  const file = (name, data) => ({ name, mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(data)) });
+  let [fc] = await Promise.all([page.waitForEvent('filechooser'), page.click('[data-act=restore]')]);
+  await fc.setFiles(file('bad.json', { hallo: 'welt' }));
+  await expect(page.locator('.sheet h2')).toHaveText('Nicht geladen');
+  expect(await page.evaluate(() => S.journal.length)).toBe(20);
+  await page.click('.sheet [data-act=closeModal]');
+  [fc] = await Promise.all([page.waitForEvent('filechooser'), page.click('[data-act=restore]')]);
+  await fc.setFiles(file('mixed.json', { app: 'PadelUp', state: { v: 3, onb: true, xp: 50, journal: [
+    { id: 'ok', type: 'Match', date: '2026-09-01', dur: 90, res: 'w', rt: { lob: 7, quatsch: 3, smash: 99 } },
+    { id: 'kaputt', type: 'Golf', date: 'gestern', dur: 90 }] } }));
+  await expect(page.locator('.sheet')).toContainText('Eintrag 2 übersprungen');
+  await page.click('[data-act=restoreDo]');
+  await page.waitForTimeout(1500);
+  expect(await page.evaluate(() => ({ n: S.journal.length, rt: S.journal[0].rt }))).toEqual({ n: 1, rt: { lob: 7 } });
+});
+
+test('Schnell-Einträge werden markiert und in der Statistik ausgewiesen', async ({ page }) => {
+  await open(page, () => { base(); S.tab = 'journal'; S.jtab = 'entries'; });
+  await page.click('[data-act=quick]');
+  await page.click('[data-act=ql][data-k=res][data-v=w]');
+  await page.click('[data-act=qlSave]');
+  await closePopups(page);
+  expect(await page.evaluate(() => S.journal[0].q)).toBe(true);
+  await page.click('[data-act=jtab][data-v=stats]');
+  await expect(page.locator('#main')).toContainText('1 Schnell-Eintrag zählt nur für Bilanz');
 });

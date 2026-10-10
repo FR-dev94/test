@@ -384,6 +384,18 @@ textarea.code{font-family:ui-monospace,Menlo,monospace;font-size:12px;font-weigh
 .revf{border-left:4px solid var(--accent);padding:4px 0 4px 12px}.revf.bad{border-color:var(--bad)}.revf.good{border-color:var(--good)}
 .revf b{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.revf p{margin:2px 0 0;font-weight:700}
 
+/* 2.1 */
+.lvlrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lvlrow .lvlbig{font-size:38px}
+.cwarn{display:flex;gap:8px;align-items:flex-start;background:rgba(255,255,255,.14);border-radius:12px;padding:8px 10px;font-size:13px;font-weight:700}
+.cwarn svg{width:18px;height:18px;flex:none;margin-top:1px}
+.fitrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fitrow button{background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.35);color:#fff;border-radius:99px;padding:4px 10px;font-size:13px;font-weight:800}
+.fitrow button[aria-pressed="true"]{background:var(--ball);border-color:var(--ball);color:var(--ball-ink)}
+.cadj summary{cursor:pointer;opacity:.9}
+.cadj .btn{padding:4px 12px}
+.tthist div.off i{background:var(--locked)}
+
 /* Liga */
 .lrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;font-weight:800}
 .lrow.me{background:color-mix(in srgb,var(--accent) 14%,transparent);outline:2px solid color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -1363,7 +1375,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-const APPVER='2026-10-10 · v14';
+const APPVER='2026-10-10 · v15';
 function defaults(){return{v:3,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
@@ -1855,6 +1867,7 @@ function recRow(x){return `<div class="trow"><span class="grow b">${esc(x.name)}
 function viewStats(){
  const L=statRange(),M=L.filter(j=>j.res),r=recordOf(M),asc=[...M].sort(byDateAsc),st=streaks(asc);
  let h=`<div class="seg" style="margin:4px 0 14px">${[['all','Gesamt'],['365','12 Monate'],['30','30 Tage']].map(([v,n])=>`<button data-act="sf" data-v="${v}" aria-pressed="${(S.sf||'all')===v}">${n}</button>`).join('')}</div>`;
+ {const MM=L.filter(j=>j.res),rated=MM.filter(j=>j.rt&&Object.keys(j.rt).length).length;if(MM.length)h+=`<p class="muted small b" style="margin:-4px 0 12px">Datenbasis: ${MM.length} Matches, davon ${rated} mit Bewertung${MM.length-rated?` · ${MM.length-rated} Schnell-Eintr${MM.length-rated===1?'ag zählt':'äge zählen'} nur für Bilanz, Sätze und Spielniveau`:''}.</p>`;}
  h+=levelCard()+'<div style="height:12px"></div>'+insightsCard(L)+'<div style="height:4px"></div>';
  // Bilanz
  h+=`<div class="card stack"><div class="eyebrow muted">Bilanz · ${r.n} ${r.n===1?'Match':'Matches'}</div>
@@ -1957,7 +1970,7 @@ function viewProfile(){
   <div><label class="lab" for="nm">Name</label><input id="nm" class="field" value="${esc(S.name)}" maxlength="24" data-act="noop"></div>
   <div class="row"><div class="grow"><label class="lab" for="wkg">Gewicht (kg)</label><input id="wkg" class="field" type="text" inputmode="decimal" autocomplete="off" value="${String(S.weight).replace('.',',')}"></div><div class="grow"><label class="lab" for="hcm">Größe (cm)</label><input id="hcm" class="field" type="number" inputmode="numeric" min="120" max="230" value="${S.height}"></div></div>
   <p class="muted small b" style="margin-top:-4px">Für die Kalorien-Schätzung. Halte dein Gewicht aktuell – neue Sessions rechnen mit dem aktuellen Wert, alte behalten ihren.</p>
-  <div><label class="lab" for="mylvl">Dein bekanntes Niveau (0–7, optional)</label><input id="mylvl" class="field" type="text" inputmode="decimal" autocomplete="off" value="${S.myLevel!=null?String(S.myLevel).replace('.',','):''}" placeholder="z. B. aus deiner Buchungs-App"><p class="muted small b" style="margin-top:4px">Startwert für die Spielstärke-Schätzung in der Statistik.</p></div>
+  <div><label class="lab" for="mylvl">Dein externes Niveau (0–7, z. B. Playtomic)</label><input id="mylvl" class="field" type="text" inputmode="decimal" autocomplete="off" value="${extNow()?String(extNow().v).replace('.',','):''}" placeholder="z. B. aus deiner Buchungs-App"><p class="muted small b" style="margin-top:4px">Wird mit Datum gespeichert – den Verlauf siehst du in der Statistik.</p></div>
   <div><span class="lab">Seite</span><div class="seg">${[['rechts','Rechts'],['links','Links'],['beide','Beide']].map(([v,n])=>`<button data-act="set" data-k="side" data-v="${v}" aria-pressed="${S.side===v}">${n}</button>`).join('')}</div></div>
   <div><span class="lab">Tagesziel</span><div class="seg">${[10,20,30,50].map(v=>`<button data-act="set" data-k="goal" data-v="${v}" aria-pressed="${S.goal===v}">${v} XP</button>`).join('')}</div></div>
   <div><span class="lab">Sessions pro Woche</span><div class="seg">${[1,2,3,4,5].map(v=>`<button data-act="set" data-k="weekGoal" data-v="${v}" aria-pressed="${S.weekGoal===v}">${v}</button>`).join('')}</div></div>
@@ -1974,7 +1987,7 @@ function viewProfile(){
  return h;
 }
 function afterRender(){
- const ml=$('#mylvl');if(ml)ml.addEventListener('change',()=>{const v=parseFloat(String(ml.value).replace(',','.'));S.myLevel=ml.value.trim()===''||isNaN(v)?null:Math.max(0,Math.min(7,v));save();toast('Niveau gespeichert',I.check);});
+ const ml=$('#mylvl');if(ml)ml.addEventListener('change',()=>{const v=parseFloat(String(ml.value).replace(',','.'));if(ml.value.trim()===''||isNaN(v))return;extAdd(v);});
  document.querySelectorAll('[data-rf]').forEach(el=>{const k=el.dataset.rf;if(el.type==='range')el.addEventListener('input',()=>{const o=document.getElementById('rfv_'+k);if(o)o.textContent=el.value;});el.addEventListener('change',()=>{rfState()[k]=el.type==='range'?+el.value:el.value;S.rkOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;});});
  const rkq=$('#rkq');if(rkq)rkq.addEventListener('input',()=>{S.rkq=rkq.value;$('#rklist').innerHTML=rkListHTML(rkRanked(),rkq.value);});
  const wkg=$('#wkg');if(wkg)wkg.addEventListener('change',()=>{const v=parseFloat(String(wkg.value).replace(',','.'));if(v>=30&&v<=250){S.weight=Math.round(v*10)/10;save();toast('Gewicht gespeichert: '+String(S.weight).replace('.',',')+' kg',I.check);}});
@@ -2304,8 +2317,6 @@ function backupNow(){
  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'PadelUp Backup'}).then(done,()=>{});return;}
  const url=URL.createObjectURL(new Blob([data],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);done();
 }
-function restorePick(){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{const f=i.files&&i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result),st=o&&o.state?o.state:o;if(!st||typeof st!=='object'||!('xp' in st))throw 0;
- PENDING_RESTORE=st;modal(`<div class="center">${mascot()}<h2>Backup laden?</h2><p class="b">${o.saved?'Gesichert am '+new Date(o.saved).toLocaleDateString('de-DE')+' · ':''}${(st.journal||[]).length} Einträge · ${st.xp||0} XP</p><p class="muted small b">Dein aktueller Stand auf diesem Gerät wird ersetzt.</p></div><button class="btn block" data-act="restoreDo">Laden</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);}catch(e){toast('Das ist keine gültige PadelUp-Sicherung',I.x);}};r.readAsText(f);};i.click();}
 let PENDING_RESTORE=null;
 const backupDue=()=>S.onb&&S.journal.length>0&&(!S.lastBackup||dayDiff(S.lastBackup,today())>=14);
 function backupPopup(){S.backupAsked=today();save();modal(`<div class="center"><span class="ic" style="width:84px;height:84px;--c:var(--accent)">${I.shield}</span><h2>Zeit für ein Backup</h2><p class="b">${S.lastBackup?'Dein letztes Backup ist '+dayDiff(S.lastBackup,today())+' Tage her.':'Du hast noch nie ein Backup gemacht.'} ${S.journal.length} Einträge liegen nur auf diesem Handy.</p><p class="muted small b">Sichere die Datei z. B. in iCloud Drive oder „Dateien“ – dann ist nichts verloren, wenn das Handy weg ist.</p></div><button class="btn block" data-act="backupNowPop">${I.shield} Jetzt sichern</button><button class="btn ghost block" data-act="nextModal">Später</button>`);}
@@ -2316,7 +2327,7 @@ function backupPopup(){S.backupAsked=today();save();modal(`<div class="center"><
 const L2R=l=>600+l*200,R2L=r=>Math.max(0,Math.min(7,(r-600)/200));
 const oppKey=s=>(s||'').trim().toLowerCase();
 function eloReplay(){
- const base=S.myLevel!=null&&S.myLevel!==''?+S.myLevel:[1,2,3,4][S.lvl||0];
+ const ex=extNow(),base=ex?ex.v:[1,2,3,4][S.lvl||0];
  let R=L2R(base);const opp={},hist=[];let n=0;
  [...S.journal].filter(j=>j.res&&(j.type==='Match'||j.type==='Turnier')).sort(byDateAsc).forEach(j=>{
   const pr=j.pl!=null&&j.pl!==''?L2R(+j.pl):R,team=(R+pr)/2,k=oppKey(j.opp);
@@ -2326,12 +2337,6 @@ function eloReplay(){
   const K=n<10?40:24,d=K*(Sx-E);R+=d;if(k&&(j.ol==null||j.ol===''))opp[k]-=d;n++;hist.push({date:j.date,R});});
  return{R,L:R2L(R),base,n,hist,opp};
 }
-function levelCard(){const E=eloReplay();if(!E.n)return `<div class="card stack"><div class="eyebrow muted">Spielstärke</div><p class="muted small b">Trag Matches mit Ergebnis ein – dann schätzt die App dein Niveau (0–7) aus Siegen, Niederlagen und Games.${S.myLevel==null?' Startwert: '+fmt1(E.base)+' (aus deiner Einstufung, im Profil änderbar).':''}</p></div>`;
- const before=E.hist.filter(h=>h.date<=addDays(today(),-30)).pop(),tr=before?R2L(E.R)-R2L(before.R):R2L(E.R)-E.base;
- const vs=[E.base,...E.hist.map(h=>R2L(h.R))],mn=Math.min(...vs)-.2,mx=Math.max(...vs)+.2,W=340,H=70,X=i=>8+i/(vs.length-1||1)*(W-16),Y=v=>H-6-(v-mn)/(mx-mn||1)*(H-12);
- return `<div class="card stack"><div class="row"><div class="grow"><div class="eyebrow muted">Geschätzte Spielstärke</div><div class="lvlbig">${fmt1(E.L)}<small> / 7</small></div></div><span class="b" style="color:${tr>0.05?'var(--good)':tr<-0.05?'var(--bad)':'var(--muted)'}">${tr>0.05?'▲':tr<-0.05?'▼':'▬'} ${tr>0?'+':''}${fmt1(tr)} <span class="muted small">30 Tage</span></span></div>
- <svg viewBox="0 0 ${W} ${H}" class="dev" aria-label="Verlauf der Spielstärke"><path d="${vs.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${X(vs.length-1)}" cy="${Y(vs[vs.length-1])}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/></svg>
- <p class="muted small b" style="margin:0">Aus ${E.n} Matches berechnet (Start ${fmt1(E.base)}). Unbekannte Gegner zählen erst wie dein Niveau – trag beim Match das Niveau von Gegnern und Partner ein, dann wird's genauer.</p></div>`;}
 
 /* ================= Erkenntnisse ================= */
 function insights(L){
@@ -2470,19 +2475,8 @@ const TT=[
 const TBYID=Object.fromEntries(TT.map(t=>[t.id,t]));
 const ttRes=id=>(S.tt&&S.tt[id])||[];
 const ttLast=id=>{const r=ttRes(id);return r.length?r[r.length-1]:null;};
-function ttTrend(id){const r=ttRes(id);if(r.length<2)return null;const a=r.slice(-3),b=r.slice(-6,-3);if(!b.length)return r[r.length-1].v-r[0].v;return a.reduce((s,x)=>s+x.v,0)/a.length-b.reduce((s,x)=>s+x.v,0)/b.length;}
-function ttSection(){let h=`<h2 class="sec-title">Techniktests</h2><p class="sec-sub">Objektiv statt Gefühl: 10 Versuche, Treffer zählen, Verlauf sehen. Am besten alle 2–3 Wochen.</p><div class="stack">`;
- const wk=weekKey();
- TT.forEach(t=>{const r=ttRes(t.id),l=r[r.length-1],tr=ttTrend(t.id),best=r.length?Math.max(...r.map(x=>x.v)):null;
-  h+=`<button class="mini ttrow" data-act="ttOpen" data-id="${t.id}" style="margin:0"><span class="ic" style="--c:${SK[t.sk].c}">${I[SK[t.sk].ic]}</span><span class="grow"><span class="eyebrow muted">${esc(SK[t.sk].s)}${l&&weekKey(l.d)===wk?' · <span class="c-good">diese Woche ✓</span>':''}</span><h3>${esc(t.t)}</h3><p>${l?`Zuletzt ${l.v}/10 (${fmtDate(l.d)}) · Bestwert ${best}/10${tr!=null?` · <span style="color:${tr>0?'var(--good)':tr<0?'var(--bad)':'var(--muted)'}">${tr>0?'▲ +':tr<0?'▼ ':'▬ '}${fmt1(tr)}</span>`:''}`:'Noch nicht gemacht'}</p></span>${r.length>1?ttBars(r.slice(-6)):''}<span class="go">${I.chev}</span></button>`;});
- return h+'</div>';}
 function ttBars(r){return `<span class="ttb">${r.map(x=>`<i style="height:${Math.max(8,x.v*10)}%"></i>`).join('')}</span>`;}
 let TTV=null;
-function ttSheet(id){const t=TBYID[id],r=ttRes(id);if(TTV==null)TTV=ttLast(id)?ttLast(id).v:5;
- modal(`<div class="eyebrow muted">Techniktest · ${esc(SK[t.sk].n)}</div><h2>${esc(t.t)}</h2><div class="theory" style="padding:14px;animation:none"><p style="margin:0;font-weight:700">${esc(t.d)}</p></div>
- <div class="center"><span class="lab">Treffer von 10</span><div class="stepper"><button class="btn ghost" data-act="ttStep" data-v="-1" aria-label="Weniger">−</button><b id="ttv">${TTV}</b><button class="btn ghost" data-act="ttStep" data-v="1" aria-label="Mehr">+</button></div></div>
- ${r.length?`<div><div class="eyebrow muted" style="margin-bottom:6px">Verlauf</div><div class="tthist">${r.slice(-10).map(x=>`<div><i style="height:${Math.max(6,x.v*10)}%"></i><span>${x.v}</span><em>${parseD(x.d).getDate()}.${parseD(x.d).getMonth()+1}.</em></div>`).join('')}</div></div>`:''}
- <button class="btn block" data-act="ttSave" data-id="${id}">${I.check} Ergebnis speichern · +15 XP</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);}
 
 /* ================= Trainerstunden-Nachbereitung + Wiederholung ================= */
 const REV_STEPS=[3,7,14];
@@ -2494,43 +2488,155 @@ function reviewPopup(){const j=reviewsDue()[0];if(!j){nextModal();return;}S.revA
  <button class="btn good block" data-act="revOk" data-id="${j.id}">${I.check} Sitzt – weiter so</button><button class="btn ghost block" data-act="revAgain" data-id="${j.id}">Muss ich noch üben</button>`);beep('pop');}
 
 /* ================= Persönlicher Coach + Wochenplan ================= */
-function coachFocus(){
- const M=[...S.journal].filter(j=>j.res).sort(byDateAsc).slice(-6);
- const lc={};M.forEach(j=>{if(j.lost)lc[j.lost]=(lc[j.lost]||0)+1;});const lost=Object.entries(lc).sort((a,b)=>b[1]-a[1])[0];
- if(lost&&lost[1]>=2)return{k:lost[0],why:`In ${lost[1]} deiner letzten ${M.length} Matches hast du die meisten Punkte bei ${SK[lost[0]].n} verloren.`};
- let drop=null;SKIDS.forEach(k=>{const h=ratingHist(k);if(h.length<6)return;const a=h.slice(-3),b=h.slice(-6,-3),d=a.reduce((s,x)=>s+x,0)/3-b.reduce((s,x)=>s+x,0)/3;if(d<=-1&&(!drop||d<drop.d))drop={k,d};});
- if(drop)return{k:drop.k,why:`Deine ${SK[drop.k].p} sind zuletzt um ${fmt1(-drop.d)} Punkte schwächer geworden.`};
- const low=TT.map(t=>({t,l:ttLast(t.id)})).filter(x=>x.l&&x.l.v<=4).sort((a,b)=>a.l.v-b.l.v)[0];
- if(low)return{k:low.t.sk,why:`Im Techniktest „${low.t.t}“ hattest du zuletzt nur ${low.l.v} von 10.`};
- const sr=selfRating(),k=weakest()[0];
- return{k,why:sr[k]!=null?`Laut deinen Bewertungen ist ${SK[k].n} (${fmt1(sr[k])}/10) gerade deine größte Baustelle.`:`Dein Startfokus: ${SK[k].n}. Sobald du Matches einträgst, passe ich ihn an deine Daten an.`};
+
+/* ================= 2.1 · Spielniveau: extern vs. Schätzung vs. interne Entwicklung ================= */
+function extLevels(){S.ext=S.ext||[];if(!S.ext.length&&S.myLevel!=null&&S.myLevel!=='')S.ext.push({d:today(),v:+S.myLevel});return S.ext;}
+function extAdd(v){v=Math.round(Math.max(0,Math.min(7,v))*10)/10;const e=extLevels(),l=e[e.length-1];if(l&&l.d===today())l.v=v;else e.push({d:today(),v});S.myLevel=v;save();render();toast('Externes Niveau gespeichert: '+fmt1(v),I.check);}
+const extNow=()=>{const e=extLevels();return e.length?e[e.length-1]:null;};
+/* Niveau-Schätzung NUR aus Matches mit eingetragenem Gegner-Niveau – keine Scheingenauigkeit durch unbekannte Gegner. */
+function levelEstimate(){
+ const ex=extNow(),base=ex?ex.v:[1,2,3,4][S.lvl||0];let R=L2R(base),n=0;const hist=[];
+ [...S.journal].filter(j=>j.res&&j.ol!=null&&j.ol!==''&&(j.type==='Match'||j.type==='Turnier')).sort(byDateAsc).forEach(j=>{
+  const pr=j.pl!=null&&j.pl!==''?L2R(+j.pl):R,team=(R+pr)/2,E=1/(1+Math.pow(10,(L2R(+j.ol)-team)/400));let Sx=j.res==='w'?1:j.res==='l'?0:.5;
+  const sc=parseScore(j.score).filter(([a,b])=>Math.max(a,b)<=7);if(sc.length){const gw=sc.reduce((s,x)=>s+x[0],0),gl=sc.reduce((s,x)=>s+x[1],0);if(gw+gl)Sx=.75*Sx+.25*gw/(gw+gl);}
+  R+=(n<10?40:24)*(Sx-E);n++;hist.push({date:j.date,L:R2L(R)});});
+ return{L:R2L(R),n,base,hist,pm:n?Math.min(1.5,1.2/Math.sqrt(n)):null};
 }
+function lineSvg(vs,H){const W=340,mn=Math.min(...vs),mx=Math.max(...vs),pad=(mx-mn)*.15||1,lo=mn-pad,hi=mx+pad,X=i=>8+i/(vs.length-1||1)*(W-16),Y=v=>H-6-(v-lo)/(hi-lo)*(H-12);
+ return `<svg viewBox="0 0 ${W} ${H}" class="dev" aria-hidden="true"><path d="${vs.map((v,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${X(vs.length-1)}" cy="${Y(vs[vs.length-1])}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/></svg>`;}
+function levelCard(){
+ const ex=extNow(),es=levelEstimate(),E=eloReplay(),hist=extLevels();
+ let h=`<div class="card stack"><div class="eyebrow muted">Spielniveau (0–7)</div><div class="lvlrow">
+  <div><span class="lab">Extern</span><div class="lvlbig">${ex?fmt1(ex.v):'–'}</div><div class="muted small b">${ex?'z. B. Playtomic · Stand '+fmtDate(ex.d):'z. B. aus Playtomic eintragen'}</div></div>
+  <div><span class="lab">Schätzung aus Matches</span><div class="lvlbig">${es.n>=3?fmt1(es.L)+`<small> ±${fmt1(es.pm)}</small>`:'–'}</div><div class="muted small b">${es.n>=3?`aus ${es.n} Matches mit Gegner-Niveau`:`braucht 3 Matches mit Gegner-Niveau (${es.n}/3)`}</div></div></div>
+  <div class="row"><input id="extlvl" class="field grow" type="text" inputmode="decimal" autocomplete="off" placeholder="Neues externes Niveau, z. B. 2,4"><button class="btn sm" data-act="extSave">Speichern</button></div>
+  ${hist.length>1?`<div class="muted small b">Verlauf extern: ${hist.slice(-5).map(x=>fmt1(x.v)+' ('+parseD(x.d).getDate()+'.'+(parseD(x.d).getMonth()+1)+'.)').join(' → ')}</div>`:''}
+  <p class="muted small b" style="margin:0">Die Schätzung nutzt nur Matches, bei denen du das Niveau der Gegner einträgst – so bleibt sie ehrlich.</p></div>`;
+ if(E.n){const R0=L2R(E.base),idx=[100,...E.hist.map(x=>Math.round(100+(x.R-R0)/10))],before=E.hist.filter(x=>x.date<=addDays(today(),-30)).pop(),cur=idx[idx.length-1],tr=cur-(before?Math.round(100+(before.R-R0)/10):100);
+  h+=`<div class="card stack" style="margin-top:12px"><div class="row"><div class="grow"><div class="eyebrow muted">Interne Leistungsentwicklung</div><div class="lvlbig" style="font-size:34px">${cur}</div></div><span class="b" style="color:${tr>0?'var(--good)':tr<0?'var(--bad)':'var(--muted)'}">${tr>0?'▲ +':tr<0?'▼ ':'▬ '}${tr} <span class="muted small">30 Tage</span></span></div>${lineSvg(idx,70)}<p class="muted small b" style="margin:0">Relativer Index (Start 100) aus ${E.n} Matches inkl. unbekannter Gegner. Zeigt deine Richtung – kein Niveau-Wert.</p></div>`;}
+ return h;
+}
+
+/* ================= 2.1 · Standardisierte Techniktests ================= */
+const TT_COND={zu:[['partner','Partner'],['trainer','Trainer'],['maschine','Ballmaschine']],tempo:[['langsam','Langsam'],['mittel','Mittel'],['schnell','Schnell']],ort:[['halle','Halle'],['draussen','Draußen']]};
+const TT_STD=['10 Versuche am Stück, kein Wiederholen.','Zuspiel immer aus derselben Position (Netzmitte), du startest immer von derselben Stelle.','Nur Bälle zählen, die ganz in der Zielzone landen.','Gleiche Bedingungen wie beim letzten Mal – sonst ist der Vergleich nicht fair.'];
+const condKey=c=>c?[c.zu,c.tempo,c.ort].join('|'):'?';
+const condTxt=c=>c?Object.keys(TT_COND).map(k=>(TT_COND[k].find(x=>x[0]===c[k])||['',c[k]])[1]).join(' · '):'Bedingungen nicht erfasst';
+function ttComp(id){const r=ttRes(id),l=r[r.length-1];return l?r.filter(x=>condKey(x.c)===condKey(l.c)):[];}
+function ttTrend(id){const r=ttComp(id);if(r.length<2)return null;const a=r.slice(-3),b=r.slice(-6,-3);if(!b.length)return r[r.length-1].v-r[0].v;return a.reduce((s,x)=>s+x.v,0)/a.length-b.reduce((s,x)=>s+x.v,0)/b.length;}
+function ttSection(){let h=`<h2 class="sec-title">Techniktests</h2><p class="sec-sub">Objektiv statt Gefühl: 10 Versuche nach festem Protokoll. Trend und Bestwert vergleichen nur Tests unter gleichen Bedingungen.</p><div class="stack">`;
+ const wk=weekKey();
+ TT.forEach(t=>{const r=ttRes(t.id),l=r[r.length-1],cp=ttComp(t.id),tr=ttTrend(t.id),best=cp.length?Math.max(...cp.map(x=>x.v)):null;
+  h+=`<button class="mini ttrow" data-act="ttOpen" data-id="${t.id}" style="margin:0"><span class="ic" style="--c:${SK[t.sk].c}">${I[SK[t.sk].ic]}</span><span class="grow"><span class="eyebrow muted">${esc(SK[t.sk].s)}${l&&weekKey(l.d)===wk?' · <span class="c-good">diese Woche ✓</span>':''}</span><h3>${esc(t.t)}</h3><p>${l?`Zuletzt ${l.v}/10 (${fmtDate(l.d)}) · Bestwert ${best}/10${tr!=null?` · <span style="color:${tr>0?'var(--good)':tr<0?'var(--bad)':'var(--muted)'}">${tr>0?'▲ +':tr<0?'▼ ':'▬ '}${fmt1(tr)}</span>`:''}${cp.length<r.length?` · ${cp.length} von ${r.length} vergleichbar`:''}`:'Noch nicht gemacht'}</p></span>${cp.length>1?ttBars(cp.slice(-6)):''}<span class="go">${I.chev}</span></button>`;});
+ return h+'</div>';}
+let TTC=null;
+function ttSheet(id){const t=TBYID[id],r=ttRes(id),l=r[r.length-1];if(TTV==null)TTV=l?l.v:5;if(!TTC)TTC=Object.assign({zu:'partner',tempo:'mittel',ort:'halle'},l&&l.c||{});
+ const ck=condKey(TTC);
+ modal(`<div class="eyebrow muted">Techniktest · ${esc(SK[t.sk].n)}</div><h2>${esc(t.t)}</h2>
+ <div class="theory" style="padding:14px;animation:none"><p style="margin:0;font-weight:800">${esc(t.d)}</p></div>
+ <details class="card"><summary class="b small">Standard-Protokoll</summary><ul class="why" style="margin-top:8px">${TT_STD.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+ ${Object.entries({zu:'Zuspiel',tempo:'Tempo',ort:'Ort'}).map(([k,n])=>`<div><span class="lab">${n}</span><div class="seg">${TT_COND[k].map(([v,txt])=>`<button data-act="ttCond" data-id="${id}" data-k="${k}" data-v="${v}" aria-pressed="${TTC[k]===v}">${txt}</button>`).join('')}</div></div>`).join('')}
+ ${l&&l.c&&condKey(l.c)!==ck?`<p class="small b" style="color:var(--bad);margin:0">Andere Bedingungen als beim letzten Test (${esc(condTxt(l.c))}) – das Ergebnis zählt separat.</p>`:''}
+ <div class="center"><span class="lab">Treffer von 10</span><div class="stepper"><button class="btn ghost" data-act="ttStep" data-v="-1" aria-label="Weniger">−</button><b id="ttv">${TTV}</b><button class="btn ghost" data-act="ttStep" data-v="1" aria-label="Mehr">+</button></div></div>
+ ${r.length?`<div><div class="eyebrow muted" style="margin-bottom:6px">Verlauf <span class="muted">(blau = gleiche Bedingungen)</span></div><div class="tthist">${r.slice(-10).map(x=>`<div class="${condKey(x.c)===ck?'':'off'}" title="${esc(condTxt(x.c))}"><i style="height:${Math.max(6,x.v*10)}%"></i><span>${x.v}</span><em>${parseD(x.d).getDate()}.${parseD(x.d).getMonth()+1}.</em></div>`).join('')}</div></div>`:''}
+ <button class="btn block" data-act="ttSave" data-id="${id}">${I.check} Ergebnis speichern · +15 XP</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);}
+
+/* ================= 2.1 · Belastung ================= */
+const LOADF={Match:1,Turnier:1.2,Training:.8,Trainerstunde:.7};
+function loadInfo(){const f=j=>(+j.dur||0)/60*((INTENS.find(x=>x[0]===(j.int||2))||INTENS[1])[2])*(LOADF[j.type]||1);
+ const t=today(),acute=S.journal.filter(j=>j.date>addDays(t,-7)&&j.date<=t).reduce((a,j)=>a+f(j),0),chronic=S.journal.filter(j=>j.date>addDays(t,-35)&&j.date<=addDays(t,-7)).reduce((a,j)=>a+f(j),0)/4;
+ return{acute,chronic,ratio:chronic>0?acute/chronic:null,high:chronic>0&&acute/chronic>1.3&&acute>=3};}
+const FIT=[['fit','Fit'],['normal','Normal'],['muede','Müde'],['schmerz','Beschwerden']];
+
+/* ================= 2.1 · Coach über drei Zeiträume ================= */
+function coachFocus(){
+ const M=[...S.journal].filter(j=>j.res).sort(byDateAsc),t=today();
+ const P5=M.slice(-5),P20=M.slice(-20),P60=M.filter(j=>j.date>=addDays(t,-60));
+ const R=M.filter(j=>j.rt&&Object.keys(j.rt).length),R5=R.slice(-5),R20=R.slice(-20),R60=R.filter(j=>j.date>=addDays(t,-60));
+ const share=(P,k)=>P.length?P.filter(j=>j.lost===k).length/P.length:0;
+ const dev=(P,k)=>{const v=P.filter(j=>j.rt[k]!=null);if(!v.length)return 0;const all=P.reduce((a,j)=>{const x=Object.values(j.rt);return a+x.reduce((p,q)=>p+q,0)/x.length;},0)/P.length;return all-v.reduce((a,j)=>a+j.rt[k],0)/v.length;};
+ const sc=SKIDS.map(k=>{const L=.5*share(P5,k)+.3*share(P20,k)+.2*share(P60,k),D=.5*dev(R5,k)+.3*dev(R20,k)+.2*dev(R60,k);
+  const tl=TT.filter(x=>x.sk===k).map(x=>ttLast(x.id)).filter(Boolean).sort((a,b)=>a.v-b.v)[0];
+  return{k,L,D,tl,s:L+Math.max(0,D)/5*.6+(tl&&tl.v<=5?(5-tl.v)/10*.5:0)};}).sort((a,b)=>b.s-a.s);
+ const top=sc[0];
+ if(top.s<.12){const sr=selfRating(),k=weakest()[0];return{k,why:sr[k]!=null?`Laut deinen Bewertungen ist ${SK[k].n} (${fmt1(sr[k])}/10) gerade deine größte Baustelle.`:`Dein Startfokus: ${SK[k].n}. Sobald du Matches einträgst, passe ich ihn an deine Daten an.`,parts:[]};}
+ const k=top.k,parts=[];const c5=P5.filter(j=>j.lost===k).length,c20=P20.filter(j=>j.lost===k).length,c60=P60.filter(j=>j.lost===k).length;
+ if(c5||c20)parts.push(`in ${c5} der letzten ${P5.length}${P20.length>P5.length?` und ${c20} der letzten ${P20.length}`:''} Matches hast du die meisten Punkte bei ${SK[k].n} verloren${P60.length&&P60.length!==P20.length?` (${c60}× in 60 Tagen)`:''}`);
+ if(top.D>=.5)parts.push(`deine ${SK[k].p} liegen ${fmt1(top.D)} Punkte unter deinem Schnitt`);
+ if(top.tl&&top.tl.v<=5)parts.push(`Techniktest zuletzt ${top.tl.v}/10`);
+ return{k,why:(parts[0]?parts[0][0].toUpperCase()+parts.join(' · ').slice(1):`${SK[k].n} ist gerade deine größte Baustelle`)+'.',parts};
+}
+
+/* ================= 2.1 · Wochenplan: flexibel, mit Verfügbarkeit und Belastung ================= */
+const WDS=['Mo','Di','Mi','Do','Fr','Sa','So'];
 function coachWeek(){
  const wk=weekKey();S.coach=S.coach||{};
  if(!S.coach[wk]){const f=coachFocus();S.coach[wk]={k:f.k,why:f.why};save();}
  const F=S.coach[wk];let streak=1;for(let i=1;i<8;i++){const p=S.coach[addDays(wk,-7*i)];if(p&&p.k===F.k)streak++;else break;}
+ const days=F.days&&F.days.length?F.days:null,n=Math.max(0,Math.min(days?days.length:7,F.n!=null?F.n:(S.weekGoal||2)));
  const J=S.journal.filter(j=>weekKey(j.date)===wk),trainings=J.filter(j=>j.type==='Training'||j.type==='Trainerstunde').length,matches=J.filter(j=>j.type==='Match'||j.type==='Turnier').length;
- const tick=id=>!!(S.wtick&&S.wtick[wk+':'+id]),items=[],n=Math.max(1,S.weekGoal||2),cs=curStage(),k=F.k;
+ const LD=loadInfo(),fit=S.fit&&S.fit.d===today()?S.fit.v:null,light=LD.high||fit==='muede'||fit==='schmerz';
+ const tick=id=>!!(S.wtick&&S.wtick[wk+':'+id]),items=[],cs=curStage(),k=F.k;
  const ls=LESSONS.filter(l=>l.sk===k&&unlocked(l.idx)),les=ls.find(l=>!lessonDone(l.id))||ls.find(l=>stars(l.id)<3);
  if(les)items.push({id:'les',ic:'book',t:`Lektion: ${les.t}`,s:lessonDone(les.id)?'Mission für den 3. Stern offen':'Theorie + Quiz, 3 Minuten',done:lessonDone(les.id)&&weekKey(S.lessons[les.id].date||'2000-01-01')===wk,act:`data-act="lesson" data-id="${les.id}"`});
  const mis=(activeMissions().find(x=>x.l.sk===k)||{}).l||les||ls[0];
  const plans=PLANS.filter(p=>p.sk===k||(k==='smash'&&p.sk==='bandeja')).sort((a,b)=>Math.abs(a.st-cs)-Math.abs(b.st-cs)||(a.n===(S.pn||2)?-1:1)),pool=[...plans,...PLANS.filter(p=>!plans.includes(p)&&Math.abs(p.st-cs)<=1).sort((a,b)=>(a.n===(S.pn||2)?-1:1)-(b.n===(S.pn||2)?-1:1)||Math.abs(a.st-cs)-Math.abs(b.st-cs))],planAt=i=>pool[(i+streak-1)%pool.length];
- let tI=0,mI=0;for(let i=0;i<n;i++){
-  const plan=planAt(tI);if(i%2===0&&plan){items.push({id:'s'+i,ic:'dumbbell',t:`Training: ${plan.t}`,s:`60 Min · ${plan.n} Spieler · mit Timer`,done:trainings>tI,act:`data-act="plan" data-id="${plan.id}"`});tI++;}
-  else{items.push({id:'s'+i,ic:'racket',t:`Match mit Fokus ${SK[k].s}`,s:mis?`Mission: ${mis.m.t}`:`Achte bewusst auf deine ${SK[k].p}`,done:matches>mI,act:`data-act="brief"`});mI++;}}
- const dr=DRILLS.filter(d=>d.sk===k);if(dr.length){const d=dr[(hash(wk)+streak)%dr.length];items.push({id:'drill',ic:'clock',t:`Drill: ${d.t}`,s:`${d.min} Min · ${d.d}`,done:tick('drill'),act:`data-act="coachTick" data-id="drill"`,tick:1});}
- const tt=TT.filter(t=>t.sk===k)[streak%2]||TT.find(t=>t.sk===k);if(tt){const l=ttLast(tt.id);items.push({id:'tt',ic:'target',t:`Techniktest: ${tt.t}`,s:l?`Letztes Mal ${l.v}/10 – schaffst du mehr?`:'Einmal messen, wo du stehst',done:!!(l&&weekKey(l.d)===wk),act:`data-act="ttOpen" data-id="${tt.id}"`});}
+ let tI=0,mI=0,lightUsed=false;
+ for(let i=0;i<n;i++){const day=days?WDS[days[i]]+' · ':'';
+  if(i%2===0){const done=trainings>tI;
+   if(fit==='schmerz'&&!done&&!lightUsed){items.push({id:'s'+i,ic:'shield',t:`${day}Regeneration statt Training`,s:'Bei Beschwerden lieber pausieren oder nur locker bewegen. Halten sie an, ärztlich abklären.',done:tick('s'+i),act:`data-act="coachTick" data-id="s${i}"`,tick:1});lightUsed=true;}
+   else if(light&&!done&&!lightUsed){items.push({id:'s'+i,ic:'clock',t:`${day}Lockere Einheit`,s:`30 Min locker einspielen + 10 Min Mobility${LD.high?' – deine Belastung ist gerade deutlich höher als sonst':''}`,done:trainings>tI||tick('s'+i),act:`data-act="coachTick" data-id="s${i}"`,tick:1});lightUsed=true;}
+   else{const plan=planAt(tI);items.push({id:'s'+i,ic:'dumbbell',t:`${day}Training: ${plan.t}`,s:`60 Min · ${plan.n} Spieler · mit Timer`,done,act:`data-act="plan" data-id="${plan.id}"`});}
+   tI++;}
+  else{items.push({id:'s'+i,ic:'racket',t:`${day}Match mit Fokus ${SK[k].s}`,s:mis?`Mission: ${mis.m.t}`:`Achte bewusst auf deine ${SK[k].p}`,done:matches>mI,act:`data-act="brief"`});mI++;}}
+ const dr=light?DRILLS.filter(d=>d.t==='Mobility'||d.t==='Atem-Reset'):DRILLS.filter(d=>d.sk===k);
+ if(dr.length){const d=dr[(hash(wk)+streak)%dr.length];items.push({id:'drill',ic:'clock',t:`Drill: ${d.t}`,s:`${d.min} Min · ${d.d}`,done:tick('drill'),act:`data-act="coachTick" data-id="drill"`,tick:1});}
+ const tt=TT.filter(t=>t.sk===k)[streak%2]||TT.find(t=>t.sk===k);if(tt&&!light){const l=ttLast(tt.id);items.push({id:'tt',ic:'target',t:`Techniktest: ${tt.t}`,s:l?`Letztes Mal ${l.v}/10 – gleiche Bedingungen wählen`:'Einmal messen, wo du stehst',done:!!(l&&weekKey(l.d)===wk),act:`data-act="ttOpen" data-id="${tt.id}"`});}
  const tc=[...S.journal].filter(j=>j.coach&&j.coach.practice&&dayDiff(j.date,today())<=14).sort((a,b)=>byDateAsc(b,a))[0];
  if(tc)items.push({id:'tc',ic:'pen',t:'Aus der Trainerstunde üben',s:tc.coach.practice,done:tick('tc'),act:`data-act="coachTick" data-id="tc"`,tick:1});
- return{F,streak,items,done:items.filter(x=>x.done).length};
+ return{F,streak,items,done:items.filter(x=>x.done).length,n,days,LD,fit,light};
 }
-function coachCard(){const C=coachWeek(),rv=reviewsDue().length;
- return `<div class="coach"><div class="row"><span class="eyebrow" style="opacity:.85">Dein Coach · diese Woche</span>${C.streak>1?`<span class="chip ball" style="margin-left:auto">Woche ${C.streak} am ${esc(SK[C.F.k].s)}</span>`:''}</div>
- <h2>Fokus: ${esc(SK[C.F.k].n)}</h2><p>${esc(C.F.why)}</p>
+function coachCard(){const C=coachWeek(),rv=reviewsDue().length,F=C.F;
+ return `<div class="coach"><div class="row"><span class="eyebrow" style="opacity:.85">Dein Coach · diese Woche</span>${C.streak>1?`<span class="chip ball" style="margin-left:auto">Woche ${C.streak} am ${esc(SK[F.k].s)}</span>`:''}</div>
+ <h2>Fokus: ${esc(SK[F.k].n)}</h2><p>${esc(F.why)}</p>
+ ${C.light?`<div class="cwarn">${I.shield}<span>${C.fit==='schmerz'?'Du hast Beschwerden angegeben – der Plan ist heute auf Regeneration gestellt.':C.fit==='muede'?'Du fühlst dich müde – ich habe eine Einheit leichter gemacht.':`Hohe Belastung: ${fmt1(C.LD.acute)} h gewichtet in 7 Tagen vs. Ø ${fmt1(C.LD.chronic)} h – eine Einheit ist leichter.`} Trainingshilfe, keine medizinische Beurteilung.</span></div>`:''}
+ <div class="fitrow"><span class="small b" style="opacity:.85">Heute:</span>${FIT.map(([v,n])=>`<button data-act="fit" data-v="${v}" aria-pressed="${C.fit===v}">${n}</button>`).join('')}</div>
  <div class="goal" style="color:inherit"><div class="bar"><i style="width:${C.items.length?C.done/C.items.length*100:0}%"></i></div><span>${C.done}/${C.items.length}</span></div>
  <div class="citems">${C.items.map(x=>`<div class="citem ${x.done?'done':''}"><button class="ck" ${x.tick?`data-act="coachTick" data-id="${x.id}"`:x.act} aria-label="${x.done?'Erledigt':'Offen'}">${x.done?I.check:''}</button><button class="cbody" ${x.act}><b>${esc(x.t)}</b><span>${esc(x.s)}</span></button></div>`).join('')}</div>
  ${rv?`<button class="btn block" data-act="revOpen">${I.book} ${rv} Wiederholung${rv>1?'en':''} aus der Trainerstunde</button>`:''}
- <p class="small" style="opacity:.8;margin:0">Plan für ${S.weekGoal||2} Sessions pro Woche (im Profil änderbar). Der Fokus wird jeden Montag neu aus deinen Daten bestimmt.</p></div>`;}
+ <details class="cadj"${S.cadjOpen?' open':''}><summary class="small b">Woche anpassen · ${C.n} Session${C.n===1?'':'s'}${C.days?' · '+C.days.map(d=>WDS[d]).join(', '):''}</summary>
+  <div class="row" style="margin-top:8px"><span class="small b grow">Sessions diese Woche</span><button class="btn sm" data-act="coachN" data-v="-1" aria-label="Weniger">−</button><b style="min-width:24px;text-align:center">${C.n}</b><button class="btn sm" data-act="coachN" data-v="1" aria-label="Mehr">+</button></div>
+  <div class="small b" style="margin:8px 0 4px">Wann kannst du?</div><div class="fitrow">${WDS.map((d,i)=>`<button data-act="coachDay" data-v="${i}" aria-pressed="${!!(F.days&&F.days.includes(i))}">${d}</button>`).join('')}</div></details>
+ <p class="small" style="opacity:.8;margin:0">Fokus aus deinen letzten 5 und 20 Matches und den letzten 60 Tagen – wird jeden Montag neu bestimmt.</p></div>`;}
+
+/* ================= 2.1 · Backup-Prüfung ================= */
+function validateState(st){
+ const err=[],warn=[];const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+ if(!isObj(st))return{ok:false,err:['Die Datei enthält keinen PadelUp-Spielstand.'],warn};
+ if(typeof st.xp!=='number'||!isFinite(st.xp)||st.xp<0)err.push('XP fehlen oder sind ungültig.');
+ if(st.journal!=null&&!Array.isArray(st.journal))err.push('Das Tagebuch hat ein ungültiges Format.');
+ if(err.length)return{ok:false,err,warn};
+ const c=JSON.parse(JSON.stringify(st)),TYPES=['Match','Training','Trainerstunde','Turnier'],dre=/^\d{4}-\d{2}-\d{2}$/;
+ const J=[];(c.journal||[]).forEach((j,i)=>{
+  if(!isObj(j)||!dre.test(j.date||'')||!TYPES.includes(j.type)){warn.push(`Eintrag ${i+1} übersprungen (Datum oder Art ungültig).`);return;}
+  if(typeof j.id!=='string'||!j.id)j.id='r'+i+Date.now().toString(36);
+  j.dur=Math.max(5,Math.min(600,Math.round(+j.dur)||60));
+  if(j.res!=null&&!['w','l','d'].includes(j.res)){delete j.res;warn.push(`Eintrag vom ${j.date}: Ergebnis ungültig, entfernt.`);}
+  if(j.rt!=null){if(!isObj(j.rt)){j.rt={};warn.push(`Eintrag vom ${j.date}: Bewertungen ungültig, entfernt.`);}else Object.keys(j.rt).forEach(k=>{const v=j.rt[k];if(!SKIDS.includes(k)||typeof v!=='number'||v<0||v>10){delete j.rt[k];warn.push(`Eintrag vom ${j.date}: Bewertung „${k}“ ungültig, entfernt.`);}});}
+  ['partner','opp','notes','score'].forEach(k=>{if(j[k]!=null&&typeof j[k]!=='string')j[k]=String(j[k]);});
+  if(j.lost!=null&&!SKIDS.includes(j.lost))delete j.lost;
+  J.push(j);});
+ c.journal=J;
+ [['lessons','obj'],['missions','obj'],['tests','obj'],['chests','obj'],['ms','obj'],['tt','obj'],['skillXp','obj'],['gear','obj'],['ach','obj'],['goals','arr'],['ext','arr']].forEach(([k,tp])=>{if(c[k]!=null&&(tp==='arr'?!Array.isArray(c[k]):!isObj(c[k]))){delete c[k];warn.push(`Bereich „${k}“ war beschädigt und wurde zurückgesetzt.`);}});
+ return{ok:true,err,warn,clean:c};
+}
+function restoreSheet(st,saved){const V=validateState(st);
+ if(!V.ok){modal(`<div class="center"><span class="ic" style="width:72px;height:72px;--c:var(--bad)">${I.x}</span><h2>Nicht geladen</h2></div><ul class="why">${V.err.map(e=>`<li>${esc(e)}</li>`).join('')}</ul><p class="muted small b">Dein aktueller Stand bleibt unverändert.</p><button class="btn block" data-act="closeModal">OK</button>`);return;}
+ PENDING_RESTORE=V.clean;
+ modal(`<div class="center">${mascot()}<h2>Backup laden?</h2><p class="b">${saved?'Gesichert am '+new Date(saved).toLocaleDateString('de-DE')+' · ':''}${V.clean.journal.length} Einträge · ${V.clean.xp} XP</p></div>
+ ${V.warn.length?`<div class="card stack" style="border-color:var(--gold)"><b class="small">${V.warn.length} Hinweis${V.warn.length>1?'e':''} – wird beim Laden korrigiert:</b><ul class="why small">${V.warn.slice(0,6).map(w=>`<li>${esc(w)}</li>`).join('')}${V.warn.length>6?`<li>… und ${V.warn.length-6} weitere</li>`:''}</ul></div>`:''}
+ <p class="muted small b">Dein aktueller Stand auf diesem Gerät wird ersetzt.</p><button class="btn block" data-act="restoreDo">Laden</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);}
+function restorePick(){const i=document.createElement('input');i.type='file';i.accept='.json,application/json';i.onchange=()=>{const f=i.files&&i.files[0];if(!f)return;if(f.size>5e6){toast('Datei zu groß für ein PadelUp-Backup',I.x);return;}const r=new FileReader();r.onload=()=>{let o;try{o=JSON.parse(r.result);}catch(e){restoreSheet(null);return;}restoreSheet(o&&o.state?o.state:o,o&&o.saved);};r.readAsText(f);};i.click();}
 
 /* ================= Modals ================= */
 function modal(html){$('#modal').innerHTML=`<div class="modal" data-act="closeModalBg"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;}
@@ -2747,7 +2853,7 @@ function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.va
  [['ol','jol'],['pl','jpl']].forEach(([k,id])=>{const v=g(id);if(v!=null){const n=parseFloat(String(v).replace(',','.'));JF[k]=v.trim()===''||isNaN(n)?'':Math.max(0,Math.min(7,n));}});}
 function saveJournal(){
  syncJF();
- if(JF.editId){const j=S.journal.find(x=>x.id===JF.editId);if(j){Object.assign(j,{type:JF.type,date:JF.date||j.date,dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner,rs:10});
+ if(JF.editId){const j=S.journal.find(x=>x.id===JF.editId);if(j){Object.assign(j,{type:JF.type,date:JF.date||j.date,dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner,rs:10});if(Object.keys(JF.rt||{}).length)delete j.q;
   if(JF.type==='Match'||JF.type==='Turnier'){j.res=JF.res||inferRes(JF.score);j.score=JF.score;j.opp=JF.opp;j.ol=JF.ol;j.pl=JF.pl;}else{delete j.res;delete j.score;delete j.opp;}
   if(JF.type==='Trainerstunde'&&JF.coach&&(JF.coach.learn||JF.coach.avoid||JF.coach.practice)){j.coach=JF.coach;if(!j.rev)j.rev={step:0,next:addDays(j.date,REV_STEPS[0])};}
   S.journal.sort((a,b)=>b.date.localeCompare(a.date));}
@@ -2756,6 +2862,7 @@ function saveJournal(){
  if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;if(JF.ol!=='')e.ol=JF.ol;if(JF.pl!=='')e.pl=JF.pl;}
  if(JF.type==='Trainerstunde'&&JF.coach&&(JF.coach.learn||JF.coach.avoid||JF.coach.practice)){e.coach=JF.coach;e.rev={step:0,next:addDays(e.date,REV_STEPS[0])};}
  e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
+ if(JF.q&&!Object.keys(e.rt||{}).length)e.q=true;
  e.ts=Date.now();if((e.type==='Match'||e.type==='Turnier')&&!e.res&&e.score)e.res=inferRes(e.score);
  const prevSR=selfRating(),dueBefore=gearDue().map(g=>g.id),rBefore=topRacket().id;
  const newL=e.lost?unlockSkill(e.lost):null;
@@ -2872,9 +2979,14 @@ const ACT={
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
  peek(){peekSheet(LS.id);},
  brief(){briefSheet();},
- ttOpen(el){TTV=null;ttSheet(el.dataset.id);},
+ ttOpen(el){TTV=null;TTC=null;ttSheet(el.dataset.id);},
+ ttCond(el){TTC[el.dataset.k]=el.dataset.v;ttSheet(el.dataset.id);},
+ extSave(){const v=parseFloat(String($('#extlvl').value).replace(',','.'));if(isNaN(v)||v<0||v>7){toast('Bitte ein Niveau zwischen 0 und 7',I.x);return;}extAdd(v);},
+ fit(el){S.fit=S.fit&&S.fit.d===today()&&S.fit.v===el.dataset.v?null:{d:today(),v:el.dataset.v};save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
+ coachN(el){const W=S.coach[weekKey()],cur=W.n!=null?W.n:(S.weekGoal||2);W.n=Math.max(0,Math.min(W.days&&W.days.length?W.days.length:7,cur+ +el.dataset.v));S.cadjOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
+ coachDay(el){const W=S.coach[weekKey()],d=+el.dataset.v;W.days=W.days||[];W.days=W.days.includes(d)?W.days.filter(x=>x!==d):[...W.days,d].sort((a,b)=>a-b);S.cadjOpen=true;save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
  ttStep(el){TTV=Math.max(0,Math.min(10,TTV+ +el.dataset.v));$('#ttv').textContent=TTV;beep('tap');},
- ttSave(el){const id=el.dataset.id,t=TBYID[id];S.tt=S.tt||{};(S.tt[id]=S.tt[id]||[]).push({d:today(),v:TTV});S.cnt.tt=(S.cnt.tt||0)+1;const prev=ttRes(id).slice(0,-1).map(x=>x.v),rec=prev.length&&TTV>Math.max(...prev);const r=addXP(15,t.sk);checkAch();save();closeModal();render();toast(rec?`Neuer Bestwert: ${TTV}/10! +${r.n} XP`:`${esc(t.t)}: ${TTV}/10 gespeichert · +${r.n} XP`,I.target);if(rec)confetti();beep('coin');TTV=null;},
+ ttSave(el){const id=el.dataset.id,t=TBYID[id];S.tt=S.tt||{};(S.tt[id]=S.tt[id]||[]).push({d:today(),v:TTV,c:{...TTC}});S.cnt.tt=(S.cnt.tt||0)+1;const prev=ttComp(id).slice(0,-1).map(x=>x.v),rec=prev.length&&TTV>Math.max(...prev);const r=addXP(15,t.sk);checkAch();save();closeModal();render();toast(rec?`Neuer Bestwert: ${TTV}/10! +${r.n} XP`:`${esc(t.t)}: ${TTV}/10 gespeichert · +${r.n} XP`,I.target);if(rec)confetti();beep('coin');TTV=null;TTC=null;},
  coachTick(el){const k=weekKey()+':'+el.dataset.id;S.wtick=S.wtick||{};S.wtick[k]=!S.wtick[k];if(S.wtick[k]){addXP(5,null);beep('coin');}save();const y=$('#main').scrollTop;render();$('#main').scrollTop=y;},
  revOpen(){MQ=[];reviewPopup();},
  revOk(el){const j=S.journal.find(x=>x.id===el.dataset.id);j.rev.step++;if(j.rev.step<REV_STEPS.length)j.rev.next=addDays(today(),REV_STEPS[j.rev.step]-REV_STEPS[j.rev.step-1]);addXP(5,null);save();render();toast(j.rev.step>=REV_STEPS.length?'Alle Wiederholungen geschafft – das sitzt!':'Nächste Wiederholung in '+(REV_STEPS[j.rev.step]-REV_STEPS[j.rev.step-1])+' Tagen',I.check);if(reviewsDue().length)reviewPopup();else nextModal();},
@@ -2883,7 +2995,7 @@ const ACT={
  briefLog(){closeModal();journalNew();},
  quick(){QL=null;quickSheet();},
  ql(el){qlSync();let v=el.dataset.v;if(el.dataset.k==='dur')v=+v;QL[el.dataset.k]=QL[el.dataset.k]===v&&el.dataset.k==='res'?null:v;quickSheet();},
- qlSave(){qlSync();const isM=QL.type==='Match'||QL.type==='Turnier';JF={type:QL.type,date:today(),dur:QL.dur,int:2,res:isM?QL.res:null,score:isM?QL.score:'',partner:QL.partner,opp:isM?QL.opp:'',feel:3,rt:{},lost:null,mr:{},notes:'',ol:'',pl:''};QL=null;closeModal();saveJournal();},
+ qlSave(){qlSync();const isM=QL.type==='Match'||QL.type==='Turnier';JF={q:true,type:QL.type,date:today(),dur:QL.dur,int:2,res:isM?QL.res:null,score:isM?QL.score:'',partner:QL.partner,opp:isM?QL.opp:'',feel:3,rt:{},lost:null,mr:{},notes:'',ol:'',pl:''};QL=null;closeModal();saveJournal();},
  qlFull(){qlSync();const q=QL;QL=null;closeModal();journalNew({type:q.type,dur:q.dur,res:q.res,score:q.score,partner:q.partner,opp:q.opp});},
  journalEdit(el){journalEdit(el.dataset.id);},
  goalNew(){GN=null;goalNewSheet();},
@@ -2950,7 +3062,7 @@ const ACT={
  export(){const code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));const done=()=>toast('Code kopiert – gut aufbewahren!',I.check);
   if(navigator.clipboard)navigator.clipboard.writeText(code).then(done,()=>showCode(code));else showCode(code);},
  import(){modal(`<h2>Code einfügen</h2><p class="muted b small">Achtung: überschreibt deinen aktuellen Fortschritt.</p><textarea id="imp" class="field code" placeholder="Code hier einfügen"></textarea><button class="btn block" data-act="doImport">Laden</button><button class="linkbtn" data-act="closeModal">Abbrechen</button>`);},
- doImport(){try{const o=JSON.parse(decodeURIComponent(escape(atob($('#imp').value.trim()))));if(!o||typeof o!=='object'||!('xp' in o))throw 0;S=Object.assign(defaults(),o);save();closeModal();tick();render();toast('Fortschritt geladen!',I.check);}catch(e){toast('Ungültiger Code',I.x);}},
+ doImport(){let o;try{o=JSON.parse(decodeURIComponent(escape(atob($('#imp').value.trim()))));}catch(e){toast('Ungültiger Code',I.x);return;}restoreSheet(o&&o.state?o.state:o);},
  reset(el){if(el.dataset.armed){try{localStorage.removeItem(KEY);}catch(e){}S=defaults();OB={step:0,name:'',lvl:null,side:null,focus:[],goal:20,weekGoal:2};save();render();return;}el.dataset.armed=1;el.textContent='Wirklich? Nochmal tippen zum Löschen';el.style.color='var(--bad)';},
  ob(el){const k=el.dataset.k;let v=el.dataset.v;if(k!=='side')v=+v;OB[k]=v;beep('tap');renderOnboarding();},
  obFocus(el){const k=el.dataset.k;if(OB.focus.includes(k))OB.focus=OB.focus.filter(x=>x!==k);else if(OB.focus.length<3)OB.focus.push(k);renderOnboarding();},

@@ -56,9 +56,18 @@ Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchs
 
 Der Fortschritt liegt im Browser (`localStorage`). Unter **Profil → Fortschritt sichern** gibt es einen Code zum Übertragen.
 
+## Qualität (2.1)
+
+- **Spielniveau ehrlich getrennt:** externes Niveau (z. B. Playtomic) mit Verlauf · Schätzung nur aus Matches mit eingetragenem Gegner-Niveau (ab 3 Matches, mit ±) · interne Leistungsentwicklung als relativer Index (Start 100)
+- **Coach über drei Zeiträume:** letzte 5 Matches (50 %), letzte 20 (30 %), letzte 60 Tage (20 %) – Verlust-Bereiche, Bewertungen unter dem eigenen Schnitt, schwache Techniktests
+- **Flexibler Wochenplan:** Sessions dieser Woche, verfügbare Tage, „Wie fühlst du dich heute?“ und Belastung (7 Tage vs. Ø der 4 Wochen davor) – bei hoher Belastung, Müdigkeit oder Beschwerden wird eine Einheit leichter
+- **Standardisierte Techniktests:** festes Protokoll, Bedingungen (Zuspiel, Tempo, Ort) werden gespeichert; Trend und Bestwert nur bei gleichen Bedingungen
+- **Datenqualität:** Schnell-Einträge sind markiert und werden in der Statistik ausgewiesen
+- **Backup-Import mit Prüfung:** ungültige Dateien werden abgelehnt, fehlerhafte Einträge/Werte aussortiert und vor dem Laden angezeigt
+
 ## Tests
 
-Automatische Browser-Tests (Playwright) prüfen Inhalte, Lernpfad, Tagebuch, Statistik, Material, Schläger-Empfehlung, Backup, Ziele, Trainingspläne, Briefing und Animationen in Hell und Dunkel.
+24 automatische Browser-Tests (Playwright) prüfen Inhalte, Lernpfad, Tagebuch, Statistik, Material, Schläger-Empfehlung, Backup, Ziele, Trainingspläne, Briefing und Animationen in Hell und Dunkel.
 
 ```bash
 npm install
