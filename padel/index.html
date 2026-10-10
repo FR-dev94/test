@@ -210,6 +210,10 @@ main{flex:1;overflow-y:auto;overflow-x:hidden;padding:16px 16px 40px;scroll-beha
 .res.w{background:var(--good-bg);color:var(--good)} .res.l{background:var(--bad-bg);color:var(--bad)} .res.d{background:var(--surface-2);color:var(--muted)}
 
 /* Formulare */
+.kcal{display:flex;gap:12px;align-items:center;background:color-mix(in srgb,var(--flame) 12%,var(--surface));border:2px solid color-mix(in srgb,var(--flame) 35%,transparent);border-radius:16px;padding:12px 14px}
+.kcal svg{width:30px;height:30px}
+.kcal b{display:block;font-family:var(--font-display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.kcal span{font-size:13px;color:var(--muted);font-weight:700}
 .seg{display:flex;flex-wrap:wrap;gap:8px}
 .seg button{border:2px solid var(--line);border-bottom-width:4px;background:var(--surface);border-radius:12px;padding:8px 12px;font-weight:800;font-size:14px}
 .seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
@@ -1202,7 +1206,7 @@ function fmtDate(s){const d=parseD(s);const diff=dayDiff(s,today());if(diff===0)
 
 /* ================= Zustand ================= */
 const KEY='padelup-v1';
-function defaults(){return{v:2,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},
+function defaults(){return{v:2,onb:false,name:'',lvl:0,side:'rechts',focus:[],goal:20,weekGoal:2,unlockId:'griff',ms:{},weight:83.5,height:178,
  xp:0,gems:40,streak:0,best:0,last:null,freezes:1,dbl:0,days:{},
  lessons:{},tests:{},chests:{},missions:{},journal:[],drills:{},skillXp:{},
  day:{d:null,lessons:0,drills:0,xp:0,perfect:0,logs:0,missions:0,claimed:[],chest:false,goalHit:false},
@@ -1315,6 +1319,13 @@ const QUESTS={
 };
 function questsToday(){if(S.day.q)return S.day.q;const r=rng(hash('q'+today()));const pool=Object.keys(QUESTS).filter(k=>k!=='mission'||Object.keys(S.missions).length);const ids=shuffle(pool,r);const out=[];for(const id of ids){if(out.some(o=>o.slice(0,2)===id.slice(0,2)))continue;out.push(id);if(out.length===3)break;}S.day.q=out;save();return out;}
 const qProg=id=>Math.min(QUESTS[id].n,S.day[QUESTS[id].k]||0);
+
+/* ----- Kalorien (Schätzung: kcal = MET × Gewicht in kg × Stunden) ----- */
+const MET={Match:6,Turnier:7,Training:5,Trainerstunde:4.5};
+const INTENS=[[1,'Locker',.8],[2,'Normal',1],[3,'Intensiv',1.2]];
+const kcalCalc=(type,dur,int)=>Math.round((MET[type]||5)*((INTENS.find(x=>x[0]===(int||2))||INTENS[1])[2])*(+S.weight||80)*(+dur||0)/60);
+const kcalOf=j=>j.kcal!=null?j.kcal:kcalCalc(j.type,j.dur,j.int);
+const fmtN=n=>Math.round(n).toLocaleString('de-DE');
 
 /* ----- Erfolge ----- */
 const wins=()=>S.journal.filter(j=>j.res==='w').length;
@@ -1483,13 +1494,15 @@ function viewJournal(){
  const wk=weekKey(),thisWeek=J.filter(j=>weekKey(j.date)===wk).length;
  let streakW=0;for(const j of [...matches].sort((a,b)=>b.date.localeCompare(a.date))){if(j.res==='w')streakW++;else break;}
  let h=`<h2 class="sec-title">Trainingstagebuch</h2>
- <div class="card stack" style="margin-bottom:14px"><div class="row"><div class="grow"><div class="eyebrow muted">Wochenziel</div><b>${thisWeek} von ${S.weekGoal} Sessions</b></div>${thisWeek>=S.weekGoal?'<span class="chip good">'+I.check+' geschafft</span>':''}</div><div class="bar green"><i style="width:${Math.min(100,thisWeek/S.weekGoal*100)}%"></i></div>
+ <div class="card stack" style="margin-bottom:14px"><div class="row"><div class="grow"><div class="eyebrow muted">Wochenziel</div><b>${thisWeek} von ${S.weekGoal} Sessions</b><div class="muted small b">${fmtN(J.filter(j=>weekKey(j.date)===wk).reduce((a,j)=>a+kcalOf(j),0))} kcal diese Woche</div></div>${thisWeek>=S.weekGoal?'<span class="chip good">'+I.check+' geschafft</span>':''}</div><div class="bar green"><i style="width:${Math.min(100,thisWeek/S.weekGoal*100)}%"></i></div>
  <button class="btn block" data-act="journalNew">${I.plus} Session eintragen</button></div>
  <div class="statgrid">
   <div class="sg"><span class="c-acc">${I.racket}</span><div><b>${J.length}</b><span>Sessions</span></div></div>
   <div class="sg"><span class="c-gold">${I.trophy}</span><div><b>${matches.length?Math.round(w/matches.length*100)+'%':'–'}</b><span>Siegquote (${w}/${matches.length})</span></div></div>
   <div class="sg"><span class="c-good">${I.clock}</span><div><b>${hours().toFixed(1).replace('.',',')} h</b><span>auf dem Court</span></div></div>
   <div class="sg"><span class="c-flame">${I.flame}</span><div><b>${streakW}</b><span>Siege in Folge</span></div></div>
+  <div class="sg"><span class="c-flame">${I.flame}</span><div><b>${fmtN(J.reduce((a,j)=>a+kcalOf(j),0))}</b><span>kcal gesamt</span></div></div>
+  <div class="sg"><span class="c-gold">${I.bolt}</span><div><b>${J.length?fmtN(J.reduce((a,j)=>a+kcalOf(j),0)/J.length):'–'}</b><span>kcal pro Session</span></div></div>
  </div>`;
  // Aktivität: letzte 8 Wochen in Minuten
  const weeks=[];for(let i=7;i>=0;i--){const k=addDays(wk,-7*i);weeks.push({k,m:J.filter(j=>weekKey(j.date)===k).reduce((a,j)=>a+(+j.dur||0),0)});}
@@ -1501,7 +1514,7 @@ function viewJournal(){
   <div class="row"><span class="ic" style="--c:var(--bad)">${I.target}</span><div class="grow"><div class="eyebrow muted">Deine Baustelle</div><b>${esc(SK[wk1].n)}</b></div>${(()=>{const l=LESSONS.find(l=>l.sk===wk1&&unlocked(l.idx));return l?`<button class="btn sm" data-act="lesson" data-id="${l.id}">Üben</button>`:'';})()}</div></div>`;
  h+=`<h2 class="sec-title">Einträge</h2>`;
  if(!J.length)h+=`<div class="card empty">${mascot()}<h3>Noch keine Einträge</h3><p class="muted">Trag dein nächstes Match oder Training ein – mit Ergebnis, Gefühl und Selbsteinschätzung.</p></div>`;
- else h+=`<div class="card">${J.map((j,i)=>`<button class="entry" data-act="journalView" data-i="${i}"><span class="ic" style="--c:${j.type==='Match'||j.type==='Turnier'?'var(--accent)':'var(--u4)'}">${j.type==='Training'||j.type==='Trainerstunde'?I.dumbbell:I.racket}</span><div class="grow"><h3>${esc(j.type)}${j.score?' · '+esc(j.score):''}</h3><p>${fmtDate(j.date)} · ${j.dur} Min${j.partner?' · mit '+esc(j.partner):''}</p></div>${j.res?`<span class="res ${j.res}">${{w:'Sieg',l:'Niederlage',d:'Remis'}[j.res]}</span>`:''}</button>`).join('')}</div>`;
+ else h+=`<div class="card">${J.map((j,i)=>`<button class="entry" data-act="journalView" data-i="${i}"><span class="ic" style="--c:${j.type==='Match'||j.type==='Turnier'?'var(--accent)':'var(--u4)'}">${j.type==='Training'||j.type==='Trainerstunde'?I.dumbbell:I.racket}</span><div class="grow"><h3>${esc(j.type)}${j.score?' · '+esc(j.score):''}</h3><p>${fmtDate(j.date)} · ${j.dur} Min · ${fmtN(kcalOf(j))} kcal${j.partner?' · mit '+esc(j.partner):''}</p></div>${j.res?`<span class="res ${j.res}">${{w:'Sieg',l:'Niederlage',d:'Remis'}[j.res]}</span>`:''}</button>`).join('')}</div>`;
  return h;
 }
 
@@ -1540,6 +1553,8 @@ function viewProfile(){
  <h2 class="sec-title">Shop</h2><button class="btn ball block" data-act="shop">${I.bag} Shop öffnen · ${S.gems} Bälle</button>
  <h2 class="sec-title">Einstellungen</h2><div class="card stack">
   <div><label class="lab" for="nm">Name</label><input id="nm" class="field" value="${esc(S.name)}" maxlength="24" data-act="noop"></div>
+  <div class="row"><div class="grow"><label class="lab" for="wkg">Gewicht (kg)</label><input id="wkg" class="field" type="number" inputmode="decimal" min="30" max="250" step="0.1" value="${S.weight}"></div><div class="grow"><label class="lab" for="hcm">Größe (cm)</label><input id="hcm" class="field" type="number" inputmode="numeric" min="120" max="230" value="${S.height}"></div></div>
+  <p class="muted small b" style="margin-top:-4px">Für die Kalorien-Schätzung. Halte dein Gewicht aktuell – neue Sessions rechnen mit dem aktuellen Wert, alte behalten ihren.</p>
   <div><span class="lab">Seite</span><div class="seg">${[['rechts','Rechts'],['links','Links'],['beide','Beide']].map(([v,n])=>`<button data-act="set" data-k="side" data-v="${v}" aria-pressed="${S.side===v}">${n}</button>`).join('')}</div></div>
   <div><span class="lab">Tagesziel</span><div class="seg">${[10,20,30,50].map(v=>`<button data-act="set" data-k="goal" data-v="${v}" aria-pressed="${S.goal===v}">${v} XP</button>`).join('')}</div></div>
   <div><span class="lab">Sessions pro Woche</span><div class="seg">${[1,2,3,4,5].map(v=>`<button data-act="set" data-k="weekGoal" data-v="${v}" aria-pressed="${S.weekGoal===v}">${v}</button>`).join('')}</div></div>
@@ -1553,6 +1568,8 @@ function viewProfile(){
  return h;
 }
 function afterRender(){
+ const wkg=$('#wkg');if(wkg)wkg.addEventListener('change',()=>{const v=parseFloat(String(wkg.value).replace(',','.'));if(v>=30&&v<=250){S.weight=Math.round(v*10)/10;save();toast('Gewicht gespeichert: '+String(S.weight).replace('.',',')+' kg',I.check);}});
+ const hcm=$('#hcm');if(hcm)hcm.addEventListener('change',()=>{const v=parseInt(hcm.value);if(v>=120&&v<=230){S.height=v;save();}});
  const nm=$('#nm');if(nm)nm.addEventListener('change',()=>{S.name=nm.value.trim().slice(0,24);save();renderTop();});
  if(S.tab==='learn'&&scrollCur){scrollCur=false;const c=document.querySelector('.node.current');if(c)setTimeout(()=>c.scrollIntoView({block:'center',behavior:'smooth'}),60);}
 }
@@ -1714,7 +1731,7 @@ function missionDoneFx(out){
 /* ================= Tagebuch ================= */
 let JF=null;
 function journalNew(){
- JF={type:'Match',date:today(),dur:90,res:null,score:'',partner:'',opp:'',feel:3,rt:{},lost:null,mr:{},notes:''};
+ JF={type:'Match',date:today(),dur:90,int:2,res:null,score:'',partner:'',opp:'',feel:3,rt:{},lost:null,mr:{},notes:''};
  drawJournal();
 }
 function drawJournal(){
@@ -1724,6 +1741,9 @@ function drawJournal(){
  <div class="l-body"><div class="l-inner">
   <div><span class="lab">Art</span><div class="seg big">${['Match','Training','Trainerstunde','Turnier'].map(t=>`<button data-act="jf" data-k="type" data-v="${t}" aria-pressed="${JF.type===t}">${t}</button>`).join('')}</div></div>
   <div class="row"><div class="grow"><label class="lab" for="jdate">Datum</label><input id="jdate" type="date" class="field" value="${JF.date}" max="${today()}"></div><div class="grow"><label class="lab" for="jdur">Dauer (Min)</label><input id="jdur" type="number" min="10" max="600" step="5" class="field" value="${JF.dur}"></div></div>
+  <div class="seg big">${[60,90,120].map(v=>`<button data-act="jf" data-k="dur" data-v="${v}" aria-pressed="${JF.dur===v}">${v} Min</button>`).join('')}</div>
+  <div><span class="lab">Intensität</span><div class="seg">${INTENS.map(([v,n])=>`<button data-act="jf" data-k="int" data-v="${v}" aria-pressed="${JF.int===v}">${n}</button>`).join('')}</div></div>
+  <div class="kcal"><span class="c-flame">${I.flame}</span><div class="grow"><b id="jkcal">≈ ${fmtN(kcalCalc(JF.type,JF.dur,JF.int))} kcal</b><span>bei ${String(S.weight).replace('.',',')} kg · Schätzung</span></div></div>
   ${isMatch?`<div><span class="lab">Ergebnis</span><div class="seg big">${[['w','Sieg'],['l','Niederlage'],['d','Remis']].map(([v,n])=>`<button data-act="jf" data-k="res" data-v="${v}" aria-pressed="${JF.res===v}">${n}</button>`).join('')}</div></div>
   <div><label class="lab" for="jscore">Satzergebnis</label><input id="jscore" class="field" placeholder="z. B. 6:4 3:6 7:5" value="${esc(JF.score)}"></div>`:''}
   <div class="row"><div class="grow"><label class="lab" for="jpart">Partner/in</label><input id="jpart" class="field" value="${esc(JF.partner)}" placeholder="optional"></div>${isMatch?`<div class="grow"><label class="lab" for="jopp">Gegner</label><input id="jopp" class="field" value="${esc(JF.opp)}" placeholder="optional"></div>`:''}</div>
@@ -1734,13 +1754,15 @@ function drawJournal(){
   <div><label class="lab" for="jnotes">Notizen</label><textarea id="jnotes" class="field" placeholder="Was lief gut? Was nimmst du mit?">${esc(JF.notes)}</textarea></div>
  </div></div>
  <div class="l-foot"><div class="foot-in"><button class="btn block" data-act="saveJournal">${I.check} Speichern</button></div></div></div>`;
+ liveKcal();
 }
+function liveKcal(){const i=document.getElementById('jdur'),o=document.getElementById('jkcal');if(i&&o)i.addEventListener('input',()=>{o.textContent='≈ '+fmtN(kcalCalc(JF.type,parseInt(i.value)||0,JF.int))+' kcal';});}
 function syncJF(){const g=id=>{const e=document.getElementById(id);return e?e.value:null;};
  const d=g('jdate');if(d)JF.date=d;const du=g('jdur');if(du!=null)JF.dur=Math.max(5,Math.min(600,parseInt(du)||0));
  ['score','partner','opp','notes'].forEach(k=>{const v=g('j'+({partner:'part'}[k]||k));if(v!=null)JF[k]=v.trim();});}
 function saveJournal(){
  syncJF();
- const e={id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
+ const e={id:Date.now().toString(36),type:JF.type,date:JF.date||today(),dur:JF.dur||60,int:JF.int||2,kcal:kcalCalc(JF.type,JF.dur||60,JF.int),feel:JF.feel,rt:JF.rt,lost:JF.lost,notes:JF.notes,partner:JF.partner};
  if(JF.type==='Match'||JF.type==='Turnier'){e.res=JF.res;e.score=JF.score;e.opp=JF.opp;}
  e.missions=Object.entries(JF.mr).filter(([,v])=>v>0).map(([id,r])=>({id,r}));
  const newL=e.lost?unlockSkill(e.lost):null;
@@ -1754,7 +1776,7 @@ function saveJournal(){
  const done=outs.filter(o=>o.done);
  const mx=outs.reduce((a,o)=>a+o.res.n,0);
  const streak=res.streakUp;if(res.goal)setTimeout(()=>toast('Tagesziel erreicht! +10 Bälle',I.target),300);
- modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">+${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
+ modal(`<div class="center">${mascot('happy')}<h2>Session gespeichert!</h2><p class="b muted">≈ ${fmtN(e.kcal)} kcal verbrannt · +${res.n+mx} XP${done.length?' · '+done.length+' Mission'+(done.length>1?'en':'')+' gemeistert!':''}</p></div>
  ${e.lost?`<div class="card stack"><div class="eyebrow muted">Dein nächster Schritt</div><b>Du hast viele Punkte bei „${esc(SK[e.lost].n)}“ verloren.</b>${newL?`<p class="muted b small">Dafür habe ich dir „${esc(newL.t)}“ freigeschaltet.</p>`:''}${(()=>{const l=LESSONS.find(l=>l.sk===e.lost&&unlocked(l.idx));return l?`<button class="btn ball block" data-act="lesson" data-id="${l.id}">${esc(l.t)} üben</button>`:'';})()}</div>`:''}
  <button class="btn block" data-act="${streak?'showStreak':'closeModal'}">Weiter</button>`);
  beep('done');if(done.length||e.res==='w')confetti();
@@ -1764,6 +1786,7 @@ function journalView(i){
  const rt=Object.entries(j.rt||{});
  modal(`<div class="eyebrow muted">${fmtDate(j.date)} · ${j.dur} Min</div><h2>${esc(j.type)}${j.res?` <span class="res ${j.res}">${{w:'Sieg',l:'Niederlage',d:'Remis'}[j.res]}</span>`:''}</h2>
  ${j.score?`<p class="b">${esc(j.score)}</p>`:''}${j.partner?`<p class="muted b">Partner/in: ${esc(j.partner)}</p>`:''}${j.opp?`<p class="muted b">Gegner: ${esc(j.opp)}</p>`:''}
+ <p class="b"><span class="c-flame">≈ ${fmtN(kcalOf(j))} kcal</span> · Intensität: ${(INTENS.find(x=>x[0]===(j.int||2))||INTENS[1])[1]}</p>
  <p class="b">Gefühl: ${['Mies','Naja','Okay','Gut','Top'][(j.feel||3)-1]}</p>
  ${rt.length?`<div class="stack">${rt.map(([k,v])=>`<div class="row"><span style="width:90px" class="b small">${esc(SK[k].s)}</span><div class="bar thin blue"><i style="width:${v*20}%"></i></div><span class="b small">${v}/5</span></div>`).join('')}</div>`:''}
  ${j.lost?`<p class="b">Punkte verloren vor allem bei: ${esc(SK[j.lost].n)}</p>`:''}
@@ -1843,7 +1866,7 @@ const ACT={
  claim(el){const id=el.dataset.id;if(S.day.claimed.includes(id)||qProg(id)<QUESTS[id].n)return;S.day.claimed.push(id);S.gems+=10;save();beep('coin');render();},
  questChest(){if(S.day.chest)return;S.day.chest=true;S.gems+=30;save();beep('coin');confetti();toast('Bonustruhe: +30 Bälle',I.chest);render();},
  journalNew(){closeModal();journalNew();},
- jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
+ jf(el){syncJF();const k=el.dataset.k;let v=el.dataset.v;if(k==='feel'||k==='dur'||k==='int')v=+v;JF[k]=(JF[k]===v&&(k==='res'||k==='lost'))?null:v;drawJournal();},
  jmr(el){syncJF();JF.mr[el.dataset.id]=+el.dataset.v;drawJournal();},
  jrt(el){syncJF();const k=el.dataset.k,v=+el.dataset.v;if(JF.rt[k]===v)delete JF.rt[k];else JF.rt[k]=v;drawJournal();},
  closeJournal(){JF=null;$('#ov').innerHTML='';},

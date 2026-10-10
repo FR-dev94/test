@@ -34,6 +34,7 @@ Eine Stufe ist gemeistert, wenn alle Meisterprüfungen bestanden sind und höchs
 - 11 Skills (inkl. Athletik) mit eigenem Level-Balken (bis Level 10)
 - Tägliche Quests + Bonustruhe, Wochenliga (Club → Major) mit Auf- und Abstieg
 - Bälle als Währung, Shop (Streak-Schutz, Doppel-XP, Outfits für Maskottchen Bolita), 26 Erfolge
+- Kalorien-Schätzung pro Session (MET × Gewicht × Dauer, mit Intensität), kcal pro Woche und gesamt
 - Tagebuch-Statistiken: Siegquote, Stunden, Spielzeit pro Woche, Radar-Spielerprofil, Wochenziel
 
 Der Fortschritt liegt im Browser (`localStorage`). Unter **Profil → Fortschritt sichern** gibt es einen Code zum Übertragen.
